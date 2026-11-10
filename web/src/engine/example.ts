@@ -2,7 +2,7 @@
 import type { Lead } from "@/lib";
 import { proposta } from "./pricing";
 
-export const SITE_PUBLICO = "https://ryandamasio.github.io/csearch/";
+export const SITE_PUBLICO = "https://c-search.github.io/";
 
 export type ExampleData = {
   n: string; // nome

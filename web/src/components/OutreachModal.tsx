@@ -272,7 +272,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                 {qr ? <img src={qr} alt="QR code da demonstração" className="h-36 w-36 shrink-0 rounded-lg bg-white p-1.5" /> : <div className="h-36 w-36 shrink-0 rounded-lg bg-white/10" />}
                 <div className="text-xs text-muted-foreground">
                   Aponte a câmera do celular para o código: abre <b className="text-foreground">exatamente o mesmo link</b> que vai na mensagem.
-                  <span className="mt-2 block">O link é público (ryandamasio.github.io): abre no celular ou no computador de qualquer pessoa.</span>
+                  <span className="mt-2 block">O link é público (c-search.github.io): abre no celular ou no computador de qualquer pessoa.</span>
                 </div>
               </div>
             )}

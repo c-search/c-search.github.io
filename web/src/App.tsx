@@ -281,9 +281,9 @@ function Main() {
               <div className="mb-6 -mt-2 rounded-xl bg-white/[0.03] p-4 ring-1 ring-white/10">
                 <div className="mb-1 text-sm font-medium">Token do GitHub <span className="font-normal text-muted-foreground">(link curto da demonstração)</span></div>
                 <ol className="mb-3 list-decimal space-y-0.5 pl-4 text-xs text-muted-foreground">
-                  <li>Abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer" className="underline hover:text-foreground">github.com/settings/personal-access-tokens/new</a> (logado como ryandamasio).</li>
-                  <li>Nome: <b>csearch-demos</b> · Validade: a que preferir (ex.: 1 ano).</li>
-                  <li>Em <b>Repository access</b>, escolha <b>Only select repositories</b> → <b>csearch</b>.</li>
+                  <li>Abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer" className="underline hover:text-foreground">github.com/settings/personal-access-tokens/new</a> .</li>
+                  <li>Nome: <b>csearch-demos</b> · <b>Resource owner: c-search</b> · Validade: a que preferir (ex.: 1 ano).</li>
+                  <li>Em <b>Repository access</b>, escolha <b>Only select repositories</b> → <b>c-search.github.io</b>.</li>
                   <li>Em <b>Permissions → Repository permissions → Contents</b>, escolha <b>Read and write</b>.</li>
                   <li>Clique em <b>Generate token</b>, copie e cole aqui. Ele fica salvo só neste navegador.</li>
                 </ol>

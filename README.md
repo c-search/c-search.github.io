@@ -6,7 +6,7 @@ potencial para você vender site, cardápio digital, portfólio ou gestão do pe
 
 ## 🌐 Versão online
 
-**https://ryandamasio.github.io/csearch/**: abre direto no navegador, sem instalar nada.
+**https://c-search.github.io/**: abre direto no navegador, sem instalar nada.
 
 - Busca grátis no OpenStreetMap, ranking de categorias, score, WhatsApp e "Meus leads".
 - "Meus leads" fica salvo **no navegador de cada pessoa** (ninguém vê a lista de ninguém).

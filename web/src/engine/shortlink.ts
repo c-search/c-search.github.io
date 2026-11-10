@@ -1,9 +1,9 @@
 // Link curto: a demonstração fica guardada num arquivo no seu GitHub (branch "demos" do
-// repositório do C-Search) e o link vira só  ryandamasio.github.io/csearch/#/p/nome-do-lugar-x7k2
+// repositório do C-Search) e o link vira só  c-search.github.io/#/p/nome-do-lugar-x7k2
 import type { ExampleData } from "./example";
 import { SITE_PUBLICO } from "./example";
 
-export const REPO = "ryandamasio/csearch";
+export const REPO = "c-search/c-search.github.io";
 const BRANCH = "demos";
 
 function slugify(n: string) {
