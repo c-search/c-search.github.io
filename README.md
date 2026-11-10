@@ -4,6 +4,17 @@ Encontra estabelecimentos no Google (barbearias, mecânicos, restaurantes, empre
 que **não têm site**, **só têm Instagram/iFood** ou **têm poucas avaliações** — ou seja, clientes em
 potencial para você vender site, cardápio digital, portfólio ou gestão do perfil no Google.
 
+## 🌐 Versão online
+
+**https://ryandamasio.github.io/csearch/**: abre direto no navegador, sem instalar nada.
+
+- Busca grátis no OpenStreetMap, ranking de categorias, score, WhatsApp e "Meus leads".
+- "Meus leads" fica salvo **no navegador de cada pessoa** (ninguém vê a lista de ninguém).
+  Se limpar os dados do navegador a lista some, então exporte de vez em quando.
+- O modo Google **não existe na versão online** (a chave ficaria exposta). Ele só aparece na
+  versão local (`iniciar.bat`) quando há chave no `.env`.
+- Cada `git push` na branch `main` atualiza o site sozinho (GitHub Actions).
+
 ## Fontes de dados
 
 | Fonte | Custo | O que traz |
