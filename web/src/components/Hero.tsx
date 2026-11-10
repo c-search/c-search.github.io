@@ -65,6 +65,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
   const [lugar, setLugar] = useState("");
   const [termo, setTermo] = useState("");
   const [bairros, setBairros] = useState("");
+  const [opcoes, setOpcoes] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -74,8 +75,8 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
     return () => clearInterval(id);
   }, [loading]);
 
-  const precisaTermo = fonte !== "osm";
-  const podeBuscar = lugar.trim() && (!precisaTermo || termo.trim()) && !loading;
+  // só o modo "Google (local)" exige tipo; nos outros, sem tipo = todas as categorias principais
+  const podeBuscar = lugar.trim() && (fonte !== "google" || termo.trim()) && !loading;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -164,7 +165,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
           transition={{ duration: 0.6, delay: 0.3 }}
           className="liquid-glass w-full max-w-2xl rounded-2xl bg-black/30 p-2"
         >
-          <div className="mb-2 flex items-center gap-1 px-1 pt-1">
+          {opcoes && <div className="mb-2 flex items-center gap-1 px-1 pt-1">
             {FONTES.filter((f) => f.id !== "google" || hasGoogleKey).map((f) => (
               <button
                 key={f.id}
@@ -188,22 +189,14 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
               {fonte === "google" && (hasGoogleKey ? "Google Places · pago" : "sem chave no .env")}
               {fonte === "demo" && "dados falsos para testar"}
             </span>
-          </div>
+          </div>}
           <div className="flex flex-col gap-2 sm:flex-row">
-            {precisaTermo && (
-              <Input
-                value={termo}
-                onChange={(e) => setTermo(e.target.value)}
-                placeholder="Tipo: barbearia, pizzaria…"
-                className="h-12 sm:max-w-[40%] bg-black/65"
-              />
-            )}
             <div className="relative flex-1">
               <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
               <Input
                 value={lugar}
                 onChange={(e) => setLugar(e.target.value)}
-                placeholder="Cidade ou bairro, ex.: Campinas SP"
+                placeholder="Digite a cidade, ex.: São Paulo"
                 className="h-12 bg-black/65 pl-9"
               />
             </div>
@@ -218,14 +211,25 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
               {loading ? "Buscando…" : "Buscar"}
             </motion.button>
           </div>
-          <Input
-            value={bairros}
-            onChange={(e) => setBairros(e.target.value)}
-            placeholder={fonte === "osm"
-              ? "Vários bairros de uma vez? Ex.: Tatuapé, Mooca, Penha (e a cidade no campo de cima)"
-              : "Bairros (opcional, separados por vírgula): Centro, Cambuí, Taquaral"}
-            className="mt-2 bg-black/65"
-          />
+          {opcoes && (
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <Input value={termo} onChange={(e) => setTermo(e.target.value)}
+                placeholder="Só um tipo? Ex.: pizzaria (vazio = todos)" className="bg-black/65" />
+              <Input value={bairros} onChange={(e) => setBairros(e.target.value)}
+                placeholder="Só alguns bairros? Ex.: Mooca, Tatuapé" className="bg-black/65" />
+            </div>
+          )}
+          <div className="flex items-center justify-between px-2 pt-2 text-xs text-neutral-500">
+            <span>
+              {fonte === "gmaps" && !hasSerper && "Cole a chave do Serper em Configurações para buscar no Google Maps"}
+              {fonte === "gmaps" && hasSerper && (termo.trim() ? `Busca só ${termo.trim()}` : "Busca restaurantes, bares, barbearias, oficinas e mais (~12 créditos)")}
+              {fonte === "osm" && "Mapa grátis · pode estar desatualizado"}
+              {fonte === "demo" && "Dados falsos para testar"}
+            </span>
+            <button type="button" onClick={() => setOpcoes(!opcoes)} className="shrink-0 underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
+              {opcoes ? "menos opções" : "mais opções"}
+            </button>
+          </div>
         </motion.form>
 
         {loading && (

@@ -127,9 +127,11 @@ export const api = {
   },
   searchTerm: async (body: { termo: string; cidade: string; bairros: string[]; fonte: Fonte; paginas?: number }) => {
     if (body.fonte === "demo") {
-      const qs = body.bairros.length ? body.bairros.map((b) => `${body.termo} em ${b}, ${body.cidade}`) : [`${body.termo} em ${body.cidade}`];
-      const byId = new Map(qs.flatMap((q) => fakeSearch(q)).map((p) => [p.place_id, p]));
-      const leads = prepare([...byId.values()].map((p) => scoreLead(p, body.termo)));
+      const termos = body.termo ? [body.termo] : ["pizzaria", "barbearia", "oficina mecânica", "padaria", "dentista"];
+      const areas = body.bairros.length ? body.bairros.map((b) => `${b}, ${body.cidade}`) : [body.cidade];
+      const qs = termos.flatMap((t) => areas.map((a) => ({ t, q: `${t} em ${a}` })));
+      const byId = new Map(qs.flatMap(({ t, q }) => fakeSearch(q, body.termo ? 25 : 8).map((p) => scoreLead(p, t))).map((p) => [p.place_id, p]));
+      const leads = prepare([...byId.values()]);
       return { area: body.cidade, leads, ranking: rankCategories(leads) };
     }
     const r = await req<Omit<SearchResult, "busca">>("/api/search/term", { method: "POST", body: JSON.stringify(body) });
