@@ -21,6 +21,7 @@ type Props = {
 export function QuickMode({ leads, template, cidade, onClose, onContact, onDiscard, onExample, onVerify, checkingIds }: Props) {
   const [i, setI] = useState(0);
   const [dir, setDir] = useState(1);
+  const [perguntaQ, setPerguntaQ] = useState<string | null>(null);
   const l = leads[Math.min(i, leads.length - 1)];
 
   const ir = (d: number) => {
@@ -86,12 +87,12 @@ export function QuickMode({ leads, template, cidade, onClose, onContact, onDisca
       {!acabou && (
         <div className="mx-auto w-full max-w-md space-y-2 px-4 pb-6">
           {waLink(l, template, cidade) ? (
-            <a href={waLink(l, template, cidade)} target="_blank" rel="noreferrer" onClick={() => { onContact(l); setTimeout(() => ir(1), 400); }}
+            <a href={waLink(l, template, cidade)} target="_blank" rel="noreferrer" onClick={() => setPerguntaQ(l.place_id)}
               className="flex items-center justify-center gap-2 rounded-2xl bg-foreground py-4 text-base font-semibold text-background">
               <MessageCircle className="h-5 w-5" /> Chamar no WhatsApp
             </a>
           ) : l.telefone ? (
-            <a href={telLink(l.telefone)} onClick={() => onContact(l)}
+            <a href={telLink(l.telefone)} onClick={() => setPerguntaQ(l.place_id)}
               className="flex items-center justify-center gap-2 rounded-2xl bg-foreground py-4 text-base font-semibold text-background">
               <Phone className="h-5 w-5" /> Ligar · {l.telefone}
             </a>
@@ -111,6 +112,15 @@ export function QuickMode({ leads, template, cidade, onClose, onContact, onDisca
             )}
             <Acao onClick={() => ir(1)} icon={<ChevronRight className="h-5 w-5" />} label="Pular" />
           </div>
+          {perguntaQ === l.place_id && (
+            <div className="flex items-center justify-between gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-sm ring-1 ring-white/10">
+              <span>Você mandou?</span>
+              <div className="flex gap-2">
+                <button onClick={() => { onContact(l); setPerguntaQ(null); ir(1); }} className="rounded-lg bg-foreground px-3 py-1.5 font-semibold text-background cursor-pointer">Sim, mandei</button>
+                <button onClick={() => setPerguntaQ(null)} className="rounded-lg px-3 py-1.5 ring-1 ring-white/15 cursor-pointer">Ainda não</button>
+              </div>
+            </div>
+          )}
           <p className="pt-1 text-center text-xs text-neutral-500">Arraste o cartão para os lados ou use as setas do teclado</p>
         </div>
       )}

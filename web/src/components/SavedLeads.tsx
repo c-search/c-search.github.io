@@ -222,7 +222,7 @@ function Row({ lead: l, statuses, wa, onUpdate, onExample, onCopy }: Props & { l
             </a>
           )}
           {wa && (
-            <a href={wa} target="_blank" rel="noreferrer" onClick={() => l.status === "Novo" && onUpdate(l.place_id, "Contatado", nota)}
+            <a href={wa} target="_blank" rel="noreferrer" 
               className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-sm font-medium text-background hover:opacity-90">
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>

@@ -33,6 +33,9 @@ const DEMOS: { id: ExampleData["k"]; nome: string }[] = [
 export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubToken, onClose, onSent, onCopy, statusSalvo }: Props) {
   // 1º contato: confirmar o número com uma mensagem curta; depois, a proposta com a demo
   const jaConfirmando = statusSalvo === "Aguardando confirmação";
+  // só marca como enviado quando você confirma (abrir o WhatsApp ou copiar não quer dizer que mandou)
+  const [perguntar, setPerguntar] = useState(false);
+  const [marcado, setMarcado] = useState(false);
   const [modo, setModo] = useState<"confirmar" | "proposta">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta");
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
@@ -343,13 +346,13 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
 
           <div className="mt-6 space-y-2">
             {waUrl ? (
-              <a href={waUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado")}
+              <a href={waUrl} target="_blank" rel="noreferrer" onClick={() => setPerguntar(true)}
                 className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 font-semibold text-[#06260f] transition hover:brightness-110">
                 <MessageCircle className="h-5 w-5" /> Enviar no WhatsApp
               </a>
             ) : waFixoUrl ? (
               <>
-                <a href={waFixoUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado")}
+                <a href={waFixoUrl} target="_blank" rel="noreferrer" onClick={() => setPerguntar(true)}
                   className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 font-semibold text-[#06260f] transition hover:brightness-110">
                   <MessageCircle className="h-5 w-5" /> Tentar no WhatsApp (número fixo)
                 </a>
@@ -361,7 +364,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
               </div>
             )}
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => { onCopy(msgFinal); onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado"); }}
+              <button onClick={() => { onCopy(msgFinal); setPerguntar(true); }}
                 className="flex h-11 items-center justify-center gap-2 rounded-xl text-sm ring-1 ring-white/15 hover:bg-white/5 cursor-pointer">
                 <Copy className="h-4 w-4" /> Copiar mensagem
               </button>
@@ -375,7 +378,24 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                 </a>
               )}
             </div>
-            <p className="text-center text-[11px] text-muted-foreground">Ao enviar ou copiar, o lugar vai para Meus leads como "{modo === "confirmar" ? "Aguardando confirmação" : "Contatado"}".</p>
+            {marcado ? (
+              <div className="rounded-xl bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200 ring-1 ring-emerald-400/20">
+                ✓ Marcado como "{modo === "confirmar" ? "Aguardando confirmação" : "Contatado"}" em Meus leads
+              </div>
+            ) : perguntar ? (
+              <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/15">
+                <div className="text-sm font-medium">Você mandou a mensagem?</div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button onClick={() => { onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado"); setMarcado(true); setPerguntar(false); }}
+                    className="h-10 rounded-lg bg-foreground text-sm font-semibold text-background cursor-pointer">Sim, mandei</button>
+                  <button onClick={() => setPerguntar(false)} className="h-10 rounded-lg text-sm ring-1 ring-white/15 hover:bg-white/5 cursor-pointer">Ainda não</button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setPerguntar(true)} className="w-full text-center text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
+                Já mandou por fora? Marcar como enviado
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
