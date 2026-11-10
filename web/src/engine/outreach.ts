@@ -29,7 +29,24 @@ export function demoDaAbordagem(a: Abordagem, l: Lead): ExampleData["k"] {
   return abordagemPadrao(l) === "cardapio" ? "cardapio" : abordagemPadrao(l) === "portfolio" ? "portfolio" : "site";
 }
 
-export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: string) {
+/** 1ª mensagem curta só para confirmar que o número é mesmo do lugar. */
+export function mensagemConfirmacao(l: Lead) {
+  const h = new Date().getHours();
+  const saudacao = h < 12 ? "bom dia" : h < 18 ? "boa tarde" : "boa noite";
+  return `Olá, ${saudacao}! Esse é o WhatsApp da ${limpar(l.nome)}?`;
+}
+
+/** Proposta com a demonstração. continuacao = a pessoa já respondeu a confirmação. */
+export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: string, continuacao = false) {
+  const txt = mensagemBase(a, l, link, meuNome);
+  if (!continuacao) return txt;
+  const eu = meuNome.trim() ? `Aqui é ${meuNome.trim()}. ` : "";
+  // troca o "Olá, X! Tudo bem?" do começo por uma continuação da conversa
+  const corte = txt.indexOf("\n\n");
+  return `Que bom, obrigado por responder! ${eu}` + (corte >= 0 ? txt.slice(corte) : "\n\n" + txt);
+}
+
+function mensagemBase(a: Abordagem, l: Lead, link: string, meuNome: string) {
   const nome = limpar(l.nome);
   const eu = meuNome.trim() ? `Aqui é ${meuNome.trim()}. ` : "";
   const fecho = "\n\nÉ só abrir no celular. Se gostar, eu ajusto tudo com as fotos, os produtos e as informações reais de vocês. O que acha?";

@@ -12,7 +12,8 @@ function produto(l: Lead) {
   return "site";
 }
 
-export function mensagemRetorno(l: Lead) {
+export function mensagemRetorno(l: Lead & { status?: string }) {
+  if (l.status === "Aguardando confirmação") return `Oi, tudo bem? Só confirmando: esse é o WhatsApp da ${limpar(l.nome)}?`;
   return `Oi, ${limpar(l.nome)}, tudo bem? Passando só para saber se você viu minha mensagem. ` +
     `Se quiser, te mando um exemplo de como ficaria o ${produto(l)} de vocês, sem compromisso.`;
 }

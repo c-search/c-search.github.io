@@ -59,7 +59,7 @@ export type SearchResult = { area: string; leads: Lead[]; ranking: RankRow[]; bu
 
 export type Fonte = "gmaps" | "osm" | "google" | "demo";
 
-export const STATUS = ["Novo", "Contatado", "Respondeu", "Negociando", "Fechado", "Descartado"];
+export const STATUS = ["Novo", "Aguardando confirmação", "Contatado", "Respondeu", "Negociando", "Fechado", "Descartado"];
 
 async function req<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, {

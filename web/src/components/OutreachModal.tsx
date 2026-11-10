@@ -8,7 +8,7 @@ import { exampleData, linkLongo, type ExampleData } from "@/engine/example";
 import { buscarFotos, type FotoAchada } from "@/engine/photos";
 import { criarLinkCurto } from "@/engine/shortlink";
 import { CORES_SUGERIDAS } from "@/engine/niches";
-import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, type Abordagem } from "@/engine/outreach";
+import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, mensagemConfirmacao, type Abordagem } from "@/engine/outreach";
 import { brl, proposta } from "@/engine/pricing";
 import { VerifBadge } from "./Results";
 
@@ -19,7 +19,8 @@ type Props = {
   serperKey: string;
   githubToken: string;
   onClose: () => void;
-  onSent: (l: Lead) => void;
+  onSent: (l: Lead, status: string) => void;
+  statusSalvo?: string;
   onCopy: (texto: string) => void;
 };
 
@@ -29,7 +30,10 @@ const DEMOS: { id: ExampleData["k"]; nome: string }[] = [
   { id: "portfolio", nome: "Site + portfólio" },
 ];
 
-export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubToken, onClose, onSent, onCopy }: Props) {
+export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubToken, onClose, onSent, onCopy, statusSalvo }: Props) {
+  // 1º contato: confirmar o número com uma mensagem curta; depois, a proposta com a demo
+  const jaConfirmando = statusSalvo === "Aguardando confirmação";
+  const [modo, setModo] = useState<"confirmar" | "proposta">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta");
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
   const [cor, setCor] = useState<string | undefined>();
@@ -55,7 +59,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
   const [criandoCurto, setCriandoCurto] = useState(false);
   const [erroCurto, setErroCurto] = useState("");
   useEffect(() => {
-    if (!githubToken) return;
+    if (!githubToken || modo !== "proposta") return;
     setErroCurto("");
     const t = setTimeout(async () => {
       setCriandoCurto(true);
@@ -69,7 +73,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
       }
     }, 2000);
     return () => clearTimeout(t);
-  }, [longo, githubToken]);
+  }, [longo, githubToken, modo]);
   const link = curto?.para === longo ? curto.url : longo; // vai na mensagem
   const preview = longo; // prévia abre na hora, sem esperar o GitHub
 
@@ -85,7 +89,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
     }
   }
   const alternarFoto = (u: string) => setFotos((f) => (f.includes(u) ? f.filter((x) => x !== u) : f.length >= 4 ? f : [...f, u]));
-  const automatica = mensagemAbordagem(abordagem, l, link, meuNome);
+  const automatica = modo === "confirmar" ? mensagemConfirmacao(l) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando);
   const msg = texto ?? automatica;
   const p = proposta(l);
   const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -159,7 +163,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                   <div className="mx-auto mb-3 w-fit rounded-md bg-[#182229] px-2.5 py-1 text-[10px] uppercase tracking-wide text-white/50">Hoje</div>
                   <div className="ml-auto max-w-[92%] rounded-xl rounded-tr-sm bg-[#005c4b] p-1.5 text-[13px] leading-snug text-[#e9edef] shadow">
                     {/* prévia do link, como o WhatsApp mostra */}
-                    <button onClick={() => setAba("demo")} className="mb-1.5 block w-full overflow-hidden rounded-lg bg-[#025144] text-left cursor-pointer">
+                    {modo === "proposta" && (<button onClick={() => setAba("demo")} className="mb-1.5 block w-full overflow-hidden rounded-lg bg-[#025144] text-left cursor-pointer">
                       <div className="relative h-28 overflow-hidden bg-black">
                         {gerando ? (
                           <div className="flex h-full items-center justify-center text-[11px] text-white/60">Montando demonstração…</div>
@@ -171,7 +175,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                         <div className="truncate text-[12px] font-semibold">{l.nome.replace(/^\[DEMO\]\s*/, "")}</div>
                         <div className="truncate text-[11px] text-white/60">{DEMOS.find((d) => d.id === demo)?.nome} · demonstração</div>
                       </div>
-                    </button>
+                    </button>)}
                     <div className="whitespace-pre-line break-words px-1.5 pb-1">{msgFinal}</div>
                     <div className="flex items-center justify-end gap-1 px-1.5 text-[10px] text-white/55">{hora} <CheckCheck className="h-3.5 w-3.5 text-[#53bdeb]" /></div>
                   </div>
@@ -203,6 +207,22 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
             </div>
           )}
 
+          <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-white/[0.03] p-1 ring-1 ring-white/10">
+            {([["confirmar", "1. Confirmar o número", "Mensagem curta: \"É da …?\""], ["proposta", "2. Mandar a proposta", jaConfirmando ? "Já perguntou: agora a demo" : "Mensagem completa com a demo"]] as const).map(([k, t, d]) => (
+              <button key={k} onClick={() => { setModo(k); setTexto(null); setEditando(false); }}
+                className={cn("rounded-xl px-3 py-2 text-left transition cursor-pointer", modo === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
+                <div className="text-sm font-semibold">{t}</div>
+                <div className={cn("text-[11px]", modo === k ? "text-black/60" : "")}>{d}</div>
+              </button>
+            ))}
+          </div>
+          {modo === "confirmar" && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Primeiro confirme se o número é mesmo do lugar. Quando responderem, abra <b className="text-foreground">Abordar</b> de novo (em Meus leads) e mande a proposta com a demonstração. Menos chance de falar com a pessoa errada e de ter o número bloqueado.
+            </p>
+          )}
+
+          {modo === "proposta" && (<>
           <Passo n={1} t="O que você vai oferecer">
             <div className="grid grid-cols-2 gap-2">
               {ABORDAGENS.map((a) => (
@@ -285,7 +305,10 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
             )}
           </Passo>
 
+          </>)}
+
           <Passo n={3} t="Mensagem">
+            {modo === "proposta" && (
             <div className="mb-3 flex items-center gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-xs ring-1 ring-white/10">
               <Link2 className="h-4 w-4 shrink-0" />
               {!githubToken ? (
@@ -298,6 +321,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                 <span className="truncate"><span className="text-muted-foreground">Link curto: </span><b>{link.replace("https://", "")}</b></span>
               )}
             </div>
+            )}
             {editando ? (
               <textarea value={msgFinal} onChange={(e) => setTexto(e.target.value)} rows={9}
                 className="w-full rounded-lg bg-black/40 p-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
@@ -319,13 +343,13 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
 
           <div className="mt-6 space-y-2">
             {waUrl ? (
-              <a href={waUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l)}
+              <a href={waUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado")}
                 className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 font-semibold text-[#06260f] transition hover:brightness-110">
                 <MessageCircle className="h-5 w-5" /> Enviar no WhatsApp
               </a>
             ) : waFixoUrl ? (
               <>
-                <a href={waFixoUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l)}
+                <a href={waFixoUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado")}
                   className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 font-semibold text-[#06260f] transition hover:brightness-110">
                   <MessageCircle className="h-5 w-5" /> Tentar no WhatsApp (número fixo)
                 </a>
@@ -337,7 +361,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
               </div>
             )}
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => { onCopy(msgFinal); onSent(l); }}
+              <button onClick={() => { onCopy(msgFinal); onSent(l, modo === "confirmar" ? "Aguardando confirmação" : "Contatado"); }}
                 className="flex h-11 items-center justify-center gap-2 rounded-xl text-sm ring-1 ring-white/15 hover:bg-white/5 cursor-pointer">
                 <Copy className="h-4 w-4" /> Copiar mensagem
               </button>
@@ -351,7 +375,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                 </a>
               )}
             </div>
-            <p className="text-center text-[11px] text-muted-foreground">Ao enviar ou copiar, o lugar vai para Meus leads como "Contatado".</p>
+            <p className="text-center text-[11px] text-muted-foreground">Ao enviar ou copiar, o lugar vai para Meus leads como "{modo === "confirmar" ? "Aguardando confirmação" : "Contatado"}".</p>
           </div>
         </div>
       </motion.div>

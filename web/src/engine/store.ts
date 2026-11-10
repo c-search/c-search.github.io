@@ -98,7 +98,7 @@ export function diasParado(l: SavedLead) {
 
 export const DIAS_PARA_RETORNO = 3;
 export const precisaRetorno = (l: SavedLead) =>
-  (l.status === "Contatado" || l.status === "Respondeu") && diasParado(l) >= DIAS_PARA_RETORNO && (l.retornos || 0) < 3;
+  (l.status === "Aguardando confirmação" || l.status === "Contatado" || l.status === "Respondeu") && diasParado(l) >= DIAS_PARA_RETORNO && (l.retornos || 0) < 3;
 
 export function deleteAll() {
   write([]);

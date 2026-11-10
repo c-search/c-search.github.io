@@ -189,10 +189,12 @@ function Main() {
   }
 
   /** Clicou em WhatsApp: salva (se ainda não estiver) e marca como Contatado. */
-  async function contact(l: Lead, busca: string) {
+  async function contact(l: Lead, busca: string, status = "Contatado") {
     const ja = saved.find((s) => s.place_id === l.place_id);
     if (!ja) await api.save(busca, [l]);
-    if (!ja || ja.status === "Novo") await api.update(l.place_id, "Contatado", ja?.anotacoes || "");
+    // só avança o status (não volta "Negociando" para "Contatado", por exemplo)
+    const ordem = STATUS.indexOf(status);
+    if (!ja || STATUS.indexOf(ja.status) < ordem) await api.update(l.place_id, status, ja?.anotacoes || "");
     loadSaved();
   }
 
@@ -259,7 +261,8 @@ function Main() {
       <>
         {exemplo && (
           <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} serperKey={serperKey.trim()} githubToken={githubToken.trim()} onClose={() => setExemplo(null)} onCopy={copy}
-            onSent={(l) => contact(l, result?.busca || "Abordagem")} />
+            statusSalvo={saved.find((x) => x.place_id === exemplo.place_id)?.status}
+            onSent={(l, status) => contact(l, result?.busca || "Abordagem", status)} />
         )}
       </>
 
