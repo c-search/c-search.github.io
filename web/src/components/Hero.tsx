@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronDown, Download, Loader2, MapPin, Search } from "lucide-react";
+import { ChevronDown, Download, Loader2, MapPin, Search, Settings } from "lucide-react";
 import { cn, type Fonte, type SearchResult } from "@/lib";
 import { Button, Input } from "./ui";
 import { Creditos } from "./Creditos";
@@ -114,6 +114,10 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, serpe
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={onOpenMessage} aria-label="Configurações" title="Configurações"
+            className="flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm text-muted-foreground ring-1 ring-white/15 hover:text-foreground cursor-pointer lg:hidden">
+            <Settings className="h-4 w-4" /> <span className="hidden sm:inline">Configurações</span>
+          </button>
           {instalar && (
             <button onClick={() => { instalar.prompt(); setInstalar(null); }}
               className="hidden whitespace-nowrap rounded-lg px-3 py-2 text-sm text-muted-foreground ring-1 ring-white/15 hover:text-foreground sm:flex sm:items-center sm:gap-1.5 cursor-pointer">
