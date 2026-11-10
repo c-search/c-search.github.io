@@ -41,6 +41,10 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
   const [limite, setLimite] = useState(PAGE);
   const cidade = result.area.split(",")[0];
 
+  // ordem calculada uma vez, quando a busca chega
+  const [ordem] = useState(() => new Map(
+    [...result.leads].sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0)).map((l, i) => [l.place_id, i] as const),
+  ));
   const filtrados = useMemo(() => {
     const termo = q.trim().toLowerCase();
     return result.leads
@@ -58,8 +62,9 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
         return l.verificacao?.status === verifFiltro;
       })
       .filter((l) => !termo || `${l.nome} ${l.endereco}`.toLowerCase().includes(termo))
-      .sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0));
-  }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q]);
+      // ordem fixa da busca: verificar um lugar não faz ele pular para o fim da lista
+      .sort((a, b) => (ordem.get(a.place_id) ?? 1e9) - (ordem.get(b.place_id) ?? 1e9));
+  }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q, ordem]);
 
   const naoVerificados = filtrados.filter(precisaConfirmar);
   // modo rápido: só quem vale a pena (tira quem já tem site e quem já foi salvo como descartado)
