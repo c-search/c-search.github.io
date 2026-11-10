@@ -1,5 +1,6 @@
 // "Meus leads" guardado no navegador de cada pessoa.
 import type { Lead, SavedLead } from "@/lib";
+import { scoreLead } from "./scoring";
 
 const KEY = "csearch_leads_v1";
 
@@ -21,9 +22,16 @@ function corrigirLinkMaps(l: SavedLead): SavedLead {
 
 // A verificação antiga (sem "fonte") comparava só o nome e podia dizer "sem site" errado: descarta.
 function descartarVerificacaoAntiga(l: SavedLead): SavedLead {
-  if (!l.verificacao || l.verificacao.fonte) return l;
-  const { verificacao: _v, ...resto } = l;
-  return { ...resto, motivos: (l.motivos || "").replace(/^[^·]*·\s*/, "") };
+  // sem "versao": verificação antiga, que aceitava site de outro lugar com nome parecido
+  if (!l.verificacao || l.verificacao.versao) return l;
+  const { verificacao: v, ...resto } = l;
+  const limpo = { ...resto, motivos: (l.motivos || "").replace(/^[^·]*·\s*/, "") } as SavedLead;
+  // o site que a verificação antiga "achou" pode ser de outro lugar: tira ele também
+  if (v && v.status === "site" && v.confirmado !== false && v.url && l.site === v.url) {
+    const r = scoreLead({ ...limpo, site: "" }, "");
+    return { ...limpo, ...r, status: l.status, anotacoes: l.anotacoes, busca: l.busca, encontrado_em: l.encontrado_em };
+  }
+  return limpo;
 }
 
 export function loadLeads(): SavedLead[] {

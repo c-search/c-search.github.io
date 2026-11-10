@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Copy, ExternalLink, MessageCircle, X } from "lucide-react";
 import { api, STATUS, DEFAULT_MSG, fillTemplate, storageGet, storageSet, type Fonte, type Lead, type SavedLead, type SearchResult } from "@/lib";
 import { Hero, VideoBackground } from "./components/Hero";
-import { precisaConfirmar, salvarVerificacao, verificarLead } from "./engine/verify";
+import { contestarVerificacao, precisaConfirmar, salvarVerificacao, verificarLead } from "./engine/verify";
 import { rankCategories } from "./engine/scoring";
 import { marcarRetorno, refreshLeads } from "./engine/store";
 import { exampleKind, exampleLink, type ExampleData } from "./engine/example";
@@ -208,7 +208,14 @@ function Main() {
       <Hero onSearch={search} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
       {result && <Results key={result.busca + result.area} result={result} fonte={fonteAtual} template={template} savedIds={savedIds} onSave={save}
         onVerify={(ls) => verify(ls)} verifying={verifying} verifyingIds={verifyingIds}
-        onExample={setExemplo} onContact={contact} onDiscard={discard} />}
+        onExample={setExemplo} onContact={contact} onDiscard={discard} onContestar={(l) => {
+          const c = contestarVerificacao(l);
+          salvarVerificacao(c);
+          setResult((r) => (r ? { ...r, leads: r.leads.map((x) => (x.place_id === c.place_id ? c : x)) } : r));
+          refreshLeads([c]);
+          loadSaved();
+          notify(`${l.nome}: corrigido para "sem site"`);
+        }} />}
       <SavedLeads leads={saved} statuses={statuses} template={template} onUpdate={update} onDeleteAll={deleteAll}
         onExample={setExemplo} onFollowUp={(l) => { marcarRetorno(l.place_id); loadSaved(); }} onCopy={copy}
         onBackup={() => { exportBackup(); notify("Backup baixado. Guarde o arquivo num lugar seguro."); }} onRestore={restore} />

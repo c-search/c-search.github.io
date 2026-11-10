@@ -35,7 +35,7 @@ function agora() {
 
 /** O que a ficha do Google já diz sobre o site (sem gastar crédito extra). */
 function verificacaoDaFicha(p: Place): Verificacao {
-  const base = { links: [] as Verificacao["links"], quando: agora(), fonte: "maps" as const, confirmado: false };
+  const base = { links: [] as Verificacao["links"], quando: agora(), fonte: "maps" as const, confirmado: false, versao: 3 };
   if (p.website) {
     const h = host(p.website);
     if (has(h, DELIVERY)) return { ...base, status: "social", resumo: `Sem site próprio, mas tem cardápio/link (${h})`, url: p.website, links: [{ tipo: "Link da ficha", url: p.website }], confirmado: true };

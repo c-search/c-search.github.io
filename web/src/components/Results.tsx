@@ -19,6 +19,7 @@ type Props = {
   onExample: (l: Lead) => void;
   onContact: (l: Lead, busca: string) => void;
   onDiscard: (l: Lead, busca: string) => void;
+  onContestar: (l: Lead) => void;
   fonte?: string;
 };
 
@@ -26,7 +27,7 @@ const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
 type VF = "todos" | "pendente" | "sem_site" | "sem_site_maps" | "social" | "site" | "incerto";
 const PAGE = 60;
 
-export function Results({ result, fonte, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard }: Props) {
+export function Results({ result, fonte, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard, onContestar }: Props) {
   const [vista, setVista] = useState<"lista" | "mapa">("lista");
   const [quick, setQuick] = useState(false);
   const [verifFiltro, setVerifFiltro] = useState<VF>("todos");
@@ -240,6 +241,7 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
               onVerify={() => onVerify([l])}
               onExample={() => onExample(l)}
               onContact={() => onContact(l, busca)}
+              onContestar={() => onContestar(l)}
               checking={verifyingIds.has(l.place_id)}
             />
           ))}
@@ -322,7 +324,7 @@ function ResumoChip({ ativo, onClick, n, label, tom }: { ativo: boolean; onClick
   );
 }
 
-export function VerifBadge({ lead: l }: { lead: Lead }) {
+export function VerifBadge({ lead: l, onContestar }: { lead: Lead; onContestar?: () => void }) {
   const v = l.verificacao;
   if (!v && !l.rede) return null;
   return (
@@ -349,6 +351,12 @@ export function VerifBadge({ lead: l }: { lead: Lead }) {
           {v.resumo}
         </span>
       )}
+      {onContestar && v && (v.status === "site" || v.status === "social") && !v.manual && (
+        <button onClick={onContestar} title="O site/rede encontrado é de outro estabelecimento"
+          className="text-[11px] text-amber-200/80 underline-offset-2 hover:text-amber-100 hover:underline cursor-pointer">
+          não é deste lugar?
+        </button>
+      )}
       {v?.links.map((k) => (
         <a key={k.url} href={k.url} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
           {k.tipo} ↗
@@ -362,7 +370,7 @@ export function VerifBadge({ lead: l }: { lead: Lead }) {
   );
 }
 
-function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onContact, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; onExample: () => void; onContact: () => void; checking: boolean }) {
+function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onContact, onContestar, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; onExample: () => void; onContact: () => void; onContestar: () => void; checking: boolean }) {
   const tone = nivelTone(l.score);
   return (
     <motion.div
@@ -389,7 +397,7 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onCon
           {l.endereco && <> · {l.endereco}</>}
           {l.avaliacoes !== null && <> · {l.avaliacoes} avaliações{l.nota ? ` (${l.nota}★)` : ""}</>}
         </div>
-        <VerifBadge lead={l} />
+        <VerifBadge lead={l} onContestar={onContestar} />
         <ProposalChip lead={l} />
       </div>
 

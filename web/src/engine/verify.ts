@@ -21,6 +21,8 @@ export type Verificacao = {
   fonte?: "maps" | "busca";
   creditos?: number;
   confirmado?: boolean; // false = só olhamos a ficha do Maps; true = conferimos também na busca do Google
+  versao?: number; // 3 = exige prova de local (cidade/telefone) nos resultados da busca
+  manual?: boolean; // você corrigiu na mão
 };
 
 const DELIVERY = ["ifood.com.br", "goomer", "anota.ai", "aiqfome", "rappi", "ubereats", "deliverymuch", "menudino", "cardapioweb", "olaclick", "neemo", "saipos", "instadelivery", "pedir.delivery", "cardapio.app", "bit.ly", "linktr.ee", "linkr.bio", "beacons.ai", "bio.link", "taplink", "lnk.bio"];
@@ -50,7 +52,10 @@ const GENERICAS = new Set(["bar", "restaurante", "pizzaria", "padaria", "lanchon
   "drogaria", "hotel", "pousada", "lava", "rapido", "borracharia", "pneus", "sorveteria", "acai", "sushi", "grill",
   "churrascaria", "espetinho", "tattoo", "tatuagem", "imobiliaria", "contabilidade", "advocacia", "advogados",
   "papelaria", "grafica", "floricultura", "veterinaria", "veterinario", "comercio", "servicos", "express", "point",
-  "novo", "nova", "trattoria", "cantina", "pastificio", "bistro", "boteco", "lanchonete", "pub", "house", "kitchen"]);
+  "novo", "nova", "trattoria", "cantina", "pastificio", "bistro", "boteco", "lanchonete", "pub", "house", "kitchen",
+  "fisioterapia", "fisio", "personalizada", "personalizado", "odontologica", "odonto", "medica", "medico", "psicologia",
+  "psicologo", "psicologa", "saude", "centro", "espaco", "instituto", "integrada", "integral", "clinic", "dental",
+  "dentista", "estetica", "estudio", "pilates", "nutricao", "terapia", "reabilitacao", "ortopedia", "pediatria"]);
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const tokens = (n: string) => norm(n).replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter((t) => t.length >= 3 && !STOP.has(t));
@@ -99,7 +104,7 @@ function distanciaM(la1: number, lo1: number, la2: number, lo2: number) {
 }
 
 type Place = { title: string; address?: string; latitude?: number; longitude?: number; rating?: number; ratingCount?: number; phoneNumber?: string; website?: string; category?: string; cid?: string };
-type Busca = { knowledgeGraph?: { title?: string; website?: string; rating?: number; ratingCount?: number }; organic?: { title: string; link: string }[] };
+type Busca = { knowledgeGraph?: { title?: string; website?: string; rating?: number; ratingCount?: number; description?: string; attributes?: Record<string, string> }; organic?: { title: string; link: string; snippet?: string }[] };
 
 /** Nota de 0 a 100: o quanto essa ficha do Google parece ser o mesmo lugar. */
 export function pontuarFicha(l: Lead, p: Place) {
@@ -141,6 +146,24 @@ function classificar(url: string): "site" | "delivery" | "social" | "ignorar" {
   return "site";
 }
 
+/** Cria um teste "esse texto fala deste lugar?" com cidade, bairro, rua e telefone do lead. */
+function provaDeLocal(l: Lead, ficha: Place | null) {
+  const end = ficha?.address || l.endereco || "";
+  const cidade = (end.match(/,\s*([^,]+?)\s*-\s*[A-Z]{2}/) || [])[1] || l.endereco.split(",").map((x) => x.trim()).filter(Boolean).pop() || "";
+  const bairro = (end.match(/\d+[^,]*?-\s*([^,-]+?)\s*,/) || [])[1] || "";
+  const rua = end.split(",")[0].replace(/^(r\.|rua|av\.|avenida|al\.|alameda|tv\.|travessa|estr\.|estrada|pç\.|praça)\s*/i, "");
+  const palavrasRua = tokens(rua).filter((t) => t.length >= 5 && !GENERICAS.has(t));
+  const tels = [l.telefone, ficha?.phoneNumber].map((t) => digitos(t).slice(-8)).filter((t) => t.length === 8);
+  const c = norm(cidade).trim(), b = norm(bairro).trim();
+  return (texto: string) => {
+    const t = norm(texto), d = digitos(texto);
+    if (c.length >= 4 && t.includes(c)) return true;
+    if (b.length >= 4 && b !== "centro" && t.includes(b)) return true;
+    if (palavrasRua.length && palavrasRua.every((p) => t.includes(p))) return true;
+    return tels.some((x) => d.includes(x));
+  };
+}
+
 /** Analisa a ficha encontrada + a busca normal e decide. Exportada para testes. */
 export function decidir(l: Lead, ficha: Place | null, busca: Busca | null): Verificacao {
   const links: Verificacao["links"] = [];
@@ -154,12 +177,21 @@ export function decidir(l: Lead, ficha: Place | null, busca: Busca | null): Veri
     else if (c === "social") social = ficha.website;
   }
 
+  // Resultado da busca só conta se tiver PROVA DE QUE É ESTE LUGAR: a cidade, o bairro, a rua ou o
+  // telefone aparecem no texto, ou o domínio tem o nome completo do lugar. Só o nome parecido não
+  // basta (ex.: "IM Fisioterapia Personalizada" em Iguape ≠ "RM Fisioterapia Personalizada" em Osasco).
+  const prova = provaDeLocal(l, ficha);
+  const nomeInteiroNoDominio = (url: string) => nomes.some((n) => { const c = compactar(n); return c.length >= 8 && host(url).replace(/[^a-z0-9]/g, "").includes(c); });
+
   const kg = busca?.knowledgeGraph;
   if (kg?.website && kg.title && nomes.some((n) => palavraEmComum(n, kg.title!))) {
-    const c = classificar(kg.website);
-    if (c === "site") site ||= kg.website;
-    else if (c === "delivery") delivery ||= kg.website;
-    else if (c === "social") social ||= kg.website;
+    const textoKg = `${kg.title} ${kg.description || ""} ${Object.values(kg.attributes || {}).join(" ")}`;
+    if (prova(textoKg) || nomeInteiroNoDominio(kg.website)) {
+      const c = classificar(kg.website);
+      if (c === "site") site ||= kg.website;
+      else if (c === "delivery") delivery ||= kg.website;
+      else if (c === "social") social ||= kg.website;
+    }
   }
 
   for (const o of busca?.organic || []) {
@@ -167,7 +199,10 @@ export function decidir(l: Lead, ficha: Place | null, busca: Busca | null): Veri
     if (c === "ignorar") continue;
     const doLugar = nomes.some((n) => palavraEmComum(n, o.title)) || dominioDoLugar(nomes, o.link);
     if (!doLugar) continue;
-    if (c === "site" && dominioDoLugar(nomes, o.link)) site ||= o.link;
+    const confirmado = prova(`${o.title} ${o.snippet || ""} ${o.link}`) || nomeInteiroNoDominio(o.link);
+    if (!confirmado) continue;
+    const nomeCompletoNoTitulo = nomes.some((n) => { const c2 = compactar(n); return c2.length >= 8 && compactar(o.title).includes(c2); });
+    if (c === "site" && (dominioDoLugar(nomes, o.link) || nomeCompletoNoTitulo)) site ||= o.link;
     else if (c === "delivery") delivery ||= o.link;
     else if (c === "social") social ||= o.link;
   }
@@ -176,7 +211,7 @@ export function decidir(l: Lead, ficha: Place | null, busca: Busca | null): Veri
   if (delivery) links.push({ tipo: "Cardápio/delivery", url: delivery });
   if (social) links.push({ tipo: "Rede social", url: social });
   const nomeGoogle = ficha && compactar(ficha.title) !== compactar(l.nome) ? ficha.title : undefined;
-  const base = { links, quando: agora(), nomeGoogle, fonte: (ficha ? "maps" : "busca") as Verificacao["fonte"], confirmado: true };
+  const base = { links, quando: agora(), nomeGoogle, fonte: (ficha ? "maps" : "busca") as Verificacao["fonte"], confirmado: true, versao: 3 };
 
   if (site) return { ...base, status: "site", resumo: `Já tem site: ${host(site)}`, url: site };
   if (delivery || social) {
@@ -255,6 +290,16 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
   };
 }
 
+/** Você diz que o site/rede encontrado era de outro lugar: volta a ser "sem site". */
+export function contestarVerificacao(l: Lead): Lead {
+  const verificacao: Verificacao = {
+    status: "sem_site", resumo: "Corrigido por você: o site encontrado era de outro lugar", links: [],
+    quando: agora(), fonte: l.verificacao?.fonte, confirmado: true, versao: 3, manual: true,
+  };
+  const novo = scoreLead({ ...l, site: "" }, "");
+  return { ...novo, whatsapp: l.whatsapp || novo.whatsapp, maps_url: l.maps_url, verificacao, motivos: [verificacao.resumo, novo.motivos].filter(Boolean).join(" · ") };
+}
+
 /** Ainda vale conferir no Google? (nunca verificado, ou só vimos a ficha do Maps sem site) */
 export function precisaConfirmar(l: Lead) {
   return !l.verificacao || (l.verificacao.status === "sem_site" && l.verificacao.confirmado === false);
@@ -262,8 +307,8 @@ export function precisaConfirmar(l: Lead) {
 
 // ---- cache das verificações (não gastar crédito duas vezes) ----
 // v2: a verificação antiga comparava só o nome e errava; as antigas são descartadas.
-const KEY = "csearch_verificacoes_v2";
-try { localStorage.removeItem("csearch_verificacoes_v1"); } catch { /* sem armazenamento */ }
+const KEY = "csearch_verificacoes_v3";
+try { ["csearch_verificacoes_v1", "csearch_verificacoes_v2"].forEach((k) => localStorage.removeItem(k)); } catch { /* sem armazenamento */ }
 
 export function cacheVerificacoes(): Record<string, Lead> {
   try {
