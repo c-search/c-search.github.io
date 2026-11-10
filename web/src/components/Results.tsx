@@ -165,8 +165,9 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
 
         {/* Verificação no Google */}
         <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl bg-card px-4 py-3 ring-1 ring-white/10">
-          <ShieldCheck className="h-5 w-5 shrink-0" />
-          <div className="min-w-0 flex-1 text-sm">
+          <ShieldCheck className="h-5 w-5 shrink-0 self-start sm:self-center" />
+          {/* no celular o texto ocupa a linha toda e os botões descem para a linha de baixo */}
+          <div className="min-w-0 flex-1 basis-[calc(100%-2.5rem)] text-sm sm:basis-0">
             <div className="font-medium">Confirmar no Google se já têm site, cardápio ou Instagram</div>
             <div className="text-xs text-muted-foreground">
               Confere a ficha do Google Maps de cada lugar (pelo telefone e endereço) e busca no Google. De 1 a 3 créditos do Serper por lugar; o resultado fica gravado.
@@ -452,7 +453,7 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onCon
           <MessageCircle className="h-4 w-4" /> Abordar
         </button>
         <a href={l.maps_url} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm ring-1 ring-white/10 hover:bg-white/5">
-          <MapPin className="h-4 w-4" /> Maps <ExternalLink className="h-3 w-3 opacity-50" />
+          <MapPin className="h-4 w-4" /> <span className="hidden sm:inline">Maps</span> <ExternalLink className="hidden h-3 w-3 opacity-50 sm:block" />
         </a>
         <Button size="icon" variant={saved ? "solid" : "outline"} onClick={onSave} title={saved ? "Já está em Meus leads" : "Salvar em Meus leads"}>
           <Bookmark className={cn("h-4 w-4", saved && "fill-current")} />

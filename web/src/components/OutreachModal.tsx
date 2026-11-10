@@ -124,10 +124,10 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm" onClick={onClose}>
       <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 24, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-white/10 md:flex-row">
+        className="flex max-h-[95vh] w-full max-w-5xl flex-col overflow-y-auto rounded-3xl bg-card ring-1 ring-white/10 md:flex-row md:overflow-hidden">
 
         {/* Celular com a conversa / demo */}
-        <div className="flex shrink-0 flex-col items-center gap-3 bg-black/50 p-4 md:p-6">
+        <div className="order-last flex shrink-0 flex-col items-center gap-3 bg-black/50 p-4 md:order-none md:p-6">
           <div className="flex rounded-full bg-white/5 p-1 text-xs ring-1 ring-white/10">
             {(["conversa", "demo"] as const).map((x) => (
               <button key={x} onClick={() => setAba(x)}
@@ -179,7 +179,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
         </div>
 
         {/* Controles */}
-        <div className="flex flex-1 flex-col overflow-y-auto p-6">
+        <div className="flex flex-1 flex-col p-5 md:overflow-y-auto md:p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="text-xs text-muted-foreground">Abordagem para</div>
