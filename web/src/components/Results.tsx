@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, Download, ExternalLink, Globe, MapPin, MessageCircle, Phone, Save } from "lucide-react";
+import { Bookmark, Download, ExternalLink, Globe, Loader2, MapPin, MessageCircle, Phone, Save, ShieldCheck } from "lucide-react";
 import { cn, downloadCsv, nivelTone, telLink, waLink, type Lead, type SearchResult } from "@/lib";
 import { Button, Input, ScoreBar, SectionTitle, Stat, Toggle } from "./ui";
 
@@ -9,12 +9,17 @@ type Props = {
   template: string;
   savedIds: Set<string>;
   onSave: (leads: Lead[], busca: string) => void;
+  onVerify: (leads: Lead[]) => void;
+  verifying: { done: number; total: number } | null;
+  verifyingIds: Set<string>;
 };
 
 const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
 const PAGE = 60;
 
-export function Results({ result, template, savedIds, onSave }: Props) {
+export function Results({ result, template, savedIds, onSave, onVerify, verifying, verifyingIds }: Props) {
+  const [soVerificados, setSoVerificados] = useState(false);
+  const [lote, setLote] = useState(20);
   const [cat, setCat] = useState<string>(result.ranking[0]?.categoria ?? "");
   const [tipos, setTipos] = useState<Set<string>>(new Set(["Nenhum", "Só rede social"]));
   const [soTel, setSoTel] = useState(false);
@@ -32,9 +37,13 @@ export function Results({ result, template, savedIds, onSave }: Props) {
       .filter((l) => !soTel || l.telefone)
       .filter((l) => !soWa || l.whatsapp)
       .filter((l) => !esconderSalvos || !savedIds.has(l.place_id))
+      .filter((l) => !soVerificados || l.verificacao)
       .filter((l) => !termo || `${l.nome} ${l.endereco}`.toLowerCase().includes(termo))
       .sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0));
-  }, [result, cat, tipos, soTel, soWa, esconderSalvos, savedIds, q]);
+  }, [result, cat, tipos, soTel, soWa, esconderSalvos, soVerificados, savedIds, q]);
+
+  const naoVerificados = filtrados.filter((l) => !l.verificacao);
+  const verificadosTotal = result.leads.filter((l) => l.verificacao).length;
 
   const temAvaliacoes = result.leads.some((l) => l.avaliacoes !== null);
   const busca = `${cat || "Todas"} - ${cidade}`;
@@ -89,7 +98,38 @@ export function Results({ result, template, savedIds, onSave }: Props) {
           <Toggle checked={soTel} onChange={setSoTel}>Com telefone</Toggle>
           <Toggle checked={soWa} onChange={setSoWa}>Com WhatsApp</Toggle>
           <Toggle checked={esconderSalvos} onChange={setEsconderSalvos}>Esconder salvos</Toggle>
+          <Toggle checked={soVerificados} onChange={setSoVerificados}>Só verificados</Toggle>
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar por nome ou rua…" className="h-8 w-full md:ml-auto md:w-60" />
+        </div>
+
+        {/* Verificação no Google */}
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl bg-card px-4 py-3 ring-1 ring-white/10">
+          <ShieldCheck className="h-5 w-5 shrink-0" />
+          <div className="min-w-0 flex-1 text-sm">
+            <div className="font-medium">Confirmar no Google se já têm site, cardápio ou Instagram</div>
+            <div className="text-xs text-muted-foreground">
+              Pesquisa cada lugar no Google e esconde quem já tem site. 1 crédito do Serper por lugar ·{" "}
+              {verificadosTotal} já verificados nesta busca
+            </div>
+          </div>
+          {verifying ? (
+            <div className="flex items-center gap-2 text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" /> Verificando {verifying.done}/{verifying.total}…
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <select
+                value={lote}
+                onChange={(e) => setLote(Number(e.target.value))}
+                className="h-8 rounded-lg bg-white/[0.03] px-2 text-sm outline-none ring-1 ring-white/10 cursor-pointer"
+              >
+                {[10, 20, 50, 100].map((n) => <option key={n} value={n}>os {n} primeiros</option>)}
+              </select>
+              <Button size="sm" disabled={!naoVerificados.length} onClick={() => onVerify(naoVerificados.slice(0, lote))}>
+                Verificar {Math.min(lote, naoVerificados.length)}
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -117,6 +157,8 @@ export function Results({ result, template, savedIds, onSave }: Props) {
               saved={savedIds.has(l.place_id)}
               wa={waLink(l, template, cidade)}
               onSave={() => onSave([l], busca)}
+              onVerify={() => onVerify([l])}
+              checking={verifyingIds.has(l.place_id)}
             />
           ))}
           {!filtrados.length && (
@@ -157,7 +199,39 @@ function CatCard(p: { active: boolean; onClick: () => void; title: string; big: 
   );
 }
 
-function LeadRow({ lead: l, index, saved, wa, onSave }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void }) {
+export function VerifBadge({ lead: l }: { lead: Lead }) {
+  const v = l.verificacao;
+  if (!v && !l.rede) return null;
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+      {v?.status === "sem_site" && (
+        <span className="inline-flex items-center gap-1 rounded-md bg-foreground px-1.5 py-0.5 text-[11px] font-medium text-background">
+          <ShieldCheck className="h-3 w-3" /> Confirmado no Google: sem site
+        </span>
+      )}
+      {v?.status === "social" && (
+        <span className="inline-flex items-center gap-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-medium">
+          <ShieldCheck className="h-3 w-3" /> {v.resumo}
+        </span>
+      )}
+      {v?.status === "site" && (
+        <span className="inline-flex items-center gap-1 rounded-md bg-red-500/20 px-1.5 py-0.5 text-[11px] font-medium text-red-300">
+          {v.resumo}
+        </span>
+      )}
+      {v?.links.map((k) => (
+        <a key={k.url} href={k.url} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+          {k.tipo} ↗
+        </a>
+      ))}
+      {l.rede && !v && (
+        <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] text-neutral-300">Possível rede · {l.rede} unidades</span>
+      )}
+    </div>
+  );
+}
+
+function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; checking: boolean }) {
   const tone = nivelTone(l.score);
   return (
     <motion.div
@@ -182,6 +256,7 @@ function LeadRow({ lead: l, index, saved, wa, onSave }: { lead: Lead; index: num
           {l.avaliacoes !== null && <> · {l.avaliacoes} avaliações{l.nota ? ` (${l.nota}★)` : ""}</>}
         </div>
         <div className="mt-1 text-xs text-neutral-300">→ {l.oferta}</div>
+        <VerifBadge lead={l} />
       </div>
 
       <div className="min-w-0 text-sm">
@@ -205,6 +280,11 @@ function LeadRow({ lead: l, index, saved, wa, onSave }: { lead: Lead; index: num
       </div>
 
       <div className="flex flex-wrap gap-2 lg:justify-end">
+        {!l.verificacao && (
+          <Button size="icon" variant="outline" onClick={onVerify} disabled={checking} title="Verificar no Google se já tem site">
+            {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+          </Button>
+        )}
         {wa && (
           <a href={wa} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-sm font-medium text-background hover:opacity-90">
             <MessageCircle className="h-4 w-4" /> WhatsApp

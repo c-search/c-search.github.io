@@ -15,6 +15,21 @@ potencial para você vender site, cardápio digital, portfólio ou gestão do pe
   versão local (`iniciar.bat`) quando há chave no `.env`.
 - Cada `git push` na branch `main` atualiza o site sozinho (GitHub Actions).
 
+### ✅ Verificação no Google (Serper)
+
+O mapa grátis não sabe tudo (ex.: lugar que tem site mas não cadastrou no OpenStreetMap).
+Com uma chave grátis do [serper.dev](https://serper.dev) (só e-mail, ~2.500 pesquisas grátis),
+o botão **Verificar** pesquisa cada lugar no Google e marca:
+
+- **Confirmado no Google: sem site** → pode chamar
+- **Sem site próprio, mas tem rede social / cardápio-delivery** (Instagram, iFood…)
+- **Já tem site** → sai da lista automaticamente
+
+Cada lugar verificado gasta 1 crédito e fica guardado no navegador (não gasta de novo).
+Também pega o número de avaliações do Google quando aparece. Lugares com o mesmo nome em
+vários endereços são marcados como **possível rede** e caem no ranking.
+A chave fica em **Configurações**, salva só no navegador de quem usa.
+
 ## Fontes de dados
 
 | Fonte | Custo | O que traz |

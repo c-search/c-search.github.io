@@ -43,6 +43,14 @@ export function saveLeads(leads: Lead[], busca: string) {
   return { novos, existentes: leads.length - novos };
 }
 
+/** Atualiza os dados (ex.: verificação) de leads que já estão salvos, sem mexer no status. */
+export function refreshLeads(leads: Lead[]) {
+  const novos = new Map(leads.map((l) => [l.place_id, l]));
+  const list = loadLeads();
+  if (!list.some((l) => novos.has(l.place_id))) return;
+  write(list.map((l) => (novos.has(l.place_id) ? { ...l, ...novos.get(l.place_id), status: l.status, anotacoes: l.anotacoes, busca: l.busca, encontrado_em: l.encontrado_em } : l)));
+}
+
 export function updateLead(id: string, status: string, anotacoes: string) {
   write(loadLeads().map((l) => (l.place_id === id ? { ...l, status, anotacoes } : l)));
 }

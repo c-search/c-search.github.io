@@ -93,7 +93,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
             </a>
             <a href="#leads" className="rounded-lg px-3 py-2 text-muted-foreground hover:text-foreground">Meus leads</a>
             <button onClick={onOpenMessage} className="rounded-lg px-3 py-2 text-muted-foreground hover:text-foreground cursor-pointer">
-              Mensagem
+              Configurações
             </button>
           </div>
         </div>

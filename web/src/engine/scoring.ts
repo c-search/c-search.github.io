@@ -102,6 +102,24 @@ export function scoreLead(p: RawPlace, termo = ""): Lead {
   };
 }
 
+function nivelDe(score: number) {
+  return score >= 70 ? "🔥 Quente" : score >= 45 ? "🟡 Morno" : "❄️ Frio";
+}
+
+/** Mesmo nome em 2+ lugares = provável rede/franquia, que quase sempre já tem site. */
+export function marcarRedes(leads: Lead[]): Lead[] {
+  const chave = (n: string) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+    .replace(/\b(unidade|filial|loja)\b.*$/, "").replace(/[^a-z0-9]/g, "");
+  const cont = new Map<string, number>();
+  for (const l of leads) cont.set(chave(l.nome), (cont.get(chave(l.nome)) || 0) + 1);
+  return leads.map((l) => {
+    const n = cont.get(chave(l.nome)) || 1;
+    if (n < 2 || l.verificacao) return l;
+    const score = Math.max(0, l.score - 30);
+    return { ...l, rede: n, score, nivel: nivelDe(score), motivos: [`possível rede (${n} unidades)`, l.motivos].filter(Boolean).join(", ") };
+  });
+}
+
 export function rankCategories(leads: Lead[]): RankRow[] {
   const stats = new Map<string, RankRow>();
   for (const l of leads) {

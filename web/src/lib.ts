@@ -1,9 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { fetchPlaces, geocode } from "./engine/osm";
-import { rankCategories, scoreLead } from "./engine/scoring";
+import { marcarRedes, rankCategories, scoreLead } from "./engine/scoring";
+import { cacheVerificacoes } from "./engine/verify";
 import { fakeSearch } from "./engine/demo";
 import { deleteAll, loadLeads, saveLeads, updateLead } from "./engine/store";
+import type { Verificacao } from "./engine/verify";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -25,6 +27,8 @@ export type Lead = {
   nivel: string;
   motivos: string;
   oferta: string;
+  verificacao?: Verificacao; // preenchido depois de conferir no Google
+  rede?: number; // quantas unidades com o mesmo nome apareceram (possível franquia)
 };
 
 export type SavedLead = Lead & {
@@ -69,6 +73,12 @@ async function req<T>(url: string, init?: RequestInit): Promise<T> {
   return r.json();
 }
 
+/** Aplica verificações já feitas (cache) e marca redes/franquias. */
+function prepare(leads: Lead[]): Lead[] {
+  const cache = cacheVerificacoes();
+  return marcarRedes(leads.map((l) => cache[l.place_id] ?? l));
+}
+
 // Tudo roda no navegador (funciona no GitHub Pages). Só o modo Google usa o
 // servidor Python local (api.py), porque a chave não pode ficar exposta num site público.
 export const api = {
@@ -82,17 +92,19 @@ export const api = {
   },
   searchOsm: async (lugar: string): Promise<Omit<SearchResult, "busca">> => {
     const g = await geocode(lugar);
-    const leads = (await fetchPlaces(g)).map((p) => scoreLead(p));
+    const leads = prepare((await fetchPlaces(g)).map((p) => scoreLead(p)));
     return { area: g.nome, leads, ranking: rankCategories(leads) };
   },
   searchTerm: async (body: { termo: string; cidade: string; bairros: string[]; fonte: Fonte; paginas?: number }) => {
     if (body.fonte === "demo") {
       const qs = body.bairros.length ? body.bairros.map((b) => `${body.termo} em ${b}, ${body.cidade}`) : [`${body.termo} em ${body.cidade}`];
       const byId = new Map(qs.flatMap((q) => fakeSearch(q)).map((p) => [p.place_id, p]));
-      const leads = [...byId.values()].map((p) => scoreLead(p, body.termo));
+      const leads = prepare([...byId.values()].map((p) => scoreLead(p, body.termo)));
       return { area: body.cidade, leads, ranking: rankCategories(leads) };
     }
-    return req<Omit<SearchResult, "busca">>("/api/search/term", { method: "POST", body: JSON.stringify(body) });
+    const r = await req<Omit<SearchResult, "busca">>("/api/search/term", { method: "POST", body: JSON.stringify(body) });
+    const leads = prepare(r.leads);
+    return { ...r, leads, ranking: rankCategories(leads) };
   },
   leads: async () => loadLeads(),
   save: async (busca: string, leads: Lead[]) => saveLeads(leads, busca),
