@@ -79,8 +79,15 @@ function areaFilter(g: Geo, raio = 3000): [string, string] {
 }
 
 // ---- cache no navegador (o servidor grátis é lento) ----
-const CACHE_PREFIX = "csearch_osm_";
+const CACHE_PREFIX = "csearch_osm2_"; // v2: link do Maps corrigido
 const CACHE_MS = 24 * 3600 * 1000;
+
+// apaga o cache da versão antiga (links do Maps errados) para liberar espaço
+try {
+  Object.keys(localStorage).filter((k) => k.startsWith("csearch_osm_")).forEach((k) => localStorage.removeItem(k));
+} catch {
+  /* sem armazenamento */
+}
 
 function cacheGet(key: string): RawPlace[] | null {
   try {
@@ -182,7 +189,6 @@ function normalize(e: OsmEl): RawPlace | null {
   const endereco = [rua, tags["addr:suburb"], tags["addr:city"]].filter(Boolean).join(", ");
   const lat = e.lat ?? e.center?.lat;
   const lon = e.lon ?? e.center?.lon;
-  const q = endereco || !lat ? `${tags.name} ${endereco}`.trim() : `${tags.name} ${lat},${lon}`;
   return {
     place_id: `osm-${e.type}-${e.id}`,
     nome: tags.name,
@@ -192,6 +198,18 @@ function normalize(e: OsmEl): RawPlace | null {
     avaliacoes: null,
     site: site || social,
     telefone,
-    maps_url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`,
+    maps_url: mapsUrl(tags.name, cat, endereco, lat, lon),
   };
+}
+
+/**
+ * Link do Google Maps que procura o lugar AO REDOR do ponto certo.
+ * (Colocar as coordenadas no texto da busca faz o Google procurar o nome no Brasil inteiro.)
+ */
+function mapsUrl(nome: string, categoria: string, endereco: string, lat?: number, lon?: number) {
+  const tipo = categoria.split(" /")[0];
+  const comTipo = nome.toLowerCase().includes(tipo.toLowerCase()) ? nome : `${nome} ${tipo}`;
+  const texto = [comTipo, endereco].filter(Boolean).join(" ");
+  if (lat && lon) return `https://www.google.com/maps/search/${encodeURIComponent(texto)}/@${lat},${lon},18z`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(texto)}`;
 }

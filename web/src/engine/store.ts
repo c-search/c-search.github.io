@@ -9,9 +9,19 @@ function now() {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
+// Leads salvos antes da correção tinham link do Maps com as coordenadas no texto da busca
+// (o Google procurava o nome no Brasil inteiro). Reaproveita as coordenadas no formato certo.
+function corrigirLinkMaps(l: SavedLead): SavedLead {
+  const m = l.maps_url.match(/[?&]query=(.*)%20(-?\d+\.\d+),(-?\d+\.\d+)$/);
+  if (!m) return l;
+  const tipo = l.categoria.split(" /")[0];
+  const texto = l.nome.toLowerCase().includes(tipo.toLowerCase()) ? l.nome : `${l.nome} ${tipo}`;
+  return { ...l, maps_url: `https://www.google.com/maps/search/${encodeURIComponent(texto)}/@${m[2]},${m[3]},18z` };
+}
+
 export function loadLeads(): SavedLead[] {
   try {
-    const list: SavedLead[] = JSON.parse(localStorage.getItem(KEY) || "[]");
+    const list: SavedLead[] = JSON.parse(localStorage.getItem(KEY) || "[]").map(corrigirLinkMaps);
     return list.sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0));
   } catch {
     return [];
