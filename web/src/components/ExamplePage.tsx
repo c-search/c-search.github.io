@@ -7,7 +7,14 @@ import { cardapioPara, foto, sitePara, type MenuItem, type SiteNicho } from "@/e
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const iniciais = (n: string) => n.split(/\s+/).filter((w) => w.length > 2 || /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || n[0];
-const bairroDe = (e?: string) => (e ? e.split(",").map((s) => s.trim()).filter(Boolean).slice(-2, -1)[0] || e.split(",")[0] : "");
+// bairro: no endereço do Google vem depois do número ("Rua X, 713 - Mooca, São Paulo - SP" → "Mooca")
+const bairroDe = (e?: string) => {
+  if (!e) return "";
+  const g = e.match(/\d+[A-Za-z]?\s*-\s*([^,]+)/);
+  if (g && !/\bSP\b|^\d/.test(g[1])) return g[1].trim();
+  const partes = e.split(",").map((s) => s.trim()).filter((x) => x && !/^\d|\s-\s[A-Z]{2}$/.test(x));
+  return partes.length > 2 ? partes[partes.length - 2] : "";
+};
 const wa = (num: string | undefined, txt: string) => (num ? `https://wa.me/${num}?text=${encodeURIComponent(txt)}` : undefined);
 
 const ICONES: Record<string, I.LucideIcon> = {
@@ -288,7 +295,7 @@ function SiteCompleto({ d }: { d: ExampleData }) {
             <a href="#depoimentos">Depoimentos</a>
             <a href="#contato">Contato</a>
           </div>
-          <a href={zap} className="rounded-full px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110" style={{ background: ac }}>{s.cta}</a>
+          <a href={zap} className="shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-semibold text-black transition hover:brightness-110 sm:px-4 sm:text-sm" style={{ background: ac }}>{s.cta}</a>
         </div>
       </nav>
 
