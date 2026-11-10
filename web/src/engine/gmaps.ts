@@ -81,6 +81,18 @@ export function normalizarFicha(p: Place, termo: string): Lead {
  * Procura "termo" (ex.: "restaurante") em cada área (cidade ou bairros), algumas páginas por área.
  * Cada página traz ~20 lugares e custa 1 crédito.
  */
+/** Localização da cidade/bairro guardada no navegador (o serviço de mapas grátis é lento). */
+async function geocodeComCache(area: string) {
+  const k = "csearch_geo_" + area.toLowerCase().trim();
+  try {
+    const c = localStorage.getItem(k);
+    if (c) return JSON.parse(c) as { lat: number; lon: number };
+  } catch { /* sem armazenamento */ }
+  const g = await geocode(area);
+  try { localStorage.setItem(k, JSON.stringify({ lat: g.lat, lon: g.lon })); } catch { /* sem espaço */ }
+  return g;
+}
+
 /** Tipos de negócio pesquisados quando você digita só a cidade (os que mais compram site/cardápio). */
 export const CATEGORIAS_AUTO = [
   "restaurante", "pizzaria", "lanchonete", "hamburgueria", "padaria", "bar",
@@ -103,26 +115,31 @@ export async function buscarGoogleMaps(
   let creditos = 0;
   let passo = 0;
   const totalPassos = areas.length * termos.length;
+  // várias pesquisas ao mesmo tempo (antes era uma por vez): bem mais rápido
+  const SIMULTANEAS = 5;
   for (let a = 0; a < areas.length; a++) {
     let ll: string | undefined;
     try {
-      const g = await geocode(areas[a]);
+      const g = await geocodeComCache(areas[a]);
       ll = `@${g.lat},${g.lon},${bairros.length ? 15 : 13}z`;
     } catch {
       /* sem coordenada: busca só pelo texto */
     }
-    for (const t of termos) {
-      passo++;
-      for (let pg = 1; pg <= pgs; pg++) {
-        onProgress?.(termo
-          ? `${areas[a]} · página ${pg} de ${pgs}`
-          : `Procurando ${t} em ${areas[a]} (${passo} de ${totalPassos})`);
-        const ps = await places({ q: `${t} em ${areas[a]}`, ...(ll ? { ll } : {}), page: pg }, key);
-        creditos++;
-        ps.forEach((p) => { const l = normalizarFicha(p, t); if (!porId.has(l.place_id)) porId.set(l.place_id, l); });
-        if (ps.length < 10) break; // acabou
+    const fila = [...termos];
+    const trabalhar = async () => {
+      while (fila.length) {
+        const t = fila.shift()!;
+        for (let pg = 1; pg <= pgs; pg++) {
+          const ps = await places({ q: `${t} em ${areas[a]}`, ...(ll ? { ll } : {}), page: pg }, key);
+          creditos++;
+          ps.forEach((p) => { const l = normalizarFicha(p, t); if (!porId.has(l.place_id)) porId.set(l.place_id, l); });
+          if (ps.length < 10) break; // acabou
+        }
+        passo++;
+        onProgress?.(`${areas.length > 1 ? `${areas[a]} · ` : ""}${passo} de ${totalPassos} pesquisas · ${porId.size} lugares encontrados`);
       }
-    }
+    };
+    await Promise.all(Array.from({ length: Math.min(SIMULTANEAS, termos.length) }, trabalhar));
   }
   return { area: bairros.length ? `${bairros.join(" + ")}, ${cidade}` : cidade, leads: [...porId.values()], creditos };
 }
