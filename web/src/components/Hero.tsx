@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronDown, Loader2, MapPin, Search } from "lucide-react";
+import { ChevronDown, Download, Loader2, MapPin, Search } from "lucide-react";
 import { cn, type Fonte, type SearchResult } from "@/lib";
 import { Button, Input } from "./ui";
 
@@ -28,6 +28,7 @@ export function Logo() {
 
 type Props = {
   onSearch: (p: { fonte: Fonte; lugar: string; termo: string; bairros: string[] }) => void;
+  progress?: string;
   loading: boolean;
   result: SearchResult | null;
   hasGoogleKey: boolean;
@@ -41,12 +42,20 @@ const FONTES: { id: Fonte; label: string }[] = [
   { id: "demo", label: "Demo" },
 ];
 
-export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOpenMessage }: Props) {
+export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOpenMessage, progress }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   const textY = useTransform(scrollYProgress, [0, 0.5], [0, -200]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const panelY = useTransform(scrollYProgress, [0, 1], [0, -250]);
+
+  // botão "Instalar app" (o navegador avisa quando dá para instalar)
+  const [instalar, setInstalar] = useState<{ prompt: () => void } | null>(null);
+  useEffect(() => {
+    const h = (e: Event) => { e.preventDefault(); setInstalar(e as unknown as { prompt: () => void }); };
+    window.addEventListener("beforeinstallprompt", h);
+    return () => window.removeEventListener("beforeinstallprompt", h);
+  }, []);
 
   const [fonte, setFonte] = useState<Fonte>("osm");
   const [lugar, setLugar] = useState("");
@@ -97,9 +106,17 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
             </button>
           </div>
         </div>
-        <a href="#leads" className="whitespace-nowrap rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90">
-          Meus leads{savedCount ? ` · ${savedCount}` : ""}
-        </a>
+        <div className="flex items-center gap-2">
+          {instalar && (
+            <button onClick={() => { instalar.prompt(); setInstalar(null); }}
+              className="hidden whitespace-nowrap rounded-lg px-3 py-2 text-sm text-muted-foreground ring-1 ring-white/15 hover:text-foreground sm:flex sm:items-center sm:gap-1.5 cursor-pointer">
+              <Download className="h-4 w-4" /> Instalar app
+            </button>
+          )}
+          <a href="#leads" className="whitespace-nowrap rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90">
+            Meus leads{savedCount ? ` · ${savedCount}` : ""}
+          </a>
+        </div>
       </nav>
 
       {/* Conteúdo */}
@@ -192,20 +209,21 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
               {loading ? "Buscando…" : "Buscar"}
             </motion.button>
           </div>
-          {precisaTermo && (
-            <Input
-              value={bairros}
-              onChange={(e) => setBairros(e.target.value)}
-              placeholder="Bairros (opcional, separados por vírgula): Centro, Cambuí, Taquaral"
-              className="mt-2 bg-black/65"
-            />
-          )}
+          <Input
+            value={bairros}
+            onChange={(e) => setBairros(e.target.value)}
+            placeholder={fonte === "osm"
+              ? "Vários bairros de uma vez? Ex.: Tatuapé, Mooca, Penha (e a cidade no campo de cima)"
+              : "Bairros (opcional, separados por vírgula): Centro, Cambuí, Taquaral"}
+            className="mt-2 bg-black/65"
+          />
         </motion.form>
 
         {loading && (
           <p className="mt-4 text-sm text-muted-foreground">
+            {progress && <span className="block font-medium text-foreground">{progress}</span>}
             {fonte === "osm"
-              ? `Varrendo todos os comércios da região… ${elapsed}s. O servidor grátis pode levar de 2 a 10 min; depois a cidade fica salva por 24h.`
+              ? `Varrendo todos os comércios da região… ${elapsed}s. O servidor grátis pode levar de 2 a 10 min por área; depois fica salvo por 24h.`
               : `Buscando… ${elapsed}s`}
           </p>
         )}

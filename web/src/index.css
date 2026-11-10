@@ -90,6 +90,15 @@ body {
   border-radius: 8px;
 }
 
+/* o reset do Tailwind quebra os blocos do mapa (Leaflet) */
+.leaflet-container img {
+  max-width: none !important;
+}
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #171717;
+}
+
 select option {
   background: #0d0d0d;
 }

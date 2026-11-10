@@ -34,6 +34,9 @@ export function fakeSearch(query: string, n = 25): RawPlace[] {
       site,
       telefone,
       maps_url: "https://maps.google.com",
+      // pontos fictícios espalhados pela zona leste de SP, só para o mapa funcionar no modo demo
+      lat: -23.545 + (r() - 0.5) * 0.03,
+      lon: -46.57 + (r() - 0.5) * 0.04,
     };
   });
 }

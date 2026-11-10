@@ -28,6 +28,8 @@ export type Lead = {
   motivos: string;
   oferta: string;
   verificacao?: Verificacao; // preenchido depois de conferir no Google
+  lat?: number;
+  lon?: number;
   rede?: number; // quantas unidades com o mesmo nome apareceram (possível franquia)
 };
 
@@ -36,6 +38,9 @@ export type SavedLead = Lead & {
   anotacoes: string;
   busca: string;
   encontrado_em: string;
+  status_em?: string; // ISO: quando o status mudou (ou último retorno)
+  valor?: number; // quanto fechou (status Fechado)
+  retornos?: number; // quantas mensagens de retorno já mandou
 };
 
 export type RankRow = {
@@ -90,10 +95,28 @@ export const api = {
       return { has_google_key: false };
     }
   },
-  searchOsm: async (lugar: string): Promise<Omit<SearchResult, "busca">> => {
-    const g = await geocode(lugar);
-    const leads = prepare((await fetchPlaces(g)).map((p) => scoreLead(p)));
-    return { area: g.nome, leads, ranking: rankCategories(leads) };
+  /** Busca grátis. Com bairros, busca cada um ("Tatuapé, São Paulo", "Mooca, São Paulo"…) e junta tudo. */
+  searchOsm: async (lugar: string, bairros: string[] = [], onProgress?: (msg: string) => void): Promise<Omit<SearchResult, "busca">> => {
+    if (!bairros.length) {
+      const g = await geocode(lugar);
+      const leads = prepare((await fetchPlaces(g)).map((p) => scoreLead(p)));
+      return { area: g.nome, leads, ranking: rankCategories(leads) };
+    }
+    const byId = new Map<string, ReturnType<typeof scoreLead>>();
+    const falhas: string[] = [];
+    for (let i = 0; i < bairros.length; i++) {
+      onProgress?.(`Bairro ${i + 1} de ${bairros.length}: ${bairros[i]}`);
+      try {
+        const g = await geocode(`${bairros[i]}, ${lugar}`);
+        for (const p of await fetchPlaces(g)) byId.set(p.place_id, scoreLead(p));
+      } catch {
+        falhas.push(bairros[i]);
+      }
+    }
+    if (!byId.size) throw new Error(`Não consegui buscar ${falhas.join(", ")}. Confira os nomes dos bairros e a cidade.`);
+    const leads = prepare([...byId.values()]);
+    const area = `${bairros.filter((b) => !falhas.includes(b)).join(" + ")}, ${lugar}`;
+    return { area, leads, ranking: rankCategories(leads) };
   },
   searchTerm: async (body: { termo: string; cidade: string; bairros: string[]; fonte: Fonte; paginas?: number }) => {
     if (body.fonte === "demo") {
@@ -108,7 +131,7 @@ export const api = {
   },
   leads: async () => loadLeads(),
   save: async (busca: string, leads: Lead[]) => saveLeads(leads, busca),
-  update: async (id: string, status: string, anotacoes: string) => updateLead(id, status, anotacoes),
+  update: async (id: string, status: string, anotacoes: string, extra: Partial<SavedLead> = {}) => updateLead(id, status, anotacoes, extra),
   deleteAll: async () => deleteAll(),
 };
 

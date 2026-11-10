@@ -79,12 +79,12 @@ function areaFilter(g: Geo, raio = 3000): [string, string] {
 }
 
 // ---- cache no navegador (o servidor grátis é lento) ----
-const CACHE_PREFIX = "csearch_osm2_"; // v2: link do Maps corrigido
+const CACHE_PREFIX = "csearch_osm3_"; // v3: guarda coordenadas para o mapa
 const CACHE_MS = 24 * 3600 * 1000;
 
 // apaga o cache da versão antiga (links do Maps errados) para liberar espaço
 try {
-  Object.keys(localStorage).filter((k) => k.startsWith("csearch_osm_")).forEach((k) => localStorage.removeItem(k));
+  Object.keys(localStorage).filter((k) => k.startsWith("csearch_osm") && !k.startsWith(CACHE_PREFIX)).forEach((k) => localStorage.removeItem(k));
 } catch {
   /* sem armazenamento */
 }
@@ -199,6 +199,8 @@ function normalize(e: OsmEl): RawPlace | null {
     site: site || social,
     telefone,
     maps_url: mapsUrl(tags.name, cat, endereco, lat, lon),
+    lat,
+    lon,
   };
 }
 

@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { Bookmark, Download, ExternalLink, Globe, Loader2, MapPin, MessageCircle, Phone, Save, ShieldCheck } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Bookmark, Download, ExternalLink, Globe, List, Loader2, Map as MapIcon, MapPin, MessageCircle, Phone, Save, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { LeadsMap } from "./LeadsMap";
+import { QuickMode } from "./QuickMode";
 import { cn, downloadCsv, nivelTone, telLink, waLink, type Lead, type SearchResult } from "@/lib";
 import { Button, Input, ScoreBar, SectionTitle, Stat, Toggle } from "./ui";
 import { ProposalChip } from "./Proposal";
@@ -13,13 +15,18 @@ type Props = {
   onVerify: (leads: Lead[]) => void;
   verifying: { done: number; total: number } | null;
   verifyingIds: Set<string>;
+  onExample: (l: Lead) => void;
+  onContact: (l: Lead, busca: string) => void;
+  onDiscard: (l: Lead, busca: string) => void;
 };
 
 const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
 type VF = "todos" | "pendente" | "sem_site" | "social" | "site";
 const PAGE = 60;
 
-export function Results({ result, template, savedIds, onSave, onVerify, verifying, verifyingIds }: Props) {
+export function Results({ result, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard }: Props) {
+  const [vista, setVista] = useState<"lista" | "mapa">("lista");
+  const [quick, setQuick] = useState(false);
   const [verifFiltro, setVerifFiltro] = useState<VF>("todos");
   const [lote, setLote] = useState(20);
   const [cat, setCat] = useState<string>(result.ranking[0]?.categoria ?? "");
@@ -46,6 +53,8 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
   }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q]);
 
   const naoVerificados = filtrados.filter((l) => !l.verificacao);
+  // modo rápido: só quem vale a pena (tira quem já tem site e quem já foi salvo como descartado)
+  const rapido = filtrados.filter((l) => l.verificacao?.status !== "site");
   const daCategoria = result.leads.filter((l) => !cat || l.categoria === cat);
   const contagem = {
     sem_site: daCategoria.filter((l) => l.verificacao?.status === "sem_site").length,
@@ -164,17 +173,30 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
             <span className="font-semibold text-foreground">{filtrados.length}</span> estabelecimentos
             {!temAvaliacoes && " · confira as avaliações no Maps antes de chamar"}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <div className="flex rounded-lg p-0.5 ring-1 ring-white/10">
+              {(["lista", "mapa"] as const).map((v) => (
+                <button key={v} onClick={() => setVista(v)}
+                  className={cn("flex h-7 items-center gap-1.5 rounded-md px-3 text-sm capitalize transition cursor-pointer", vista === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
+                  {v === "lista" ? <List className="h-4 w-4" /> : <MapIcon className="h-4 w-4" />} {v}
+                </button>
+              ))}
+            </div>
+            <Button size="sm" variant="outline" disabled={!rapido.length} onClick={() => setQuick(true)} title="Um lugar por vez, botões grandes">
+              <Zap className="h-4 w-4" /> Modo rápido
+            </Button>
             <Button size="sm" variant="outline" disabled={!filtrados.length} onClick={() => downloadCsv(filtrados, "csearch_leads.csv")}>
               <Download className="h-4 w-4" /> CSV
             </Button>
             <Button size="sm" disabled={!filtrados.length} onClick={() => onSave(filtrados, busca)}>
-              <Save className="h-4 w-4" /> Salvar {filtrados.length} em Meus leads
+              <Save className="h-4 w-4" /> Salvar {filtrados.length}
             </Button>
           </div>
         </div>
 
-        {/* Lista */}
+        {vista === "mapa" ? (
+          <LeadsMap leads={filtrados} template={template} cidade={cidade} />
+        ) : (
         <div className="overflow-hidden rounded-2xl bg-card ring-1 ring-white/5">
           {filtrados.slice(0, limite).map((l, i) => (
             <LeadRow
@@ -185,6 +207,8 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
               wa={waLink(l, template, cidade)}
               onSave={() => onSave([l], busca)}
               onVerify={() => onVerify([l])}
+              onExample={() => onExample(l)}
+              onContact={() => onContact(l, busca)}
               checking={verifyingIds.has(l.place_id)}
             />
           ))}
@@ -194,7 +218,24 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
             </div>
           )}
         </div>
-        {filtrados.length > limite && (
+        )}
+
+        <AnimatePresence>
+          {quick && (
+            <QuickMode
+              leads={rapido}
+              template={template}
+              cidade={cidade}
+              onClose={() => setQuick(false)}
+              onContact={(l) => onContact(l, busca)}
+              onDiscard={(l) => onDiscard(l, busca)}
+              onExample={onExample}
+              onVerify={(l) => onVerify([l])}
+              checkingIds={verifyingIds}
+            />
+          )}
+        </AnimatePresence>
+        {vista === "lista" && filtrados.length > limite && (
           <div className="mt-6 flex justify-center">
             <Button variant="glass" onClick={() => setLimite(limite + PAGE)}>
               Mostrar mais ({filtrados.length - limite} restantes)
@@ -283,7 +324,7 @@ export function VerifBadge({ lead: l }: { lead: Lead }) {
   );
 }
 
-function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; checking: boolean }) {
+function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onContact, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; onExample: () => void; onContact: () => void; checking: boolean }) {
   const tone = nivelTone(l.score);
   return (
     <motion.div
@@ -340,8 +381,12 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, checking }: { le
             {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
           </Button>
         )}
+        <Button size="icon" variant="outline" onClick={onExample} title="Gerar exemplo pronto (cardápio/site) para mandar">
+          <Sparkles className="h-4 w-4" />
+        </Button>
         {wa && (
-          <a href={wa} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-sm font-medium text-background hover:opacity-90">
+          <a href={wa} target="_blank" rel="noreferrer" onClick={onContact} title="Abre o WhatsApp e já salva como Contatado"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-sm font-medium text-background hover:opacity-90">
             <MessageCircle className="h-4 w-4" /> WhatsApp
           </a>
         )}

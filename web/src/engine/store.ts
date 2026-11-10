@@ -61,9 +61,29 @@ export function refreshLeads(leads: Lead[]) {
   write(list.map((l) => (novos.has(l.place_id) ? { ...l, ...novos.get(l.place_id), status: l.status, anotacoes: l.anotacoes, busca: l.busca, encontrado_em: l.encontrado_em } : l)));
 }
 
-export function updateLead(id: string, status: string, anotacoes: string) {
-  write(loadLeads().map((l) => (l.place_id === id ? { ...l, status, anotacoes } : l)));
+export function updateLead(id: string, status: string, anotacoes: string, extra: Partial<SavedLead> = {}) {
+  write(loadLeads().map((l) => {
+    if (l.place_id !== id) return l;
+    const mudou = l.status !== status;
+    return { ...l, status, anotacoes, ...(mudou ? { status_em: new Date().toISOString() } : {}), ...extra };
+  }));
 }
+
+/** Registra que mandou mensagem de retorno: o lembrete volta só daqui a alguns dias. */
+export function marcarRetorno(id: string) {
+  write(loadLeads().map((l) => (l.place_id === id ? { ...l, status_em: new Date().toISOString(), retornos: (l.retornos || 0) + 1 } : l)));
+}
+
+/** Dias desde a última mudança de status (ou retorno). */
+export function diasParado(l: SavedLead) {
+  const ref = l.status_em || l.encontrado_em.replace(" ", "T");
+  const t = new Date(ref).getTime();
+  return isNaN(t) ? 0 : Math.floor((Date.now() - t) / 86400000);
+}
+
+export const DIAS_PARA_RETORNO = 3;
+export const precisaRetorno = (l: SavedLead) =>
+  (l.status === "Contatado" || l.status === "Respondeu") && diasParado(l) >= DIAS_PARA_RETORNO && (l.retornos || 0) < 3;
 
 export function deleteAll() {
   write([]);

@@ -15,6 +15,23 @@ potencial para você vender site, cardápio digital, portfólio ou gestão do pe
   versão local (`iniciar.bat`) quando há chave no `.env`.
 - Cada `git push` na branch `main` atualiza o site sozinho (GitHub Actions).
 
+### 🧰 Ferramentas de venda
+
+- **Exemplo pronto** (✨): gera um link com um cardápio digital ou site de exemplo com o nome do
+  lugar, para mandar quando o dono disser "pode mandar". Coloque seu nome e WhatsApp em
+  Configurações para aparecer o botão "Gostei, quero o meu".
+- **WhatsApp marca sozinho**: ao clicar em WhatsApp, o lugar vai para Meus leads como "Contatado".
+- **Lembretes**: quem está sem resposta há 3+ dias aparece em "Para retornar hoje", com a
+  2ª mensagem pronta.
+- **Respostas prontas** (💬 em Meus leads): "Quanto custa?", "Já tenho Instagram", "Tá caro"…
+- **Painel de vendas**: chamados, taxa de resposta, fechados e quanto você já faturou.
+- **Mapa** com rota pelo Google Maps passando pelos melhores lugares.
+- **Vários bairros** numa busca só (campo de bairros, separados por vírgula).
+- **Modo rápido**: um lugar por vez, com botões grandes. Ótimo no celular (dá para arrastar).
+- **Instalar como app** (botão no topo, ou "Adicionar à tela inicial" no celular).
+- **Backup**: baixa um arquivo com seus leads e restaura em outro aparelho (a chave do Serper
+  não vai no arquivo).
+
 ### ✅ Verificação no Google (Serper)
 
 O mapa grátis não sabe tudo (ex.: lugar que tem site mas não cadastrou no OpenStreetMap).
