@@ -21,6 +21,9 @@ type Props = {
   onDiscard: (l: Lead, busca: string) => void;
   onContestar: (l: Lead) => void;
   fonte?: string;
+  salvaEm?: string;
+  onAtualizar?: () => void;
+  atualizando?: boolean;
 };
 
 const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
@@ -36,7 +39,7 @@ function tipoEfetivo(l: Lead): string {
 type VF = "todos" | "pendente" | "sem_site" | "sem_site_maps" | "social" | "site" | "incerto";
 const PAGE = 60;
 
-export function Results({ result, fonte, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard, onContestar }: Props) {
+export function Results({ result, fonte, salvaEm, onAtualizar, atualizando, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard, onContestar }: Props) {
   const [vista, setVista] = useState<"lista" | "mapa">("lista");
   const [quick, setQuick] = useState(false);
   const [verifFiltro, setVerifFiltro] = useState<VF>("todos");
@@ -113,6 +116,17 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
     <section id="resultados" className="relative px-6 md:px-12 lg:px-28 py-24">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker={result.area} title="Onde estão seus" accent="clientes." />
+        {salvaEm && (
+          <div className="-mt-4 mb-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
+            <span>Busca salva em {new Date(salvaEm).toLocaleDateString("pt-BR")} às {new Date(salvaEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · abrir de novo não gasta créditos</span>
+            {onAtualizar && fonte !== "demo" && (
+              <button onClick={onAtualizar} disabled={atualizando}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 ring-1 ring-white/15 hover:text-foreground disabled:opacity-50 cursor-pointer">
+                {atualizando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null} Atualizar busca{fonte === "gmaps" ? " (gasta créditos)" : ""}
+              </button>
+            )}
+          </div>
+        )}
         {fonte === "osm" && (
           <div className="mb-8 rounded-2xl bg-amber-400/10 px-5 py-4 text-sm text-amber-100 ring-1 ring-amber-300/20">
             <b>Atenção:</b> estes lugares vêm do mapa grátis (OpenStreetMap), que em muitas cidades está desatualizado: nomes antigos,

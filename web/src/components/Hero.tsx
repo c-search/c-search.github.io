@@ -29,6 +29,9 @@ export function Logo() {
 
 type Props = {
   onSearch: (p: { fonte: Fonte; lugar: string; termo: string; bairros: string[] }) => void;
+  recentes: { id: string; rotulo: string; quando: string; total?: number }[];
+  onAbrirRecente: (id: string) => void;
+  onApagarRecente: (id: string) => void;
   progress?: string;
   loading: boolean;
   result: SearchResult | null;
@@ -48,7 +51,7 @@ const FONTES: { id: Fonte; label: string }[] = [
   { id: "demo", label: "Demo" },
 ];
 
-export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, serperKey, paginas, onPaginas, savedCount, onOpenMessage, progress }: Props) {
+export function Hero({ onSearch, recentes, onAbrirRecente, onApagarRecente, loading, result, hasGoogleKey, hasSerper, serperKey, paginas, onPaginas, savedCount, onOpenMessage, progress }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   const textY = useTransform(scrollYProgress, [0, 0.5], [0, -200]);
@@ -238,6 +241,21 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, serpe
             </button>
           </div>
         </motion.form>
+
+        {!loading && recentes.length > 0 && (
+          <div className="mt-4 flex w-full max-w-2xl flex-wrap items-center justify-center gap-2 text-xs">
+            <span className="text-muted-foreground">Recentes:</span>
+            {recentes.slice(0, 5).map((r) => (
+              <span key={r.id} className="group flex items-center rounded-full bg-black/40 ring-1 ring-white/10 hover:ring-white/30">
+                <button onClick={() => onAbrirRecente(r.id)} title={`Abrir sem gastar créditos · ${new Date(r.quando).toLocaleString("pt-BR")}`}
+                  className="max-w-[220px] truncate py-1.5 pl-3 pr-1 text-left text-foreground cursor-pointer">
+                  {r.rotulo}{r.total ? <span className="text-muted-foreground"> · {r.total}</span> : null}
+                </button>
+                <button onClick={() => onApagarRecente(r.id)} aria-label="Apagar busca" className="py-1.5 pl-1 pr-2.5 text-muted-foreground opacity-60 hover:text-foreground hover:opacity-100 cursor-pointer">×</button>
+              </span>
+            ))}
+          </div>
+        )}
 
         {loading && (
           <p className="mt-4 text-sm text-muted-foreground">

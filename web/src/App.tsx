@@ -10,6 +10,7 @@ import { exampleKind, exampleLink, type ExampleData } from "./engine/example";
 import { CORES_SUGERIDAS } from "./engine/niches";
 import { mensagemExemplo } from "./engine/replies";
 import { exportBackup, importBackup } from "./engine/backup";
+import { abrirBusca, apagarBusca, diasDesde, idBusca, recentes, salvarBusca, ultimaBusca, VALIDADE_DIAS } from "./engine/history";
 import { Results } from "./components/Results";
 import { SavedLeads } from "./components/SavedLeads";
 import { HowItWorks } from "./components/HowItWorks";
@@ -48,6 +49,8 @@ function Main() {
   const [verifyingIds, setVerifyingIds] = useState<Set<string>>(new Set());
   const [paginas, setPaginas] = useState(() => Number(storageGet("csearch_paginas", "3")) || 3);
   const [fonteAtual, setFonteAtual] = useState<Fonte>("gmaps");
+  const [buscaAtual, setBuscaAtual] = useState<{ id: string; quando: string; params: { fonte: Fonte; lugar: string; termo: string; bairros: string[] } } | null>(null);
+  const [recentesLista, setRecentesLista] = useState(() => recentes());
   const [exemplo, setExemploRaw] = useState<Lead | null>(null);
   const [exCor, setExCor] = useState<string | undefined>();
   const [exFrase, setExFrase] = useState("");
@@ -63,6 +66,9 @@ function Main() {
 
   useEffect(() => {
     api.config().then((c) => setHasKey(c.has_google_key));
+    // reabre a última busca ao atualizar a página
+    const ultima = ultimaBusca();
+    if (ultima) mostrarBusca(ultima, false);
     loadSaved();
   }, [loadSaved]);
 
@@ -106,7 +112,25 @@ function Main() {
     notify(`${prontos.length} verificados: ${sem} sem site, ${social} só rede social/delivery, ${site} já têm site`);
   }
 
-  async function search(p: { fonte: Fonte; lugar: string; termo: string; bairros: string[] }) {
+  function mostrarBusca(r: NonNullable<ReturnType<typeof abrirBusca>>, rolar = true) {
+    setFonteAtual(r.salva.fonte);
+    setResult({ area: r.area, leads: r.leads, ranking: r.ranking, busca: r.busca });
+    setBuscaAtual({ id: r.salva.id, quando: r.salva.quando, params: { fonte: r.salva.fonte, lugar: r.salva.cidade, termo: r.salva.termo, bairros: r.salva.bairros } });
+    if (rolar) setTimeout(() => document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth" }), 300);
+  }
+
+  async function search(p: { fonte: Fonte; lugar: string; termo: string; bairros: string[] }, forcar = false) {
+    // mesma busca feita há menos de 7 dias: abre a salva, sem gastar créditos
+    const id = idBusca(p.fonte, p.termo, p.lugar, p.bairros);
+    if (!forcar && p.fonte !== "demo") {
+      const salva = abrirBusca(id);
+      if (salva && diasDesde(salva.salva.quando) < VALIDADE_DIAS) {
+        mostrarBusca(salva);
+        notify("Essa busca já estava salva: abri sem gastar créditos. Para buscar de novo, use \"Atualizar busca\".");
+        setRecentesLista(recentes());
+        return;
+      }
+    }
     setLoading(true);
     setProgress("");
     try {
@@ -120,7 +144,12 @@ function Main() {
         ? await api.searchOsm(p.lugar, p.bairros, setProgress)
         : await api.searchTerm({ termo: p.termo, cidade: p.lugar, bairros: p.bairros, fonte: p.fonte });
       setFonteAtual(p.fonte);
-      setResult({ ...r, busca: `${p.termo || "comércios"} - ${p.lugar}${p.bairros.length ? " (" + p.bairros.join(", ") + ")" : ""}` });
+      const busca = `${p.termo || "comércios"} - ${p.lugar}${p.bairros.length ? " (" + p.bairros.join(", ") + ")" : ""}`;
+      setResult({ ...r, busca });
+      const rotulo = `${p.termo ? p.termo + " em " : ""}${p.bairros.length ? p.bairros.join(", ") + ", " : ""}${p.lugar}`;
+      salvarBusca({ id, fonte: p.fonte, termo: p.termo, cidade: p.lugar, bairros: p.bairros, rotulo, area: r.area, busca, leads: r.leads });
+      setBuscaAtual({ id, quando: new Date().toISOString(), params: p });
+      setRecentesLista(recentes());
       setTimeout(() => document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth" }), 300);
       // verificação automática dos 10 melhores (sem site próprio e ainda não verificados)
       if (autoVerify && serperKey.trim()) {
@@ -206,8 +235,8 @@ function Main() {
     <main className="relative min-h-screen text-foreground">
       <VideoBackground />
       <div className="relative z-10">
-      <Hero onSearch={search} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} serperKey={serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
-      {result && <Results key={result.busca + result.area} result={result} fonte={fonteAtual} template={template} savedIds={savedIds} onSave={save}
+      <Hero onSearch={(p) => search(p)} recentes={recentesLista} onAbrirRecente={(id) => { const r = abrirBusca(id); if (r) mostrarBusca(r); }} onApagarRecente={(id) => { apagarBusca(id); setRecentesLista(recentes()); }} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} serperKey={serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
+      {result && <Results key={result.busca + result.area} result={result} fonte={fonteAtual} salvaEm={buscaAtual?.quando} onAtualizar={buscaAtual ? () => search(buscaAtual.params, true) : undefined} atualizando={loading} template={template} savedIds={savedIds} onSave={save}
         onVerify={(ls) => verify(ls)} verifying={verifying} verifyingIds={verifyingIds}
         onExample={setExemplo} onContact={contact} onDiscard={discard} onContestar={(l) => {
           const c = contestarVerificacao(l);
