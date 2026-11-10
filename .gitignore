@@ -1,0 +1,12 @@
+# segredos e dados locais — nunca subir
+.env
+dados/
+
+# gerados
+__pycache__/
+web/node_modules/
+web/dist/
+*.tsbuildinfo
+
+# configuração local do editor/assistente
+.claude/
