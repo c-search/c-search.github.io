@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Download, ExternalLink, Globe, List, Loader2, Map as MapIcon, MapPin, MessageCircle, Phone, Save, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { LeadsMap } from "./LeadsMap";
@@ -24,6 +24,15 @@ type Props = {
 };
 
 const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
+
+/** Situação do site considerando a verificação no Google (mais confiável que o mapa). */
+function tipoEfetivo(l: Lead): string {
+  const s = l.verificacao?.status;
+  if (s === "site") return "Site próprio";
+  if (s === "social") return "Só rede social";
+  if (s === "sem_site") return "Nenhum";
+  return l.tipo_site;
+}
 type VF = "todos" | "pendente" | "sem_site" | "sem_site_maps" | "social" | "site" | "incerto";
 const PAGE = 60;
 
@@ -35,6 +44,12 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
   // no mapa grátis abre na melhor categoria; nas buscas por tipo (Google Maps etc.) abre em "Todas"
   const [cat, setCat] = useState<string>(fonte === "osm" ? result.ranking[0]?.categoria ?? "" : "");
   const [tipos, setTipos] = useState<Set<string>>(new Set(["Nenhum", "Só rede social"]));
+  // lugares verificados agora há pouco: ficam na tela com o resultado até você trocar um filtro
+  const [fixos, setFixos] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!verifyingIds.size) return;
+    setFixos((f) => new Set([...f, ...verifyingIds]));
+  }, [verifyingIds]);
   const [soTel, setSoTel] = useState(false);
   const [soWa, setSoWa] = useState(false);
   const [esconderSalvos, setEsconderSalvos] = useState(false);
@@ -51,7 +66,10 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
     return result.leads
       .filter((l) => !cat || l.categoria === cat)
       // quem já foi verificado continua na lista com o resultado (não some)
-      .filter((l) => l.verificacao || tipos.has(l.tipo_site))
+      // "Sem site / Só rede social / Site próprio" usam o resultado da verificação quando existe.
+      // Se você clicou num resumo (ex.: "Já têm site"), ele manda; e quem acabou de ser verificado
+      // continua visível até você mexer num filtro (não some na sua frente).
+      .filter((l) => verifFiltro !== "todos" || fixos.has(l.place_id) || tipos.has(tipoEfetivo(l)))
       .filter((l) => !soTel || l.telefone)
       .filter((l) => !soWa || l.whatsapp)
       .filter((l) => !esconderSalvos || !savedIds.has(l.place_id))
@@ -65,7 +83,7 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
       .filter((l) => !termo || `${l.nome} ${l.endereco}`.toLowerCase().includes(termo))
       // ordem fixa da busca: verificar um lugar não faz ele pular para o fim da lista
       .sort((a, b) => (ordem.get(a.place_id) ?? 1e9) - (ordem.get(b.place_id) ?? 1e9));
-  }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q, ordem]);
+  }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q, ordem, fixos]);
 
   const naoVerificados = filtrados.filter(precisaConfirmar);
   // modo rápido: só quem vale a pena (tira quem já tem site e quem já foi salvo como descartado)
@@ -87,6 +105,8 @@ export function Results({ result, fonte, template, savedIds, onSave, onVerify, v
     const n = new Set(tipos);
     n.has(t) ? n.delete(t) : n.add(t);
     setTipos(n);
+    setVerifFiltro("todos"); // os botões de cima voltam a mandar
+    setFixos(new Set());
   }
 
   return (
