@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<script>document.documentElement.classList.add("js")</script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Movimento Fisioterapia · Exemplo de site</title>
+<meta name="description" content="Exemplo de site para clínica de fisioterapia e pilates, criado pela C-Search." />
+<meta property="og:title" content="Movimento Fisioterapia · Exemplo de site" />
+<meta property="og:description" content="Volte a se mover sem dor. Exemplo de site criado pela C-Search." />
+<meta property="og:image" content="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=1200&q=75&auto=format&fit=crop" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  html, body { background: #0D1A14; }
+  :root {
+    --bg: #0D1A14; --bg-2: #13241B; --card: #172C21; --ink: #EEF3EC; --muted: #9BB0A2; --sage: #A7C4A0;
+    --lime: #D7F25C; --line: rgba(238, 243, 236, .1);
+    --sans: "Space Grotesk", system-ui, sans-serif; --serif: "Instrument Serif", Georgia, serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { color: var(--ink); font-family: var(--sans); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { width: min(1200px, 100% - 40px); margin-inline: auto; }
+  em, .it { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--lime); letter-spacing: 0; }
+  .kicker { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--sage); }
+  .kicker::before { content: ""; width: 26px; height: 1px; background: var(--sage); }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 17px 28px; border-radius: 999px; font-weight: 600; font-size: 15px; transition: transform .25s, background .25s, color .25s; cursor: pointer; border: 0; font-family: inherit; }
+  .btn-lime { background: var(--lime); color: #0D1A14; }
+  .btn-lime:hover { transform: translateY(-2px); background: #e5ff73; }
+  .btn-line { box-shadow: inset 0 0 0 1px rgba(238,243,236,.3); color: var(--ink); }
+  .btn-line:hover { box-shadow: inset 0 0 0 1px var(--ink); }
+  :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+
+  nav { position: fixed; inset: 0 0 auto; z-index: 50; padding: 22px 0; transition: background .3s, padding .3s; }
+  nav.solid { background: rgba(13, 26, 20, .85); backdrop-filter: blur(14px); padding: 14px 0; box-shadow: 0 1px 0 var(--line); }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+  .logo i { width: 34px; height: 34px; border-radius: 10px; background: var(--lime); color: #0D1A14; display: grid; place-items: center; font-style: normal; }
+  .links { display: flex; gap: 30px; font-size: 14px; color: var(--muted); }
+  .links a:hover { color: var(--ink); }
+  nav .btn { padding: 11px 20px; font-size: 14px; }
+
+  /* hero */
+  .hero { position: relative; min-height: 100svh; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); animation: zoom 3s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes zoom { to { transform: scale(1.02); } }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,26,20,.35) 0%, rgba(13,26,20,.55) 45%, #0D1A14 100%); }
+  .hero .wrap { position: relative; z-index: 2; padding: 160px 0 70px; }
+  .hero h1 { font-size: clamp(54px, 9vw, 138px); line-height: .9; letter-spacing: -.045em; font-weight: 600; margin: 22px 0 26px; max-width: 1000px; }
+  .hero p { font-size: 19px; color: rgba(238,243,236,.8); max-width: 520px; }
+  .hero .row { display: flex; justify-content: space-between; align-items: end; gap: 40px; flex-wrap: wrap; }
+  .hero .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+  .chips { display: grid; grid-template-columns: repeat(3, auto); gap: 30px; }
+  .chips div b { display: block; font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1; color: var(--lime); }
+  .chips div span { font-size: 13px; color: var(--muted); }
+
+  .marquee { border-block: 1px solid var(--line); overflow: hidden; padding: 22px 0; background: var(--bg-2); }
+  .marquee div { display: flex; gap: 46px; width: max-content; animation: marq 32s linear infinite; font-size: 26px; font-weight: 500; letter-spacing: -.02em; white-space: nowrap; }
+  .marquee span { display: inline-flex; align-items: center; gap: 46px; }
+  .marquee span::after { content: "✦"; color: var(--lime); font-size: 16px; }
+  @keyframes marq { to { transform: translateX(-50%); } }
+
+  section { padding: 120px 0; }
+  .head { display: flex; justify-content: space-between; align-items: end; gap: 30px; flex-wrap: wrap; margin-bottom: 56px; }
+  .head h2 { font-size: clamp(40px, 5.4vw, 76px); line-height: .98; letter-spacing: -.04em; font-weight: 600; max-width: 760px; margin-top: 16px; }
+  .head p { color: var(--muted); max-width: 400px; }
+
+  /* mapa do corpo */
+  .map { display: grid; grid-template-columns: 1fr 1.15fr; gap: 50px; align-items: center; background: var(--bg-2); border: 1px solid var(--line); border-radius: 36px; padding: 50px; }
+  .body-fig { position: relative; max-width: 330px; margin-inline: auto; width: 100%; }
+  .body-fig svg { width: 100%; height: auto; }
+  .body-fig .sil { fill: #1E3A2B; stroke: rgba(167,196,160,.35); stroke-width: 1.2; }
+  .pt { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; border-radius: 50%; background: rgba(215,242,92,.18); border: 0; cursor: pointer; display: grid; place-items: center; transition: transform .2s; }
+  .pt::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 0 rgba(215,242,92,.6); animation: pulse 2.2s infinite; }
+  .pt:hover, .pt.on { transform: translate(-50%, -50%) scale(1.25); }
+  .pt.on::before { background: #fff; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 14px rgba(215,242,92,0); } 100% { box-shadow: 0 0 0 0 rgba(215,242,92,0); } }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .tabs button { font-family: inherit; font-size: 14px; padding: 9px 16px; border-radius: 99px; border: 0; cursor: pointer; background: rgba(238,243,236,.06); color: var(--muted); transition: background .2s, color .2s; }
+  .tabs button.on { background: var(--lime); color: #0D1A14; font-weight: 600; }
+  .info h3 { font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1.05; }
+  .info .sub { color: var(--sage); margin: 8px 0 22px; }
+  .info p { color: var(--muted); }
+  .info ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 26px 0 30px; }
+  .info li { background: rgba(238,243,236,.05); border-radius: 14px; padding: 12px 14px; font-size: 14px; }
+  .info li b { display: block; color: var(--lime); font-weight: 600; font-size: 13px; letter-spacing: .04em; }
+  .fade { animation: fadeUp .45s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } }
+
+  /* serviços */
+  .svc { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+  .tile { position: relative; border-radius: 28px; overflow: hidden; min-height: 340px; display: flex; align-items: flex-end; padding: 28px; border: 1px solid var(--line); background: var(--card); }
+  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .tile:hover img { transform: scale(1.06); }
+  .tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(13,26,20,.92)); }
+  .tile > div { position: relative; z-index: 1; }
+  .tile h3 { font-size: 30px; font-weight: 600; letter-spacing: -.03em; }
+  .tile p { color: rgba(238,243,236,.75); font-size: 15px; margin-top: 4px; max-width: 360px; }
+  .tile .n { position: absolute; top: 24px; right: 26px; z-index: 1; font-family: var(--serif); font-style: italic; font-size: 34px; color: var(--lime); }
+  .t1 { grid-column: span 7; } .t2 { grid-column: span 5; } .t3 { grid-column: span 4; } .t4 { grid-column: span 4; } .t5 { grid-column: span 4; }
+  .tile.plain { align-items: flex-start; flex-direction: column; justify-content: space-between; }
+  .tile.plain::after { display: none; }
+  .tile.plain .ic { width: 52px; height: 52px; border-radius: 16px; background: rgba(215,242,92,.12); color: var(--lime); display: grid; place-items: center; }
+
+  /* método */
+  .method { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .method .ph { border-radius: 32px; overflow: hidden; aspect-ratio: 4/5; position: relative; }
+  .method .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .method .badge { position: absolute; left: 20px; bottom: 20px; right: 20px; background: rgba(13,26,20,.75); backdrop-filter: blur(12px); border-radius: 20px; padding: 18px 20px; display: flex; gap: 14px; align-items: center; }
+  .method .badge b { font-size: 34px; color: var(--lime); letter-spacing: -.03em; }
+  .steps { margin-top: 30px; }
+  .st { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 24px 0; border-top: 1px solid var(--line); }
+  .st:last-child { border-bottom: 1px solid var(--line); }
+  .st b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 40px; color: var(--lime); line-height: 1; }
+  .st h3 { font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+  .st p { color: var(--muted); font-size: 15px; }
+
+  /* planos */
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border-radius: 30px; padding: 34px; background: var(--card); border: 1px solid var(--line); display: flex; flex-direction: column; }
+  .plan.hot { background: var(--lime); color: #0D1A14; border: 0; transform: translateY(-12px); }
+  .plan h3 { font-size: 22px; font-weight: 600; }
+  .plan .pr { font-size: 54px; font-weight: 600; letter-spacing: -.04em; margin: 18px 0 2px; line-height: 1; }
+  .plan .pr small { font-size: 16px; font-weight: 500; letter-spacing: 0; opacity: .7; }
+  .plan .d { font-size: 14px; opacity: .7; }
+  .plan ul { list-style: none; margin: 26px 0 30px; display: grid; gap: 10px; flex: 1; }
+  .plan li { display: flex; gap: 10px; font-size: 15px; }
+  .plan li::before { content: "✓"; color: var(--lime); font-weight: 700; }
+  .plan.hot li::before { color: #0D1A14; }
+  .plan .btn { justify-content: center; }
+  .plan.hot .btn { background: #0D1A14; color: var(--lime); }
+  .plan .tag { align-self: flex-start; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 99px; background: #0D1A14; color: var(--lime); margin-bottom: 14px; }
+
+  /* depoimentos */
+  .quotes { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; }
+  .qb { border-radius: 30px; padding: 40px; background: var(--card); border: 1px solid var(--line); }
+  .qb blockquote { font-family: var(--serif); font-size: clamp(26px, 3vw, 40px); line-height: 1.15; margin: 18px 0 26px; }
+  .qb .who { color: var(--muted); font-size: 14px; }
+  .qb .who b { color: var(--ink); display: block; font-size: 16px; }
+  .qs { display: grid; gap: 18px; }
+  .qs .qb blockquote { font-size: 22px; }
+  .stars { color: var(--lime); letter-spacing: 3px; }
+
+  .cta { text-align: center; padding: 140px 20px; position: relative; overflow: hidden; }
+  .cta::before { content: ""; position: absolute; width: 700px; height: 700px; border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(215,242,92,.16), transparent 65%); }
+  .cta > * { position: relative; }
+  .cta h2 { font-size: clamp(48px, 8vw, 120px); line-height: .92; letter-spacing: -.045em; font-weight: 600; margin: 20px auto 28px; max-width: 1000px; }
+  .cta p { color: var(--muted); max-width: 480px; margin: 0 auto 36px; }
+
+  footer { border-top: 1px solid var(--line); padding: 50px 0 34px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
+  footer p, footer li { color: var(--muted); font-size: 14px; list-style: none; line-height: 1.9; }
+  footer h4 { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--sage); margin-bottom: 10px; }
+  .bottom { margin-top: 40px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .bottom b { color: var(--lime); }
+
+  .wa { position: fixed; right: 22px; bottom: 22px; z-index: 60; width: 60px; height: 60px; border-radius: 50%; background: #25D366; color: #fff; display: grid; place-items: center; box-shadow: 0 14px 34px -8px rgba(37,211,102,.6); transition: transform .25s; }
+  .wa:hover { transform: scale(1.08); }
+
+  .js .reveal { opacity: 0; transform: translateY(30px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 960px) {
+    .links { display: none; }
+    .map { grid-template-columns: 1fr; padding: 30px 22px; }
+    .svc { grid-template-columns: 1fr; }
+    .t1, .t2, .t3, .t4, .t5 { grid-column: auto; }
+    .method, .quotes { grid-template-columns: 1fr; gap: 40px; }
+    .method .ph { max-width: 480px; }
+    .plans { grid-template-columns: 1fr; }
+    .plan.hot { transform: none; }
+    section { padding: 84px 0; }
+  }
+  @media (max-width: 560px) {
+    .chips { grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; }
+    .chips div b { font-size: 30px; }
+    .info ul { grid-template-columns: 1fr; }
+    .info h3 { font-size: 32px; }
+    nav .btn span { display: none; }
+    .tile { min-height: 280px; }
+    .tile.plain { min-height: 0; gap: 26px; padding: 24px; }
+    .body-fig { max-width: 200px; }
+    .map { gap: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .js .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="#" class="logo"><i>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 18c3-6 5-12 8-12s5 6 8 12"/></svg>
+    </i>movimento</a>
+    <div class="links">
+      <a href="#dor">Onde dói?</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#metodo">Método</a>
+      <a href="#planos">Planos</a>
+    </div>
+    <a class="btn btn-lime" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o%20de%20fisioterapia." target="_blank" rel="noreferrer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Agendar avaliação</span>
+    </a>
+  </div>
+</nav>
+
+<header class="hero">
+  <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=2000&q=75&auto=format&fit=crop" alt="Fisioterapeuta orientando um paciente durante o exercício" />
+  <div class="wrap">
+    <div class="kicker">Fisioterapia · Pilates · Reabilitação</div>
+    <h1>Volte a se <em>mover</em> sem dor.</h1>
+    <div class="row">
+      <div>
+        <p>Tratamento individual, com avaliação completa e um plano feito para o seu corpo. Da dor nas costas à volta ao esporte.</p>
+        <div class="ctas">
+          <a class="btn btn-lime" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o%20de%20fisioterapia." target="_blank" rel="noreferrer">
+            Agendar avaliação
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-line" href="#dor">Onde dói em você?</a>
+        </div>
+      </div>
+      <div class="chips">
+        <div><b>+3 mil</b><span>pacientes tratados</span></div>
+        <div><b>94%</b><span>com alívio em 6 sessões</span></div>
+        <div><b>4,9★</b><span>no Google</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div>
+    <span>Ortopedia</span><span>Pilates clínico</span><span>Coluna</span><span>Esportiva</span><span>Pós-operatório</span><span>RPG</span><span>Dor crônica</span><span>Gestantes</span>
+    <span>Ortopedia</span><span>Pilates clínico</span><span>Coluna</span><span>Esportiva</span><span>Pós-operatório</span><span>RPG</span><span>Dor crônica</span><span>Gestantes</span>
+  </div>
+</div>
+
+<section id="dor">
+  <div class="wrap">
+    <div class="head reveal">
+      <div><div class="kicker">Onde dói?</div><h2>Toque no corpo e veja <em>como tratamos</em>.</h2></div>
+      <p>Cada dor tem uma causa. Na avaliação, descobrimos a sua e montamos o plano para resolver de vez, não só aliviar.</p>
+    </div>
+    <div class="map reveal">
+      <div class="body-fig">
+        <svg viewBox="0 0 200 440" aria-hidden="true">
+          <circle class="sil" cx="100" cy="38" r="26"/>
+          <path class="sil" d="M86 62h28l2 12c18 3 30 10 34 24l14 70c2 8-8 11-11 4l-15-58-4 52 4 70c2 50 4 96 4 128 0 10-14 11-16 1L110 250h-20l-16 115c-2 10-16 9-16-1 0-32 2-78 4-128l4-70-4-52-15 58c-3 7-13 4-11-4l14-70c4-14 16-21 34-24z"/>
+        </svg>
+        <button class="pt" style="left:50%;top:15.5%" data-area="pescoco" aria-label="Pescoço"></button>
+        <button class="pt" style="left:30%;top:22%" data-area="ombro" aria-label="Ombro"></button>
+        <button class="pt" style="left:50%;top:44%" data-area="lombar" aria-label="Lombar"></button>
+        <button class="pt" style="left:42%;top:68%" data-area="joelho" aria-label="Joelho"></button>
+        <button class="pt" style="left:58%;top:89%" data-area="tornozelo" aria-label="Tornozelo"></button>
+      </div>
+      <div>
+        <div class="tabs" role="tablist"></div>
+        <div class="info" id="info" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="servicos" style="padding-top:0">
+  <div class="wrap">
+    <div class="head reveal">
+      <div><div class="kicker">Serviços</div><h2>Tudo para o seu corpo <em>funcionar bem</em>.</h2></div>
+    </div>
+    <div class="svc">
+      <article class="tile t1 reveal">
+        <img src="https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=1200&h=700&q=75&auto=format&fit=crop" alt="Paciente em sessão de pilates" loading="lazy" />
+        <span class="n">01</span>
+        <div><h3>Pilates clínico</h3><p>Fortalecimento, postura e mobilidade com aparelhos e instrutores fisioterapeutas.</p></div>
+      </article>
+      <article class="tile t2 reveal">
+        <img src="https://images.unsplash.com/photo-1584515933487-779824d29309?w=900&h=700&q=75&auto=format&fit=crop" alt="Mãos de terapeuta segurando a mão do paciente" loading="lazy" />
+        <span class="n">02</span>
+        <div><h3>Terapia manual</h3><p>Liberação miofascial e mobilizações para aliviar a dor logo nas primeiras sessões.</p></div>
+      </article>
+      <article class="tile t3 plain reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 4a2 2 0 11-4 0 2 2 0 014 0zM8 21l2-7-3-3 4-4 3 3 3 1M16 21l-2-5"/></svg></div>
+        <div><h3>Esportiva</h3><p>Prevenção de lesões e retorno seguro ao esporte.</p></div>
+      </article>
+      <article class="tile t4 plain reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v18M7 7l5-4 5 4M7 17l5 4 5-4"/></svg></div>
+        <div><h3>Coluna e RPG</h3><p>Hérnia, lombalgia e postura com reeducação global.</p></div>
+      </article>
+      <article class="tile t5 plain reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 12h-4l-3 8-4-16-3 8H2"/></svg></div>
+        <div><h3>Pós-operatório</h3><p>Reabilitação após cirurgias de joelho, ombro e coluna.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="metodo" style="padding-top:0">
+  <div class="wrap method">
+    <div class="ph reveal">
+      <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=900&h=1125&q=75&auto=format&fit=crop" alt="Fisioterapeuta da clínica" loading="lazy" />
+      <div class="badge"><b>1:1</b><span>Atendimento individual, do começo ao fim da sessão.</span></div>
+    </div>
+    <div class="reveal">
+      <div class="kicker">Método</div>
+      <h2 style="font-size:clamp(40px,5vw,68px);line-height:.98;letter-spacing:-.04em;font-weight:600;margin-top:16px">Menos aparelho ligado. Mais <em>mão na massa</em>.</h2>
+      <div class="steps">
+        <div class="st"><b>01</b><div><h3>Avaliação de 60 minutos</h3><p>Testes de movimento, força e postura para achar a causa da dor.</p></div></div>
+        <div class="st"><b>02</b><div><h3>Plano sob medida</h3><p>Objetivos claros e número de sessões estimado desde o início.</p></div></div>
+        <div class="st"><b>03</b><div><h3>Sessões individuais</h3><p>Terapia manual e exercícios com o fisioterapeuta do seu lado.</p></div></div>
+        <div class="st"><b>04</b><div><h3>Alta com autonomia</h3><p>Você sai com exercícios para manter o resultado em casa.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="planos" style="padding-top:0">
+  <div class="wrap">
+    <div class="head reveal" style="justify-content:center;text-align:center"><div><div class="kicker">Planos</div><h2>Escolha como <em>começar</em>.</h2></div></div>
+    <div class="plans">
+      <div class="plan reveal">
+        <h3>Avaliação</h3>
+        <div class="pr">R$ 150</div><div class="d">sessão única · 60 min</div>
+        <ul><li>Avaliação completa</li><li>Diagnóstico funcional</li><li>Plano de tratamento</li></ul>
+        <a class="btn btn-line" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o." target="_blank" rel="noreferrer">Agendar</a>
+      </div>
+      <div class="plan hot reveal">
+        <span class="tag">Mais escolhido</span>
+        <h3>Pacote 10 sessões</h3>
+        <div class="pr">R$ 1.200 <small>ou 10x</small></div><div class="d">fisioterapia individual</div>
+        <ul><li>Avaliação inclusa</li><li>Sessões de 50 minutos</li><li>Reavaliação na 5ª sessão</li><li>Exercícios para casa</li></ul>
+        <a class="btn" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20saber%20do%20pacote%20de%2010%20sess%C3%B5es." target="_blank" rel="noreferrer">Quero esse</a>
+      </div>
+      <div class="plan reveal">
+        <h3>Pilates mensal</h3>
+        <div class="pr">R$ 390 <small>/mês</small></div><div class="d">2x por semana</div>
+        <ul><li>Turmas de até 3 alunos</li><li>Instrutores fisioterapeutas</li><li>Horários de manhã e à noite</li></ul>
+        <a class="btn btn-line" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20saber%20do%20pilates." target="_blank" rel="noreferrer">Agendar aula</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="head reveal"><div><div class="kicker">Depoimentos</div><h2>Quem voltou a <em>se mexer</em>.</h2></div><p><span class="stars">★★★★★</span> 4,9 de média no Google</p></div>
+    <div class="quotes">
+      <figure class="qb reveal"><span class="stars">★★★★★</span><blockquote>“Cheguei sem conseguir amarrar o tênis por causa da lombar. Em um mês, voltei a correr. Atendimento impecável.”</blockquote><figcaption class="who"><b>Carlos M.</b>Lombalgia · 12 sessões</figcaption></figure>
+      <div class="qs">
+        <figure class="qb reveal"><span class="stars">★★★★★</span><blockquote>“A recuperação do joelho foi muito mais rápida do que o médico esperava.”</blockquote><figcaption class="who"><b>Fernanda L.</b>Pós-operatório</figcaption></figure>
+        <figure class="qb reveal"><span class="stars">★★★★★</span><blockquote>“O pilates mudou minha postura e acabou com a dor no pescoço.”</blockquote><figcaption class="who"><b>Ana P.</b>Pilates clínico</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta reveal">
+  <div class="kicker">Primeiro passo</div>
+  <h2>Sua dor tem <em>solução</em>. Vamos começar?</h2>
+  <p>Agende sua avaliação pelo WhatsApp. A gente responde em minutos.</p>
+  <a class="btn btn-lime" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o%20de%20fisioterapia." target="_blank" rel="noreferrer">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.1z"/></svg>
+    Falar no WhatsApp
+  </a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div><a href="#" class="logo"><i><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 18c3-6 5-12 8-12s5 6 8 12"/></svg></i>movimento</a><p style="margin-top:12px;max-width:280px">Fisioterapia, pilates e reabilitação com atendimento individual.</p></div>
+    <div><h4>Contato</h4><ul><li>(11) 0000-0000</li><li>contato@exemplo.com</li></ul></div>
+    <div><h4>Horário</h4><ul><li>Seg a Sex · 6h às 21h</li><li>Sábado · 8h às 12h</li></ul></div>
+    <div><h4>Endereço</h4><ul><li>Rua Exemplo, 500</li><li>São Paulo · SP</li></ul></div>
+  </div>
+  <div class="wrap bottom">
+    <span>Movimento Fisioterapia é uma clínica fictícia: textos, preços e fotos ilustrativos.</span>
+    <span>Site de demonstração criado pela <b>C-Search</b></span>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/?text=Ol%C3%A1!%20Quero%20agendar%20uma%20avalia%C3%A7%C3%A3o%20de%20fisioterapia." target="_blank" rel="noreferrer" aria-label="Falar no WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.1z"/></svg>
+</a>
+
+<script>
+  const nav = document.getElementById("nav");
+  addEventListener("scroll", () => nav.classList.toggle("solid", scrollY > 30), { passive: true });
+
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el, i) => { el.style.transitionDelay = (i % 3) * 80 + "ms"; io.observe(el); });
+
+  // "Onde dói?": mapa do corpo
+  const AREAS = {
+    pescoco: { pre: "no pescoço", nome: "Pescoço", titulo: "Dor no pescoço e tensão", sub: "Postura, celular e estresse", texto: "Muito comum em quem passa horas no computador. Tratamos a causa: postura, mobilidade da coluna cervical e fortalecimento dos músculos que sustentam a cabeça.", itens: [["Sessões", "6 a 10"], ["Técnicas", "Terapia manual + RPG"], ["Alívio", "já nas primeiras"], ["Em casa", "exercícios guiados"]] },
+    ombro: { pre: "no ombro", nome: "Ombro", titulo: "Ombro travado ou dolorido", sub: "Tendinite, bursite e lesões", texto: "Recuperamos a amplitude do movimento e a força com exercícios progressivos, sem forçar a articulação e respeitando a fase da lesão.", itens: [["Sessões", "8 a 15"], ["Técnicas", "Cinesioterapia"], ["Ideal para", "esportistas e trabalho"], ["Inclui", "reavaliação"]] },
+    lombar: { pre: "na lombar", nome: "Lombar", titulo: "Dor nas costas e hérnia", sub: "Lombalgia, ciático e hérnia de disco", texto: "A queixa número 1 da clínica. Combinamos terapia manual para aliviar a dor e pilates clínico para estabilizar a coluna e evitar que a dor volte.", itens: [["Sessões", "10 a 12"], ["Técnicas", "Pilates + manual"], ["Resultado", "94% com alívio"], ["Sem", "remédio para sempre"]] },
+    joelho: { pre: "no joelho", nome: "Joelho", titulo: "Joelho e pós-cirurgia", sub: "Ligamento, menisco e condromalácia", texto: "Do pós-operatório ao retorno ao esporte, com fortalecimento progressivo e testes de força para liberar cada nova etapa com segurança.", itens: [["Sessões", "12 a 20"], ["Técnicas", "Fortalecimento"], ["Volta ao esporte", "com testes"], ["Parceria", "com seu médico"]] },
+    tornozelo: { pre: "no tornozelo", nome: "Tornozelo", titulo: "Entorse e instabilidade", sub: "Torções que se repetem", texto: "Tratamos a dor e treinamos o equilíbrio para o tornozelo parar de virar. Ideal para quem corre, joga bola ou já torceu mais de uma vez.", itens: [["Sessões", "6 a 10"], ["Técnicas", "Propriocepção"], ["Foco", "não torcer de novo"], ["Ideal para", "corredores"]] },
+  };
+  const tabs = document.querySelector(".tabs"), info = document.getElementById("info");
+  const pts = [...document.querySelectorAll(".pt")];
+  function mostrar(k) {
+    const a = AREAS[k];
+    pts.forEach((p) => p.classList.toggle("on", p.dataset.area === k));
+    tabs.querySelectorAll("button").forEach((b) => { b.classList.toggle("on", b.dataset.area === k); b.setAttribute("aria-selected", b.dataset.area === k); });
+    info.innerHTML = `<div class="fade"><h3>${a.titulo}</h3><div class="sub">${a.sub}</div><p>${a.texto}</p><ul>${a.itens.map(([t, v]) => `<li><b>${t}</b>${v}</li>`).join("")}</ul><a class="btn btn-lime" target="_blank" rel="noreferrer" href="https://wa.me/?text=${encodeURIComponent("Olá! Tenho dor " + a.pre + " e quero agendar uma avaliação.")}">Tratar minha dor ${a.pre} →</a></div>`;
+  }
+  Object.entries(AREAS).forEach(([k, a]) => {
+    const b = document.createElement("button");
+    b.textContent = a.nome; b.dataset.area = k; b.setAttribute("role", "tab");
+    b.onclick = () => mostrar(k);
+    tabs.appendChild(b);
+  });
+  pts.forEach((p) => (p.onclick = () => mostrar(p.dataset.area)));
+  mostrar("lombar");
+  setTimeout(() => document.querySelectorAll(".reveal:not(.in)").forEach((el) => { const r = el.getBoundingClientRect(); if (r.top < innerHeight) el.classList.add("in"); }), 2500);
+  if (!("IntersectionObserver" in window)) document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+</script>
+</body>
+</html>
