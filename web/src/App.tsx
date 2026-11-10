@@ -14,6 +14,7 @@ import { Results } from "./components/Results";
 import { SavedLeads } from "./components/SavedLeads";
 import { HowItWorks } from "./components/HowItWorks";
 import { ExamplePage } from "./components/ExamplePage";
+import { OutreachModal } from "./components/OutreachModal";
 import { Button } from "./components/ui";
 
 export default function App() {
@@ -216,76 +217,11 @@ function Main() {
       </footer>
       </div>
 
-      {/* Exemplo pronto */}
+      {/* Abordagem: mensagem + demonstração */}
       <AnimatePresence>
         {exemplo && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" onClick={() => setExemplo(null)}>
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()} className="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-white/10 md:flex-row">
-              <div className="flex shrink-0 items-center justify-center bg-black/40 p-4 md:p-6">
-                <div className="h-[420px] w-[230px] overflow-hidden rounded-[2rem] bg-black ring-[6px] ring-neutral-800 md:h-[600px] md:w-[300px]">
-                  <iframe key={linkExemplo} src={linkExemplo} title="Prévia do exemplo" className="h-full w-full" />
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col overflow-y-auto p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Exemplo pronto para</div>
-                    <h3 className="text-xl font-medium tracking-tight">{exemplo.nome}</h3>
-                  </div>
-                  <button onClick={() => setExemplo(null)} className="text-muted-foreground hover:text-foreground cursor-pointer"><X className="h-5 w-5" /></button>
-                </div>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  Prévia com fotos profissionais, o nome, o endereço e o mapa do negócio. Personalize e mande quando o dono disser "pode mandar".
-                  {!meuWhats && " Coloque seu WhatsApp em Configurações para aparecer o botão \"Quero o meu\"."}
-                </p>
-
-                <div className="mt-5 space-y-4 rounded-xl bg-white/[0.03] p-4 ring-1 ring-white/10">
-                  <div>
-                    <div className="mb-2 text-xs text-muted-foreground">Modelo</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {([["cardapio", "Cardápio digital"], ["site", "Site"], ["portfolio", "Site + portfólio"]] as const).map(([k, t]) => (
-                        <button key={k} onClick={() => setExTipo(k === tipoPadrao ? undefined : k)}
-                          className={`rounded-full px-3 py-1.5 text-xs transition cursor-pointer ${(exTipo || tipoPadrao) === k ? "bg-foreground text-background" : "ring-1 ring-white/15 text-muted-foreground hover:text-foreground"}`}>
-                          {t}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-xs text-muted-foreground">Cor</div>
-                    <div className="flex flex-wrap gap-2">
-                      <button onClick={() => setExCor(undefined)} title="Cor automática"
-                        className={`flex h-7 items-center rounded-full px-2.5 text-[11px] cursor-pointer ${!exCor ? "bg-foreground text-background" : "ring-1 ring-white/15 text-muted-foreground"}`}>Auto</button>
-                      {CORES_SUGERIDAS.map((c) => (
-                        <button key={c} onClick={() => setExCor(c)} aria-label={c}
-                          className={`h-7 w-7 rounded-full transition cursor-pointer ${exCor === c ? "ring-2 ring-white ring-offset-2 ring-offset-black" : ""}`} style={{ background: c }} />
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-xs text-muted-foreground">Frase de destaque (opcional)</div>
-                    <input key={exemplo.place_id} defaultValue={exFrase} onBlur={(e) => setExFrase(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-                      placeholder="Ex.: A melhor pizza da Mooca desde 1998"
-                      className="h-9 w-full rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
-                  </div>
-                </div>
-                <div className="mt-5 space-y-2">
-                  {exemplo.whatsapp && (
-                    <a href={`https://wa.me/${exemplo.whatsapp}?text=${encodeURIComponent(mensagemExemplo(exemplo, linkExemplo))}`} target="_blank" rel="noreferrer"
-                      className="flex items-center justify-center gap-2 rounded-xl bg-foreground py-3 font-medium text-background hover:opacity-90">
-                      <MessageCircle className="h-4 w-4" /> Mandar no WhatsApp
-                    </a>
-                  )}
-                  <Button variant="outline" className="w-full" onClick={() => copy(linkExemplo)}><Copy className="h-4 w-4" /> Copiar link</Button>
-                  <a href={linkExemplo} target="_blank" rel="noreferrer" className="flex h-10 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground hover:text-foreground">
-                    <ExternalLink className="h-4 w-4" /> Abrir em tela cheia
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} onClose={() => setExemplo(null)} onCopy={copy}
+            onSent={(l) => contact(l, result?.busca || "Abordagem")} />
         )}
       </AnimatePresence>
 

@@ -211,7 +211,7 @@ function Row({ lead: l, statuses, wa, onUpdate, onExample, onCopy }: Props & { l
 
         <div className="flex flex-wrap gap-2 lg:justify-end">
           <Button size="sm" variant="outline" onClick={() => onExample(l)} title="Gerar exemplo pronto para mandar">
-            <Sparkles className="h-4 w-4" /> Exemplo
+            <Sparkles className="h-4 w-4" /> Abordar
           </Button>
           <Button size="icon" variant={resp ? "solid" : "outline"} onClick={() => setResp(!resp)} title="Respostas prontas">
             <MessageSquareText className="h-4 w-4" />

@@ -84,7 +84,9 @@ export function normalizarFicha(p: Place, termo: string): Lead {
 /** Tipos de negócio pesquisados quando você digita só a cidade (os que mais compram site/cardápio). */
 export const CATEGORIAS_AUTO = [
   "restaurante", "pizzaria", "lanchonete", "hamburgueria", "padaria", "bar",
-  "barbearia", "salão de beleza", "oficina mecânica", "dentista", "pet shop", "academia",
+  "barbearia", "salão de beleza", "oficina mecânica", "pet shop", "academia",
+  // saúde e estética: costumam pagar mais por um site profissional
+  "dentista", "clínica médica", "clínica de estética", "fisioterapia", "psicólogo",
 ];
 
 /**

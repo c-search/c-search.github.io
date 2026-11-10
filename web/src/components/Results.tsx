@@ -414,15 +414,10 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onCon
             {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
           </Button>
         )}
-        <Button size="icon" variant="outline" onClick={onExample} title="Gerar exemplo pronto (cardápio/site) para mandar">
-          <Sparkles className="h-4 w-4" />
-        </Button>
-        {wa && (
-          <a href={wa} target="_blank" rel="noreferrer" onClick={onContact} title="Abre o WhatsApp e já salva como Contatado"
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-sm font-medium text-background hover:opacity-90">
-            <MessageCircle className="h-4 w-4" /> WhatsApp
-          </a>
-        )}
+        <button onClick={onExample} title="Abrir a abordagem: mensagem pronta + demonstração"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-foreground px-3 text-sm font-medium text-background hover:opacity-90 cursor-pointer">
+          <MessageCircle className="h-4 w-4" /> Abordar
+        </button>
         <a href={l.maps_url} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm ring-1 ring-white/10 hover:bg-white/5">
           <MapPin className="h-4 w-4" /> Maps <ExternalLink className="h-3 w-3 opacity-50" />
         </a>

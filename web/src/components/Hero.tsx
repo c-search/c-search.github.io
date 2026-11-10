@@ -222,7 +222,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
           <div className="flex items-center justify-between px-2 pt-2 text-xs text-neutral-500">
             <span>
               {fonte === "gmaps" && !hasSerper && "Cole a chave do Serper em Configurações para buscar no Google Maps"}
-              {fonte === "gmaps" && hasSerper && (termo.trim() ? `Busca só ${termo.trim()}` : "Busca restaurantes, bares, barbearias, oficinas e mais (~12 créditos)")}
+              {fonte === "gmaps" && hasSerper && (termo.trim() ? `Busca só ${termo.trim()}` : "Busca restaurantes, barbearias, oficinas, clínicas, dentistas e mais (~16 créditos)")}
               {fonte === "osm" && "Mapa grátis · pode estar desatualizado"}
               {fonte === "demo" && "Dados falsos para testar"}
             </span>
