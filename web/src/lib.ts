@@ -102,8 +102,8 @@ export const api = {
 
 export const DEFAULT_MSG =
   "Olá, {nome}! Tudo bem?\n\n" +
-  "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Notei que ainda não têm {oferta}, " +
-  "e acho que pode ser uma ótima forma de mostrar o trabalho de vocês para mais clientes.\n\n" +
+  "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Procurei, mas não encontrei um {oferta} de vocês. " +
+  "Se ainda não tiverem, acho que pode ser uma ótima forma de mostrar o trabalho de vocês para mais clientes.\n\n" +
   "Posso te enviar um exemplo de como ficaria, sem compromisso?";
 
 export function fillTemplate(t: string, l: Lead, cidade = "") {
