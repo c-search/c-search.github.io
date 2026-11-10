@@ -16,10 +16,11 @@ type Props = {
 };
 
 const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
+type VF = "todos" | "pendente" | "sem_site" | "social" | "site";
 const PAGE = 60;
 
 export function Results({ result, template, savedIds, onSave, onVerify, verifying, verifyingIds }: Props) {
-  const [soVerificados, setSoVerificados] = useState(false);
+  const [verifFiltro, setVerifFiltro] = useState<VF>("todos");
   const [lote, setLote] = useState(20);
   const [cat, setCat] = useState<string>(result.ranking[0]?.categoria ?? "");
   const [tipos, setTipos] = useState<Set<string>>(new Set(["Nenhum", "Só rede social"]));
@@ -34,17 +35,24 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
     const termo = q.trim().toLowerCase();
     return result.leads
       .filter((l) => !cat || l.categoria === cat)
-      .filter((l) => tipos.has(l.tipo_site))
+      // quem já foi verificado continua na lista com o resultado (não some)
+      .filter((l) => l.verificacao || tipos.has(l.tipo_site))
       .filter((l) => !soTel || l.telefone)
       .filter((l) => !soWa || l.whatsapp)
       .filter((l) => !esconderSalvos || !savedIds.has(l.place_id))
-      .filter((l) => !soVerificados || l.verificacao)
+      .filter((l) => verifFiltro === "todos" || (verifFiltro === "pendente" ? !l.verificacao : l.verificacao?.status === verifFiltro))
       .filter((l) => !termo || `${l.nome} ${l.endereco}`.toLowerCase().includes(termo))
       .sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0));
-  }, [result, cat, tipos, soTel, soWa, esconderSalvos, soVerificados, savedIds, q]);
+  }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q]);
 
   const naoVerificados = filtrados.filter((l) => !l.verificacao);
-  const verificadosTotal = result.leads.filter((l) => l.verificacao).length;
+  const daCategoria = result.leads.filter((l) => !cat || l.categoria === cat);
+  const contagem = {
+    sem_site: daCategoria.filter((l) => l.verificacao?.status === "sem_site").length,
+    social: daCategoria.filter((l) => l.verificacao?.status === "social").length,
+    site: daCategoria.filter((l) => l.verificacao?.status === "site").length,
+  };
+  const verificadosTotal = contagem.sem_site + contagem.social + contagem.site;
 
   const temAvaliacoes = result.leads.some((l) => l.avaliacoes !== null);
   const busca = `${cat || "Todas"} - ${cidade}`;
@@ -99,7 +107,6 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
           <Toggle checked={soTel} onChange={setSoTel}>Com telefone</Toggle>
           <Toggle checked={soWa} onChange={setSoWa}>Com WhatsApp</Toggle>
           <Toggle checked={esconderSalvos} onChange={setEsconderSalvos}>Esconder salvos</Toggle>
-          <Toggle checked={soVerificados} onChange={setSoVerificados}>Só verificados</Toggle>
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar por nome ou rua…" className="h-8 w-full md:ml-auto md:w-60" />
         </div>
 
@@ -109,8 +116,7 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
           <div className="min-w-0 flex-1 text-sm">
             <div className="font-medium">Confirmar no Google se já têm site, cardápio ou Instagram</div>
             <div className="text-xs text-muted-foreground">
-              Pesquisa cada lugar no Google e esconde quem já tem site. 1 crédito do Serper por lugar ·{" "}
-              {verificadosTotal} já verificados nesta busca
+              Pesquisa cada lugar no Google. O resultado fica gravado em cada um. 1 crédito do Serper por lugar.
             </div>
           </div>
           {verifying ? (
@@ -129,6 +135,26 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
               <Button size="sm" disabled={!naoVerificados.length} onClick={() => onVerify(naoVerificados.slice(0, lote))}>
                 Verificar {Math.min(lote, naoVerificados.length)}
               </Button>
+            </div>
+          )}
+
+          {/* resumo que fica gravado: clique para filtrar */}
+          {verificadosTotal > 0 && (
+            <div className="flex w-full flex-wrap items-center gap-2 border-t border-white/10 pt-3">
+              <span className="mr-1 text-xs text-muted-foreground">{verificadosTotal} verificados:</span>
+              <ResumoChip ativo={verifFiltro === "sem_site"} onClick={() => setVerifFiltro(verifFiltro === "sem_site" ? "todos" : "sem_site")}
+                n={contagem.sem_site} label="Sem site, pode chamar" tom="branco" />
+              <ResumoChip ativo={verifFiltro === "social"} onClick={() => setVerifFiltro(verifFiltro === "social" ? "todos" : "social")}
+                n={contagem.social} label="Só Instagram/iFood" tom="cinza" />
+              <ResumoChip ativo={verifFiltro === "site"} onClick={() => setVerifFiltro(verifFiltro === "site" ? "todos" : "site")}
+                n={contagem.site} label="Já têm site" tom="vermelho" />
+              <ResumoChip ativo={verifFiltro === "pendente"} onClick={() => setVerifFiltro(verifFiltro === "pendente" ? "todos" : "pendente")}
+                n={daCategoria.length - verificadosTotal} label="Não verificados" tom="cinza" />
+              {verifFiltro !== "todos" && (
+                <button onClick={() => setVerifFiltro("todos")} className="text-xs text-muted-foreground underline hover:text-foreground cursor-pointer">
+                  mostrar todos
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -200,6 +226,30 @@ function CatCard(p: { active: boolean; onClick: () => void; title: string; big: 
   );
 }
 
+function formatarData(iso: string) {
+  // "2026-11-10 03:20" (UTC) -> "10/11 às 00:20" no horário local
+  const d = new Date(iso.replace(" ", "T") + ":00Z");
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " às " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function ResumoChip({ ativo, onClick, n, label, tom }: { ativo: boolean; onClick: () => void; n: number; label: string; tom: "branco" | "cinza" | "vermelho" }) {
+  const dot = { branco: "bg-white", cinza: "bg-neutral-500", vermelho: "bg-red-400" }[tom];
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-2 rounded-full px-3 py-1 text-xs transition cursor-pointer ring-1",
+        ativo ? "bg-foreground text-background ring-foreground" : "ring-white/10 hover:ring-white/30",
+      )}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      {label}
+      <span className="font-semibold tabular-nums">{n}</span>
+    </button>
+  );
+}
+
 export function VerifBadge({ lead: l }: { lead: Lead }) {
   const v = l.verificacao;
   if (!v && !l.rede) return null;
@@ -225,6 +275,7 @@ export function VerifBadge({ lead: l }: { lead: Lead }) {
           {k.tipo} ↗
         </a>
       ))}
+      {v && <span className="text-[11px] text-neutral-500">verificado em {formatarData(v.quando)}</span>}
       {l.rede && !v && (
         <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] text-neutral-300">Possível rede · {l.rede} unidades</span>
       )}
@@ -240,7 +291,10 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, checking }: { le
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.3, delay: Math.min(index % 12, 6) * 0.03 }}
-      className="grid grid-cols-1 gap-3 border-b border-white/5 px-5 py-4 last:border-0 lg:grid-cols-[110px_1fr_200px_auto] lg:items-center"
+      className={cn(
+        "grid grid-cols-1 gap-3 border-b border-white/5 px-5 py-4 last:border-0 lg:grid-cols-[110px_1fr_200px_auto] lg:items-center",
+        l.verificacao?.status === "site" && "opacity-50",
+      )}
     >
       <div className="flex items-center gap-3 lg:flex-col lg:items-start lg:gap-1">
         <span className={cn("flex items-center gap-1.5 text-xs font-medium", tone.text)}>

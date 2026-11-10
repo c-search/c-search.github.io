@@ -3,6 +3,7 @@ import { Download, MapPin, MessageCircle, Phone, Trash2 } from "lucide-react";
 import { cn, downloadCsv, nivelTone, telLink, waLink, type SavedLead } from "@/lib";
 import { Button, Input, SectionTitle } from "./ui";
 import { ProposalChip } from "./Proposal";
+import { VerifBadge } from "./Results";
 
 type Props = {
   leads: SavedLead[];
@@ -113,6 +114,7 @@ function Row({ lead: l, statuses, wa, onUpdate }: { lead: SavedLead; statuses: s
         <div className="truncate text-xs text-muted-foreground">
           {l.categoria} · salvo em {l.encontrado_em}
         </div>
+        <VerifBadge lead={l} />
         <ProposalChip lead={l} />
       </div>
 
