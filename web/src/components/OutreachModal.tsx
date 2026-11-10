@@ -118,6 +118,13 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
   // se o texto foi editado, mantém o link atualizado
   const msgFinal = texto !== null ? texto.replace(/https?:\/\/\S*#\/(exemplo\?d=|p\/)\S+/g, link) : msg;
   const waUrl = l.whatsapp ? `https://wa.me/${l.whatsapp}?text=${encodeURIComponent(msgFinal)}` : "";
+  // número fixo: muitos comércios usam WhatsApp Business no fixo, então vale tentar
+  const fixo = (() => {
+    let d = (l.telefone || "").replace(/\D/g, "").replace(/^0+/, "");
+    if (d.startsWith("55") && d.length >= 12) d = d.slice(2);
+    return d.length === 10 ? "55" + d : "";
+  })();
+  const waFixoUrl = !waUrl && fixo ? `https://wa.me/${fixo}?text=${encodeURIComponent(msgFinal)}` : "";
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -316,9 +323,17 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
                 className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 font-semibold text-[#06260f] transition hover:brightness-110">
                 <MessageCircle className="h-5 w-5" /> Enviar no WhatsApp
               </a>
+            ) : waFixoUrl ? (
+              <>
+                <a href={waFixoUrl} target="_blank" rel="noreferrer" onClick={() => onSent(l)}
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-4 font-semibold text-[#06260f] transition hover:brightness-110">
+                  <MessageCircle className="h-5 w-5" /> Tentar no WhatsApp (número fixo)
+                </a>
+                <p className="text-center text-[11px] text-muted-foreground">É um número fixo: muitos comércios usam WhatsApp Business nele. Se o WhatsApp disser que o número não tem conta, ligue ou copie a mensagem.</p>
+              </>
             ) : (
               <div className="rounded-xl bg-white/5 px-4 py-3 text-sm text-muted-foreground">
-                Esse número {l.telefone ? "parece ser fixo" : "não foi encontrado"}: copie a mensagem e mande pelo WhatsApp Business, e-mail ou Instagram do lugar.
+                Esse lugar não tem telefone cadastrado: copie a mensagem e mande pelo Instagram ou e-mail do lugar.
               </div>
             )}
             <div className="grid grid-cols-2 gap-2">

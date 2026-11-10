@@ -226,13 +226,13 @@ function Main() {
       </footer>
       </div>
 
-      {/* Abordagem: mensagem + demonstração */}
-      <AnimatePresence>
+      {/* Abordagem: mensagem + demonstração (fecha na hora, sem esperar animação) */}
+      <>
         {exemplo && (
           <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} serperKey={serperKey.trim()} githubToken={githubToken.trim()} onClose={() => setExemplo(null)} onCopy={copy}
             onSent={(l) => contact(l, result?.busca || "Abordagem")} />
         )}
-      </AnimatePresence>
+      </>
 
       {/* Configurações */}
       <AnimatePresence>
