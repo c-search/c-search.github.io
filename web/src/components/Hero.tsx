@@ -84,9 +84,9 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
         <div className="flex items-center gap-12 md:gap-20">
           <a href="#" className="flex items-center gap-2">
             <Logo />
-            <span className="text-xl font-bold tracking-tight">C-Search</span>
+            <span className="whitespace-nowrap text-xl font-bold tracking-tight">C-Search</span>
           </a>
-          <div className="hidden md:flex items-center gap-1 text-sm">
+          <div className="hidden lg:flex items-center gap-1 whitespace-nowrap text-sm">
             <a href="#" className="rounded-lg px-3 py-2 text-foreground">Buscar</a>
             <a href="#resultados" className="flex items-center gap-1 rounded-lg px-3 py-2 text-muted-foreground hover:text-foreground">
               Resultados <ChevronDown className="h-4 w-4" />
@@ -97,7 +97,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
             </button>
           </div>
         </div>
-        <a href="#leads" className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90">
+        <a href="#leads" className="whitespace-nowrap rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90">
           Meus leads{savedCount ? ` · ${savedCount}` : ""}
         </a>
       </nav>

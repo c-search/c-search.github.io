@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Download, MapPin, MessageCircle, Phone, Trash2 } from "lucide-react";
 import { cn, downloadCsv, nivelTone, telLink, waLink, type SavedLead } from "@/lib";
 import { Button, Input, SectionTitle } from "./ui";
+import { ProposalChip } from "./Proposal";
 
 type Props = {
   leads: SavedLead[];
@@ -110,8 +111,9 @@ function Row({ lead: l, statuses, wa, onUpdate }: { lead: SavedLead; statuses: s
           <span className="truncate font-medium">{l.nome}</span>
         </div>
         <div className="truncate text-xs text-muted-foreground">
-          {l.categoria} · {l.oferta} · salvo em {l.encontrado_em}
+          {l.categoria} · salvo em {l.encontrado_em}
         </div>
+        <ProposalChip lead={l} />
       </div>
 
       <Input

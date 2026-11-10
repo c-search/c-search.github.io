@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Bookmark, Download, ExternalLink, Globe, Loader2, MapPin, MessageCircle, Phone, Save, ShieldCheck } from "lucide-react";
 import { cn, downloadCsv, nivelTone, telLink, waLink, type Lead, type SearchResult } from "@/lib";
 import { Button, Input, ScoreBar, SectionTitle, Stat, Toggle } from "./ui";
+import { ProposalChip } from "./Proposal";
 
 type Props = {
   result: SearchResult;
@@ -255,8 +256,8 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, checking }: { le
           {l.endereco && <> · {l.endereco}</>}
           {l.avaliacoes !== null && <> · {l.avaliacoes} avaliações{l.nota ? ` (${l.nota}★)` : ""}</>}
         </div>
-        <div className="mt-1 text-xs text-neutral-300">→ {l.oferta}</div>
         <VerifBadge lead={l} />
+        <ProposalChip lead={l} />
       </div>
 
       <div className="min-w-0 text-sm">
