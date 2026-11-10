@@ -42,7 +42,8 @@ function Main() {
   const [msgOpen, setMsgOpen] = useState(false);
   const [serperKey, setSerperKey] = useState(() => storageGet("csearch_serper_key", ""));
   const [githubToken, setGithubToken] = useState(() => storageGet("csearch_github_token", ""));
-  const [meuNome, setMeuNome] = useState(() => storageGet("csearch_meu_nome", ""));
+  const [meuNome, setMeuNome] = useState(() => storageGet("csearch_meu_nome", "Ryan"));
+  const [empresa, setEmpresa] = useState(() => storageGet("csearch_empresa", "C-Search"));
   const [meuWhats, setMeuWhats] = useState(() => storageGet("csearch_meu_whats", ""));
   const [autoVerify, setAutoVerify] = useState(() => storageGet("csearch_auto_verify", "0") === "1");
   const [verifying, setVerifying] = useState<{ done: number; total: number } | null>(null);
@@ -221,7 +222,7 @@ function Main() {
       const r = importBackup(await f.text());
       loadSaved();
       setTemplate(storageGet("csearch_template", DEFAULT_MSG));
-      setMeuNome(storageGet("csearch_meu_nome", ""));
+      setMeuNome(storageGet("csearch_meu_nome", "Ryan"));
       setMeuWhats(storageGet("csearch_meu_whats", ""));
       notify(`Backup restaurado: ${r.leads} leads e ${r.verificacoes} verificações`);
     } catch (e) {
@@ -260,7 +261,7 @@ function Main() {
       {/* Abordagem: mensagem + demonstração (fecha na hora, sem esperar animação) */}
       <>
         {exemplo && (
-          <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} serperKey={serperKey.trim()} githubToken={githubToken.trim()} onClose={() => setExemplo(null)} onCopy={copy}
+          <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} empresa={empresa} serperKey={serperKey.trim()} githubToken={githubToken.trim()} onClose={() => setExemplo(null)} onCopy={copy}
             statusSalvo={saved.find((x) => x.place_id === exemplo.place_id)?.status}
             onSent={(l, status) => contact(l, result?.busca || "Abordagem", status)} />
         )}
@@ -279,10 +280,12 @@ function Main() {
               </div>
 
               <div className="mb-4 rounded-xl bg-white/[0.03] p-4 ring-1 ring-white/10">
-                <div className="mb-1 text-sm font-medium">Seus dados <span className="font-normal text-muted-foreground">(aparecem no exemplo pronto)</span></div>
+                <div className="mb-1 text-sm font-medium">Seus dados <span className="font-normal text-muted-foreground">(aparecem nas mensagens e na demonstração)</span></div>
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
                   <input value={meuNome} onChange={(e) => { setMeuNome(e.target.value); storageSet("csearch_meu_nome", e.target.value); }}
-                    placeholder="Seu nome ou da sua marca" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
+                    placeholder="Seu nome, ex.: Ryan" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
+                  <input value={empresa} onChange={(e) => { setEmpresa(e.target.value); storageSet("csearch_empresa", e.target.value); }}
+                    placeholder="Nome da empresa, ex.: C-Search" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
                   <input value={meuWhats} onChange={(e) => { setMeuWhats(e.target.value); storageSet("csearch_meu_whats", e.target.value); }}
                     placeholder="Seu WhatsApp, ex.: 11 91234-5678" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
                 </div>
@@ -328,7 +331,7 @@ function Main() {
 
               <div className="mb-3">
                 <h4 className="text-base font-medium tracking-tight">Mensagem do <span className="font-serif italic font-normal">WhatsApp</span></h4>
-                <p className="text-sm text-muted-foreground">Variáveis: {"{nome}"}, {"{oferta}"}, {"{cidade}"}, {"{avaliacoes}"}</p>
+                <p className="text-sm text-muted-foreground">Variáveis: {"{nome}"}, {"{oferta}"}, {"{meunome}"}, {"{empresa}"}, {"{cidade}"}</p>
               </div>
               <textarea
                 value={template}

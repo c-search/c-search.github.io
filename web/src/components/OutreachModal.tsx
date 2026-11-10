@@ -16,6 +16,7 @@ type Props = {
   lead: Lead;
   meuNome: string;
   meuWhats: string;
+  empresa: string;
   serperKey: string;
   githubToken: string;
   onClose: () => void;
@@ -30,7 +31,7 @@ const DEMOS: { id: ExampleData["k"]; nome: string }[] = [
   { id: "portfolio", nome: "Site + portfólio" },
 ];
 
-export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubToken, onClose, onSent, onCopy, statusSalvo }: Props) {
+export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, githubToken, onClose, onSent, onCopy, statusSalvo }: Props) {
   // 1º contato: confirmar o número com uma mensagem curta; depois, a proposta com a demo
   const jaConfirmando = statusSalvo === "Aguardando confirmação";
   // só marca como enviado quando você confirma (abrir o WhatsApp ou copiar não quer dizer que mandou)
@@ -92,7 +93,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubTok
     }
   }
   const alternarFoto = (u: string) => setFotos((f) => (f.includes(u) ? f.filter((x) => x !== u) : f.length >= 4 ? f : [...f, u]));
-  const automatica = modo === "confirmar" ? mensagemConfirmacao(l) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando);
+  const automatica = modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa);
   const msg = texto ?? automatica;
   const p = proposta(l);
   const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });

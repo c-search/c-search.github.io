@@ -1,7 +1,7 @@
 // Backup em arquivo: baixa tudo o que está salvo no navegador e restaura em outro aparelho.
 import type { SavedLead } from "@/lib";
 
-const CHAVES = ["csearch_leads_v1", "csearch_verificacoes_v3", "csearch_template", "csearch_meu_nome", "csearch_meu_whats", "csearch_auto_verify"];
+const CHAVES = ["csearch_leads_v1", "csearch_verificacoes_v3", "csearch_template", "csearch_meu_nome", "csearch_empresa", "csearch_meu_whats", "csearch_auto_verify"];
 // a chave do Serper NÃO vai no arquivo, para não vazar se você mandar o backup para alguém
 
 export function exportBackup() {
@@ -45,7 +45,7 @@ export function importBackup(texto: string) {
   const verArquivo = JSON.parse(b.dados["csearch_verificacoes_v3"] || "{}");
   localStorage.setItem("csearch_verificacoes_v3", JSON.stringify({ ...verArquivo, ...verAtuais }));
 
-  for (const k of ["csearch_template", "csearch_meu_nome", "csearch_meu_whats", "csearch_auto_verify"]) {
+  for (const k of ["csearch_template", "csearch_meu_nome", "csearch_empresa", "csearch_meu_whats", "csearch_auto_verify"]) {
     const v = b.dados[k];
     if (v != null && !localStorage.getItem(k)) localStorage.setItem(k, v);
   }

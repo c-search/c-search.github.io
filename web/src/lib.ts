@@ -146,6 +146,7 @@ export const api = {
 
 export const DEFAULT_MSG =
   "Olá, {nome}! Tudo bem?\n\n" +
+  "Meu nome é {meunome} e eu tenho a {empresa}, uma empresa que cria sites e cardápios digitais para negócios locais.\n\n" +
   "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Procurei, mas não encontrei um {oferta} de vocês. " +
   "Se ainda não tiverem, acho que pode ser uma ótima forma de mostrar o trabalho de vocês para mais clientes.\n\n" +
   "Posso te enviar um exemplo de como ficaria, sem compromisso?";
@@ -155,7 +156,9 @@ export function fillTemplate(t: string, l: Lead, cidade = "") {
     .replaceAll("{nome}", l.nome)
     .replaceAll("{oferta}", (l.oferta || "um site").toLowerCase())
     .replaceAll("{cidade}", cidade)
-    .replaceAll("{avaliacoes}", String(l.avaliacoes ?? 0));
+    .replaceAll("{avaliacoes}", String(l.avaliacoes ?? 0))
+    .replaceAll("{meunome}", storageGet("csearch_meu_nome", "Ryan") || "Ryan")
+    .replaceAll("{empresa}", storageGet("csearch_empresa", "C-Search") || "C-Search");
 }
 
 export function waLink(l: Lead, template: string, cidade = "") {
