@@ -7,7 +7,8 @@ const TEXT =
   "Você escolhe os melhores, confere no Maps e chama no WhatsApp com a mensagem pronta. Simples assim.";
 
 function Word({ word, i, total, progress }: { word: string; i: number; total: number; progress: MotionValue<number> }) {
-  const range = [i / total, (i + 1) / total];
+  // acende tudo até 90% do progresso, para a última palavra não depender do fim exato da rolagem
+  const range = [(i / total) * 0.9, ((i + 1) / total) * 0.9];
   const opacity = useTransform(progress, range, [0.2, 1]);
   const color = useTransform(progress, range, ["hsl(0 0% 35%)", "hsl(0 0% 100%)"]);
   return (
@@ -19,7 +20,8 @@ function Word({ word, i, total, progress }: { word: string; i: number; total: nu
 
 export function HowItWorks() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start end", "end center"] });
+  // termina quando o fim do texto chega a 85% da tela: alcançável mesmo sendo a última seção da página
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start 0.95", "end 0.85"] });
   const words = TEXT.split(" ");
 
   return (
