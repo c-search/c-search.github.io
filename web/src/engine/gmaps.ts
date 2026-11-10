@@ -1,6 +1,7 @@
 // Busca DIRETO no Google Maps (via Serper.dev). É a fonte confiável:
 // lugares reais e atuais, com o site, telefone e avaliações da própria ficha do Google.
 import type { Lead } from "@/lib";
+import { erroSerper, registrarCredito } from "./credits";
 import { scoreLead, type RawPlace } from "./scoring";
 import { geocode } from "./osm";
 import type { Verificacao } from "./verify";
@@ -51,9 +52,8 @@ async function places(body: object, key: string): Promise<Place[]> {
     headers: { "X-API-KEY": key, "Content-Type": "application/json" },
     body: JSON.stringify({ gl: "br", hl: "pt-br", ...body }),
   });
-  if (r.status === 401 || r.status === 403) throw new Error("Chave do Serper inválida. Confira em Configurações.");
-  if (r.status === 400 || r.status === 402) throw new Error("Seus créditos do Serper acabaram.");
-  if (!r.ok) throw new Error(`Erro ${r.status} no Serper.`);
+  if (!r.ok) throw await erroSerper(r, "busca no Google Maps");
+  registrarCredito();
   return (await r.json()).places || [];
 }
 

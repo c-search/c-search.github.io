@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown, Download, Loader2, MapPin, Search } from "lucide-react";
 import { cn, type Fonte, type SearchResult } from "@/lib";
 import { Button, Input } from "./ui";
+import { Creditos } from "./Creditos";
 
 export const VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4";
@@ -33,6 +34,7 @@ type Props = {
   result: SearchResult | null;
   hasGoogleKey: boolean;
   hasSerper: boolean;
+  serperKey: string;
   paginas: number;
   onPaginas: (n: number) => void;
   savedCount: number;
@@ -46,7 +48,7 @@ const FONTES: { id: Fonte; label: string }[] = [
   { id: "demo", label: "Demo" },
 ];
 
-export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, paginas, onPaginas, savedCount, onOpenMessage, progress }: Props) {
+export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, serperKey, paginas, onPaginas, savedCount, onOpenMessage, progress }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   const textY = useTransform(scrollYProgress, [0, 0.5], [0, -200]);
@@ -223,6 +225,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, pagin
             <span>
               {fonte === "gmaps" && !hasSerper && "Cole a chave do Serper em Configurações para buscar no Google Maps"}
               {fonte === "gmaps" && hasSerper && (termo.trim() ? `Busca só ${termo.trim()}` : "Busca restaurantes, barbearias, oficinas, clínicas, dentistas e mais (~16 créditos)")}
+              {fonte === "gmaps" && hasSerper && <> · <Creditos serperKey={serperKey} compacto /></>}
               {fonte === "osm" && "Mapa grátis · pode estar desatualizado"}
               {fonte === "demo" && "Dados falsos para testar"}
             </span>

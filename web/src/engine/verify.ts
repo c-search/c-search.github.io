@@ -9,6 +9,7 @@
 //  3. Se a ficha não tiver site, faz uma busca normal no Google com o nome do Google para ter certeza.
 //  4. Só diz "sem site" quando ACHOU a ficha e nada apareceu. Se não achou a ficha, diz "não confirmado".
 import type { Lead } from "@/lib";
+import { erroSerper, registrarCredito } from "./credits";
 import { scoreLead, siteKind, whatsappNumber, type RawPlace } from "./scoring";
 
 export type Verificacao = {
@@ -131,9 +132,8 @@ async function serper(endpoint: "search" | "places", body: object, key: string) 
     headers: { "X-API-KEY": key, "Content-Type": "application/json" },
     body: JSON.stringify({ gl: "br", hl: "pt-br", ...body }),
   });
-  if (r.status === 401 || r.status === 403) throw new Error("Chave do Serper inválida. Confira em Configurações.");
-  if (r.status === 400 || r.status === 402) throw new Error("Seus créditos do Serper acabaram.");
-  if (!r.ok) throw new Error(`Erro ${r.status} no Serper.`);
+  if (!r.ok) throw await erroSerper(r, "verificação");
+  registrarCredito();
   return r.json();
 }
 

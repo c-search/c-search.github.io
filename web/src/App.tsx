@@ -15,6 +15,7 @@ import { SavedLeads } from "./components/SavedLeads";
 import { HowItWorks } from "./components/HowItWorks";
 import { ExamplePage } from "./components/ExamplePage";
 import { OutreachModal } from "./components/OutreachModal";
+import { Creditos } from "./components/Creditos";
 import { Button } from "./components/ui";
 
 export default function App() {
@@ -205,7 +206,7 @@ function Main() {
     <main className="relative min-h-screen text-foreground">
       <VideoBackground />
       <div className="relative z-10">
-      <Hero onSearch={search} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
+      <Hero onSearch={search} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} serperKey={serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
       {result && <Results key={result.busca + result.area} result={result} fonte={fonteAtual} template={template} savedIds={savedIds} onSave={save}
         onVerify={(ls) => verify(ls)} verifying={verifying} verifyingIds={verifyingIds}
         onExample={setExemplo} onContact={contact} onDiscard={discard} onContestar={(l) => {
@@ -270,6 +271,7 @@ function Main() {
                   className="h-10 w-full rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40"
                 />
                 <div className="mt-2 text-xs text-muted-foreground">{serperKey ? "✓ Chave salva" : "Sem chave: a verificação no Google fica desligada"}</div>
+                <Creditos serperKey={serperKey.trim()} />
                 <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
                   <input type="checkbox" checked={autoVerify} onChange={(e) => { setAutoVerify(e.target.checked); storageSet("csearch_auto_verify", e.target.checked ? "1" : "0"); }} />
                   Verificar automaticamente os 10 melhores depois de cada busca <span className="text-muted-foreground">(até 30 créditos)</span>
