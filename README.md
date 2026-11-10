@@ -47,6 +47,20 @@ Também pega o número de avaliações do Google quando aparece. Lugares com o m
 vários endereços são marcados como **possível rede** e caem no ranking.
 A chave fica em **Configurações**, salva só no navegador de quem usa.
 
+## ⭐ Busca recomendada: Google Maps
+
+Com a chave grátis do [serper.dev](https://serper.dev) (Configurações), a busca **Google Maps** traz os
+lugares direto do Google: reais, atuais, com site, telefone e avaliações da própria ficha.
+Cada página (~20 lugares) custa 1 crédito. O botão **Maps** abre exatamente a ficha do lugar.
+
+- Ficha **com site** → "Já tem site" na hora (sem gastar crédito extra).
+- Ficha **sem site** → "Sem site no Maps · falta confirmar". O botão **Verificar** faz uma busca no
+  Google (1 crédito) para pegar sites que não estão na ficha. Só depois disso aparece
+  **"Sem site (confirmado)"**.
+- No mapa grátis (OpenStreetMap) a verificação procura a ficha do Google pelo telefone,
+  distância e endereço (o nome pode ser diferente). Se não achar, diz "Não achei no Google
+  Maps", nunca "sem site".
+
 ## Fontes de dados
 
 | Fonte | Custo | O que traz |

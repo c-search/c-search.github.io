@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { fetchPlaces, geocode } from "./engine/osm";
 import { marcarRedes, rankCategories, scoreLead } from "./engine/scoring";
 import { cacheVerificacoes } from "./engine/verify";
+import { buscarGoogleMaps } from "./engine/gmaps";
 import { fakeSearch } from "./engine/demo";
 import { deleteAll, loadLeads, saveLeads, updateLead } from "./engine/store";
 import type { Verificacao } from "./engine/verify";
@@ -56,7 +57,7 @@ export type RankRow = {
 
 export type SearchResult = { area: string; leads: Lead[]; ranking: RankRow[]; busca: string };
 
-export type Fonte = "osm" | "google" | "demo";
+export type Fonte = "gmaps" | "osm" | "google" | "demo";
 
 export const STATUS = ["Novo", "Contatado", "Respondeu", "Negociando", "Fechado", "Descartado"];
 
@@ -94,6 +95,12 @@ export const api = {
     } catch {
       return { has_google_key: false };
     }
+  },
+  /** Busca no Google Maps (Serper): lugares reais, com site/telefone/avaliações da ficha do Google. */
+  searchGmaps: async (termo: string, cidade: string, bairros: string[], key: string, paginas: number, onProgress?: (m: string) => void) => {
+    const r = await buscarGoogleMaps(termo, cidade, bairros, key, paginas, onProgress);
+    const leads = marcarRedes(r.leads.map((l) => cacheVerificacoes()[l.place_id] ?? l));
+    return { area: r.area, leads, ranking: rankCategories(leads), creditos: r.creditos };
   },
   /** Busca grátis. Com bairros, busca cada um ("Tatuapé, São Paulo", "Mooca, São Paulo"…) e junta tudo. */
   searchOsm: async (lugar: string, bairros: string[] = [], onProgress?: (msg: string) => void): Promise<Omit<SearchResult, "busca">> => {

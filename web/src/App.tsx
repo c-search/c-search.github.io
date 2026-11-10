@@ -3,10 +3,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Copy, ExternalLink, MessageCircle, X } from "lucide-react";
 import { api, STATUS, DEFAULT_MSG, fillTemplate, storageGet, storageSet, type Fonte, type Lead, type SavedLead, type SearchResult } from "@/lib";
 import { Hero, VideoBackground } from "./components/Hero";
-import { salvarVerificacao, verificarLead } from "./engine/verify";
+import { precisaConfirmar, salvarVerificacao, verificarLead } from "./engine/verify";
 import { rankCategories } from "./engine/scoring";
 import { marcarRetorno, refreshLeads } from "./engine/store";
-import { exampleLink } from "./engine/example";
+import { exampleKind, exampleLink, type ExampleData } from "./engine/example";
+import { CORES_SUGERIDAS } from "./engine/niches";
 import { mensagemExemplo } from "./engine/replies";
 import { exportBackup, importBackup } from "./engine/backup";
 import { Results } from "./components/Results";
@@ -42,7 +43,13 @@ function Main() {
   const [autoVerify, setAutoVerify] = useState(() => storageGet("csearch_auto_verify", "0") === "1");
   const [verifying, setVerifying] = useState<{ done: number; total: number } | null>(null);
   const [verifyingIds, setVerifyingIds] = useState<Set<string>>(new Set());
-  const [exemplo, setExemplo] = useState<Lead | null>(null);
+  const [paginas, setPaginas] = useState(() => Number(storageGet("csearch_paginas", "3")) || 3);
+  const [fonteAtual, setFonteAtual] = useState<Fonte>("gmaps");
+  const [exemplo, setExemploRaw] = useState<Lead | null>(null);
+  const [exCor, setExCor] = useState<string | undefined>();
+  const [exFrase, setExFrase] = useState("");
+  const [exTipo, setExTipo] = useState<ExampleData["k"] | undefined>();
+  const setExemplo = (l: Lead | null) => { setExemploRaw(l); setExCor(undefined); setExFrase(""); setExTipo(undefined); };
 
   const notify = useCallback((msg: string, erro = false) => {
     setToast({ msg, erro });
@@ -100,15 +107,22 @@ function Main() {
     setLoading(true);
     setProgress("");
     try {
-      const r = p.fonte === "osm"
+      if (p.fonte === "gmaps" && !serperKey.trim()) {
+        setMsgOpen(true);
+        throw new Error("A busca no Google Maps usa a sua chave do Serper. Cole a chave em Configurações.");
+      }
+      const r = p.fonte === "gmaps"
+        ? await api.searchGmaps(p.termo, p.lugar, p.bairros, serperKey.trim(), paginas, setProgress)
+        : p.fonte === "osm"
         ? await api.searchOsm(p.lugar, p.bairros, setProgress)
         : await api.searchTerm({ termo: p.termo, cidade: p.lugar, bairros: p.bairros, fonte: p.fonte });
+      setFonteAtual(p.fonte);
       setResult({ ...r, busca: `${p.termo || "comércios"} - ${p.lugar}${p.bairros.length ? " (" + p.bairros.join(", ") + ")" : ""}` });
       setTimeout(() => document.getElementById("resultados")?.scrollIntoView({ behavior: "smooth" }), 300);
       // verificação automática dos 10 melhores (sem site próprio e ainda não verificados)
       if (autoVerify && serperKey.trim()) {
         const top = r.leads
-          .filter((l) => !l.verificacao && l.tipo_site !== "Site próprio" && !l.rede)
+          .filter((l) => precisaConfirmar(l) && l.tipo_site !== "Site próprio" && !l.rede)
           .sort((a, b) => b.score - a.score)
           .slice(0, 10);
         if (top.length) verify(top, r.area.split(",")[0]);
@@ -182,14 +196,15 @@ function Main() {
   }
 
   const savedIds = new Set(saved.map((l) => l.place_id));
-  const linkExemplo = exemplo ? exampleLink(exemplo, meuNome, meuWhats) : "";
+  const linkExemplo = exemplo ? exampleLink(exemplo, { meuNome, meuWhats, cor: exCor, frase: exFrase, tipo: exTipo }) : "";
+  const tipoPadrao = exemplo ? exampleKind(exemplo) : "site";
 
   return (
     <main className="relative min-h-screen text-foreground">
       <VideoBackground />
       <div className="relative z-10">
-      <Hero onSearch={search} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
-      {result && <Results key={result.busca + result.area} result={result} template={template} savedIds={savedIds} onSave={save}
+      <Hero onSearch={search} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
+      {result && <Results key={result.busca + result.area} result={result} fonte={fonteAtual} template={template} savedIds={savedIds} onSave={save}
         onVerify={(ls) => verify(ls)} verifying={verifying} verifyingIds={verifyingIds}
         onExample={setExemplo} onContact={contact} onDiscard={discard} />}
       <SavedLeads leads={saved} statuses={statuses} template={template} onUpdate={update} onDeleteAll={deleteAll}
@@ -207,11 +222,13 @@ function Main() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" onClick={() => setExemplo(null)}>
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()} className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-white/10 md:flex-row">
-              <div className="h-[380px] shrink-0 bg-white md:h-auto md:w-[300px]">
-                <iframe key={linkExemplo} src={linkExemplo} title="Prévia do exemplo" className="h-full min-h-[380px] w-full md:min-h-[560px]" />
+              onClick={(e) => e.stopPropagation()} className="flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-white/10 md:flex-row">
+              <div className="flex shrink-0 items-center justify-center bg-black/40 p-4 md:p-6">
+                <div className="h-[420px] w-[230px] overflow-hidden rounded-[2rem] bg-black ring-[6px] ring-neutral-800 md:h-[600px] md:w-[300px]">
+                  <iframe key={linkExemplo} src={linkExemplo} title="Prévia do exemplo" className="h-full w-full" />
+                </div>
               </div>
-              <div className="flex flex-1 flex-col p-6">
+              <div className="flex flex-1 flex-col overflow-y-auto p-6">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="text-xs text-muted-foreground">Exemplo pronto para</div>
@@ -220,9 +237,40 @@ function Main() {
                   <button onClick={() => setExemplo(null)} className="text-muted-foreground hover:text-foreground cursor-pointer"><X className="h-5 w-5" /></button>
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Uma prévia com o nome e o tipo do negócio, pronta para mandar quando o dono disser "pode mandar".
-                  {!meuWhats && " Coloque seu WhatsApp em Configurações para aparecer o botão \"Gostei, quero o meu\"."}
+                  Prévia com fotos profissionais, o nome, o endereço e o mapa do negócio. Personalize e mande quando o dono disser "pode mandar".
+                  {!meuWhats && " Coloque seu WhatsApp em Configurações para aparecer o botão \"Quero o meu\"."}
                 </p>
+
+                <div className="mt-5 space-y-4 rounded-xl bg-white/[0.03] p-4 ring-1 ring-white/10">
+                  <div>
+                    <div className="mb-2 text-xs text-muted-foreground">Modelo</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {([["cardapio", "Cardápio digital"], ["site", "Site"], ["portfolio", "Site + portfólio"]] as const).map(([k, t]) => (
+                        <button key={k} onClick={() => setExTipo(k === tipoPadrao ? undefined : k)}
+                          className={`rounded-full px-3 py-1.5 text-xs transition cursor-pointer ${(exTipo || tipoPadrao) === k ? "bg-foreground text-background" : "ring-1 ring-white/15 text-muted-foreground hover:text-foreground"}`}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-2 text-xs text-muted-foreground">Cor</div>
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => setExCor(undefined)} title="Cor automática"
+                        className={`flex h-7 items-center rounded-full px-2.5 text-[11px] cursor-pointer ${!exCor ? "bg-foreground text-background" : "ring-1 ring-white/15 text-muted-foreground"}`}>Auto</button>
+                      {CORES_SUGERIDAS.map((c) => (
+                        <button key={c} onClick={() => setExCor(c)} aria-label={c}
+                          className={`h-7 w-7 rounded-full transition cursor-pointer ${exCor === c ? "ring-2 ring-white ring-offset-2 ring-offset-black" : ""}`} style={{ background: c }} />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-2 text-xs text-muted-foreground">Frase de destaque (opcional)</div>
+                    <input key={exemplo.place_id} defaultValue={exFrase} onBlur={(e) => setExFrase(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                      placeholder="Ex.: A melhor pizza da Mooca desde 1998"
+                      className="h-9 w-full rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
+                  </div>
+                </div>
                 <div className="mt-5 space-y-2">
                   {exemplo.whatsapp && (
                     <a href={`https://wa.me/${exemplo.whatsapp}?text=${encodeURIComponent(mensagemExemplo(exemplo, linkExemplo))}`} target="_blank" rel="noreferrer"
@@ -280,7 +328,7 @@ function Main() {
                 <div className="mt-2 text-xs text-muted-foreground">{serperKey ? "✓ Chave salva" : "Sem chave: a verificação no Google fica desligada"}</div>
                 <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
                   <input type="checkbox" checked={autoVerify} onChange={(e) => { setAutoVerify(e.target.checked); storageSet("csearch_auto_verify", e.target.checked ? "1" : "0"); }} />
-                  Verificar automaticamente os 10 melhores depois de cada busca <span className="text-muted-foreground">(10 créditos)</span>
+                  Verificar automaticamente os 10 melhores depois de cada busca <span className="text-muted-foreground">(até 30 créditos)</span>
                 </label>
               </div>
 

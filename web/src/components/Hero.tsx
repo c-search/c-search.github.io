@@ -32,17 +32,21 @@ type Props = {
   loading: boolean;
   result: SearchResult | null;
   hasGoogleKey: boolean;
+  hasSerper: boolean;
+  paginas: number;
+  onPaginas: (n: number) => void;
   savedCount: number;
   onOpenMessage: () => void;
 };
 
 const FONTES: { id: Fonte; label: string }[] = [
-  { id: "osm", label: "Grátis" },
-  { id: "google", label: "Google" },
+  { id: "gmaps", label: "Google Maps" },
+  { id: "osm", label: "Mapa grátis" },
+  { id: "google", label: "Google (local)" },
   { id: "demo", label: "Demo" },
 ];
 
-export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOpenMessage, progress }: Props) {
+export function Hero({ onSearch, loading, result, hasGoogleKey, hasSerper, paginas, onPaginas, savedCount, onOpenMessage, progress }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
   const textY = useTransform(scrollYProgress, [0, 0.5], [0, -200]);
@@ -57,7 +61,7 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
     return () => window.removeEventListener("beforeinstallprompt", h);
   }, []);
 
-  const [fonte, setFonte] = useState<Fonte>("osm");
+  const [fonte, setFonte] = useState<Fonte>(hasSerper ? "gmaps" : "osm");
   const [lugar, setLugar] = useState("");
   const [termo, setTermo] = useState("");
   const [bairros, setBairros] = useState("");
@@ -175,7 +179,12 @@ export function Hero({ onSearch, loading, result, hasGoogleKey, savedCount, onOp
               </button>
             ))}
             <span className="ml-auto pr-2 text-xs text-neutral-500">
-              {fonte === "osm" && "OpenStreetMap · sem avaliações"}
+              {fonte === "gmaps" && (hasSerper ? (
+                <select value={paginas} onChange={(e) => onPaginas(Number(e.target.value))} className="cursor-pointer bg-transparent text-xs text-neutral-400 outline-none">
+                  {[1, 3, 5].map((n) => <option key={n} value={n}>até {n * 20} lugares por área · {n} crédito{n > 1 ? "s" : ""}</option>)}
+                </select>
+              ) : "precisa da chave do Serper (Configurações)")}
+              {fonte === "osm" && "mapa aberto · pode estar desatualizado"}
               {fonte === "google" && (hasGoogleKey ? "Google Places · pago" : "sem chave no .env")}
               {fonte === "demo" && "dados falsos para testar"}
             </span>

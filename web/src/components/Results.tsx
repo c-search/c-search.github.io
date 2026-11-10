@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Download, ExternalLink, Globe, List, Loader2, Map as MapIcon, MapPin, MessageCircle, Phone, Save, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { LeadsMap } from "./LeadsMap";
+import { precisaConfirmar } from "@/engine/verify";
 import { QuickMode } from "./QuickMode";
 import { cn, downloadCsv, nivelTone, telLink, waLink, type Lead, type SearchResult } from "@/lib";
 import { Button, Input, ScoreBar, SectionTitle, Stat, Toggle } from "./ui";
@@ -18,18 +19,20 @@ type Props = {
   onExample: (l: Lead) => void;
   onContact: (l: Lead, busca: string) => void;
   onDiscard: (l: Lead, busca: string) => void;
+  fonte?: string;
 };
 
 const TIPOS = ["Nenhum", "Só rede social", "Site próprio"] as const;
-type VF = "todos" | "pendente" | "sem_site" | "social" | "site";
+type VF = "todos" | "pendente" | "sem_site" | "sem_site_maps" | "social" | "site" | "incerto";
 const PAGE = 60;
 
-export function Results({ result, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard }: Props) {
+export function Results({ result, fonte, template, savedIds, onSave, onVerify, verifying, verifyingIds, onExample, onContact, onDiscard }: Props) {
   const [vista, setVista] = useState<"lista" | "mapa">("lista");
   const [quick, setQuick] = useState(false);
   const [verifFiltro, setVerifFiltro] = useState<VF>("todos");
   const [lote, setLote] = useState(20);
-  const [cat, setCat] = useState<string>(result.ranking[0]?.categoria ?? "");
+  // no mapa grátis abre na melhor categoria; nas buscas por tipo (Google Maps etc.) abre em "Todas"
+  const [cat, setCat] = useState<string>(fonte === "osm" ? result.ranking[0]?.categoria ?? "" : "");
   const [tipos, setTipos] = useState<Set<string>>(new Set(["Nenhum", "Só rede social"]));
   const [soTel, setSoTel] = useState(false);
   const [soWa, setSoWa] = useState(false);
@@ -47,21 +50,29 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
       .filter((l) => !soTel || l.telefone)
       .filter((l) => !soWa || l.whatsapp)
       .filter((l) => !esconderSalvos || !savedIds.has(l.place_id))
-      .filter((l) => verifFiltro === "todos" || (verifFiltro === "pendente" ? !l.verificacao : l.verificacao?.status === verifFiltro))
+      .filter((l) => {
+        if (verifFiltro === "todos") return true;
+        if (verifFiltro === "pendente") return !l.verificacao;
+        if (verifFiltro === "sem_site") return l.verificacao?.status === "sem_site" && l.verificacao.confirmado !== false;
+        if (verifFiltro === "sem_site_maps") return l.verificacao?.status === "sem_site" && l.verificacao.confirmado === false;
+        return l.verificacao?.status === verifFiltro;
+      })
       .filter((l) => !termo || `${l.nome} ${l.endereco}`.toLowerCase().includes(termo))
       .sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0));
   }, [result, cat, tipos, soTel, soWa, esconderSalvos, verifFiltro, savedIds, q]);
 
-  const naoVerificados = filtrados.filter((l) => !l.verificacao);
+  const naoVerificados = filtrados.filter(precisaConfirmar);
   // modo rápido: só quem vale a pena (tira quem já tem site e quem já foi salvo como descartado)
   const rapido = filtrados.filter((l) => l.verificacao?.status !== "site");
   const daCategoria = result.leads.filter((l) => !cat || l.categoria === cat);
   const contagem = {
-    sem_site: daCategoria.filter((l) => l.verificacao?.status === "sem_site").length,
+    sem_site: daCategoria.filter((l) => l.verificacao?.status === "sem_site" && l.verificacao.confirmado !== false).length,
+    sem_site_maps: daCategoria.filter((l) => l.verificacao?.status === "sem_site" && l.verificacao.confirmado === false).length,
     social: daCategoria.filter((l) => l.verificacao?.status === "social").length,
     site: daCategoria.filter((l) => l.verificacao?.status === "site").length,
+    incerto: daCategoria.filter((l) => l.verificacao?.status === "incerto").length,
   };
-  const verificadosTotal = contagem.sem_site + contagem.social + contagem.site;
+  const verificadosTotal = contagem.sem_site + contagem.sem_site_maps + contagem.social + contagem.site + contagem.incerto;
 
   const temAvaliacoes = result.leads.some((l) => l.avaliacoes !== null);
   const busca = `${cat || "Todas"} - ${cidade}`;
@@ -76,6 +87,13 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
     <section id="resultados" className="relative px-6 md:px-12 lg:px-28 py-24">
       <div className="mx-auto max-w-7xl">
         <SectionTitle kicker={result.area} title="Onde estão seus" accent="clientes." />
+        {fonte === "osm" && (
+          <div className="mb-8 rounded-2xl bg-amber-400/10 px-5 py-4 text-sm text-amber-100 ring-1 ring-amber-300/20">
+            <b>Atenção:</b> estes lugares vêm do mapa grátis (OpenStreetMap), que em muitas cidades está desatualizado: nomes antigos,
+            lugares que fecharam e sites que ninguém cadastrou. Use para ter ideias de categorias; para prospectar de verdade,
+            busque com <b>Google Maps</b> ou verifique cada lugar antes de chamar.
+          </div>
+        )}
 
         <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Comércios encontrados" value={result.leads.length} />
@@ -125,7 +143,7 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
           <div className="min-w-0 flex-1 text-sm">
             <div className="font-medium">Confirmar no Google se já têm site, cardápio ou Instagram</div>
             <div className="text-xs text-muted-foreground">
-              Pesquisa cada lugar no Google. O resultado fica gravado em cada um. 1 crédito do Serper por lugar.
+              Confere a ficha do Google Maps de cada lugar (pelo telefone e endereço) e busca no Google. De 1 a 3 créditos do Serper por lugar; o resultado fica gravado.
             </div>
           </div>
           {verifying ? (
@@ -152,11 +170,19 @@ export function Results({ result, template, savedIds, onSave, onVerify, verifyin
             <div className="flex w-full flex-wrap items-center gap-2 border-t border-white/10 pt-3">
               <span className="mr-1 text-xs text-muted-foreground">{verificadosTotal} verificados:</span>
               <ResumoChip ativo={verifFiltro === "sem_site"} onClick={() => setVerifFiltro(verifFiltro === "sem_site" ? "todos" : "sem_site")}
-                n={contagem.sem_site} label="Sem site, pode chamar" tom="branco" />
+                n={contagem.sem_site} label="Sem site (confirmado)" tom="branco" />
+              {contagem.sem_site_maps > 0 && (
+                <ResumoChip ativo={verifFiltro === "sem_site_maps"} onClick={() => setVerifFiltro(verifFiltro === "sem_site_maps" ? "todos" : "sem_site_maps")}
+                  n={contagem.sem_site_maps} label="Sem site no Maps · falta confirmar" tom="cinza" />
+              )}
               <ResumoChip ativo={verifFiltro === "social"} onClick={() => setVerifFiltro(verifFiltro === "social" ? "todos" : "social")}
                 n={contagem.social} label="Só Instagram/iFood" tom="cinza" />
               <ResumoChip ativo={verifFiltro === "site"} onClick={() => setVerifFiltro(verifFiltro === "site" ? "todos" : "site")}
                 n={contagem.site} label="Já têm site" tom="vermelho" />
+              {contagem.incerto > 0 && (
+                <ResumoChip ativo={verifFiltro === "incerto"} onClick={() => setVerifFiltro(verifFiltro === "incerto" ? "todos" : "incerto")}
+                  n={contagem.incerto} label="Não achei no Maps" tom="cinza" />
+              )}
               <ResumoChip ativo={verifFiltro === "pendente"} onClick={() => setVerifFiltro(verifFiltro === "pendente" ? "todos" : "pendente")}
                 n={daCategoria.length - verificadosTotal} label="Não verificados" tom="cinza" />
               {verifFiltro !== "todos" && (
@@ -297,10 +323,17 @@ export function VerifBadge({ lead: l }: { lead: Lead }) {
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
       {v?.status === "sem_site" && (
-        <span className="inline-flex items-center gap-1 rounded-md bg-foreground px-1.5 py-0.5 text-[11px] font-medium text-background">
-          <ShieldCheck className="h-3 w-3" /> Confirmado no Google: sem site
+        <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
+          v.confirmado === false ? "ring-1 ring-white/40 text-foreground" : "bg-foreground text-background")}>
+          <ShieldCheck className="h-3 w-3" /> {v.resumo}
         </span>
       )}
+      {v?.status === "incerto" && (
+        <span className="inline-flex items-center gap-1 rounded-md bg-amber-400/15 px-1.5 py-0.5 text-[11px] font-medium text-amber-200">
+          {v.resumo}
+        </span>
+      )}
+      {v?.nomeGoogle && <span className="text-[11px] text-neutral-300">No Google: <b>{v.nomeGoogle}</b></span>}
       {v?.status === "social" && (
         <span className="inline-flex items-center gap-1 rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-medium">
           <ShieldCheck className="h-3 w-3" /> {v.resumo}
@@ -376,7 +409,7 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onCon
       </div>
 
       <div className="flex flex-wrap gap-2 lg:justify-end">
-        {!l.verificacao && (
+        {precisaConfirmar(l) && (
           <Button size="icon" variant="outline" onClick={onVerify} disabled={checking} title="Verificar no Google se já tem site">
             {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
           </Button>

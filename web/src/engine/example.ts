@@ -11,6 +11,12 @@ export type ExampleData = {
   w?: string; // whatsapp do estabelecimento
   by?: string; // seu nome
   bw?: string; // seu whatsapp
+  la?: number; // latitude (mapa)
+  lo?: number; // longitude
+  r?: number; // nota real no Google
+  rc?: number; // nº de avaliações reais
+  a?: string; // cor de destaque escolhida
+  h?: string; // frase de destaque personalizada
 };
 
 function b64urlEncode(s: string) {
@@ -32,16 +38,25 @@ export function exampleKind(l: Lead): ExampleData["k"] {
   return "site";
 }
 
-export function exampleLink(l: Lead, meuNome: string, meuWhats: string) {
+export type ExampleOpts = { meuNome: string; meuWhats: string; cor?: string; frase?: string; tipo?: ExampleData["k"] };
+
+export function exampleLink(l: Lead, o: ExampleOpts) {
+  const meu = o.meuWhats.replace(/\D/g, "");
   const d: ExampleData = {
     n: l.nome.replace(/^\[DEMO\]\s*/, ""),
-    k: exampleKind(l),
+    k: o.tipo || exampleKind(l),
     c: l.categoria.split(" /")[0],
     t: l.telefone || undefined,
     e: l.endereco || undefined,
     w: l.whatsapp || undefined,
-    by: meuNome.trim() || undefined,
-    bw: meuWhats.replace(/\D/g, "") ? (meuWhats.replace(/\D/g, "").startsWith("55") ? "" : "55") + meuWhats.replace(/\D/g, "") : undefined,
+    by: o.meuNome.trim() || undefined,
+    bw: meu ? (meu.startsWith("55") ? meu : "55" + meu) : undefined,
+    la: l.lat ? Math.round(l.lat * 1e5) / 1e5 : undefined,
+    lo: l.lon ? Math.round(l.lon * 1e5) / 1e5 : undefined,
+    r: l.nota ?? undefined,
+    rc: l.avaliacoes ?? undefined,
+    a: o.cor || undefined,
+    h: o.frase?.trim() || undefined,
   };
   const base = location.origin + location.pathname;
   return `${base}#/exemplo?d=${b64urlEncode(JSON.stringify(d))}`;
@@ -56,4 +71,11 @@ export function decodeExample(hash: string): ExampleData | null {
   } catch {
     return null;
   }
+}
+
+/** Mapa do OpenStreetMap (sem chave) centrado no lugar. */
+export function mapaEmbed(la?: number, lo?: number) {
+  if (!la || !lo) return "";
+  const d = 0.004;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${lo - d},${la - d},${lo + d},${la + d}&layer=mapnik&marker=${la},${lo}`;
 }

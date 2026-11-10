@@ -209,9 +209,9 @@ function normalize(e: OsmEl): RawPlace | null {
  * (Colocar as coordenadas no texto da busca faz o Google procurar o nome no Brasil inteiro.)
  */
 function mapsUrl(nome: string, categoria: string, endereco: string, lat?: number, lon?: number) {
+  // com endereço: "Nome, Rua X 123" faz o Google abrir a ficha certa; sem endereço: nome + tipo perto do ponto
   const tipo = categoria.split(" /")[0];
-  const comTipo = nome.toLowerCase().includes(tipo.toLowerCase()) ? nome : `${nome} ${tipo}`;
-  const texto = [comTipo, endereco].filter(Boolean).join(" ");
-  if (lat && lon) return `https://www.google.com/maps/search/${encodeURIComponent(texto)}/@${lat},${lon},18z`;
+  const texto = endereco ? `${nome}, ${endereco}` : nome.toLowerCase().includes(tipo.toLowerCase()) ? nome : `${nome} ${tipo}`;
+  if (lat && lon) return `https://www.google.com/maps/search/${encodeURIComponent(texto)}/@${lat},${lon},19z`;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(texto)}`;
 }

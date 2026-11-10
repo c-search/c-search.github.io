@@ -19,9 +19,16 @@ function corrigirLinkMaps(l: SavedLead): SavedLead {
   return { ...l, maps_url: `https://www.google.com/maps/search/${encodeURIComponent(texto)}/@${m[2]},${m[3]},18z` };
 }
 
+// A verificação antiga (sem "fonte") comparava só o nome e podia dizer "sem site" errado: descarta.
+function descartarVerificacaoAntiga(l: SavedLead): SavedLead {
+  if (!l.verificacao || l.verificacao.fonte) return l;
+  const { verificacao: _v, ...resto } = l;
+  return { ...resto, motivos: (l.motivos || "").replace(/^[^·]*·\s*/, "") };
+}
+
 export function loadLeads(): SavedLead[] {
   try {
-    const list: SavedLead[] = JSON.parse(localStorage.getItem(KEY) || "[]").map(corrigirLinkMaps);
+    const list: SavedLead[] = JSON.parse(localStorage.getItem(KEY) || "[]").map(corrigirLinkMaps).map(descartarVerificacaoAntiga);
     return list.sort((a, b) => b.score - a.score || (a.avaliacoes ?? 0) - (b.avaliacoes ?? 0));
   } catch {
     return [];

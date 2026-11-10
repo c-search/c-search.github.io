@@ -90,6 +90,15 @@ body {
   border-radius: 8px;
 }
 
+/* faixa com os serviços correndo (exemplo de site) */
+@keyframes marq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[marq"] { animation: none !important; }
+}
+
 /* o reset do Tailwind quebra os blocos do mapa (Leaflet) */
 .leaflet-container img {
   max-width: none !important;
