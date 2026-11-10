@@ -193,9 +193,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
                 {qr ? <img src={qr} alt="QR code da demonstração" className="h-36 w-36 shrink-0 rounded-lg bg-white p-1.5" /> : <div className="h-36 w-36 shrink-0 rounded-lg bg-white/10" />}
                 <div className="text-xs text-muted-foreground">
                   Aponte a câmera do celular para o código: abre <b className="text-foreground">exatamente o mesmo link</b> que vai na mensagem.
-                  {/localhost|127\.0\.0\.1/.test(location.hostname) && (
-                    <span className="mt-2 block text-amber-200/80">Você está na versão do computador (localhost), esse link só abre aqui. Use o site publicado para mandar aos clientes.</span>
-                  )}
+                  <span className="mt-2 block">O link é público (ryandamasio.github.io): abre no celular ou no computador de qualquer pessoa.</span>
                 </div>
               </div>
             )}

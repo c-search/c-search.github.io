@@ -2,6 +2,8 @@
 import type { Lead } from "@/lib";
 import { proposta } from "./pricing";
 
+export const SITE_PUBLICO = "https://ryandamasio.github.io/csearch/";
+
 export type ExampleData = {
   n: string; // nome
   k: "cardapio" | "site" | "portfolio";
@@ -58,7 +60,9 @@ export function exampleLink(l: Lead, o: ExampleOpts) {
     a: o.cor || undefined,
     h: o.frase?.trim() || undefined,
   };
-  const base = location.origin + location.pathname;
+  // sempre o endereço público: o cliente precisa conseguir abrir no celular dele,
+  // mesmo quando você usa o C-Search pela versão do computador (localhost)
+  const base = SITE_PUBLICO;
   return `${base}#/exemplo?d=${b64urlEncode(JSON.stringify(d))}`;
 }
 
