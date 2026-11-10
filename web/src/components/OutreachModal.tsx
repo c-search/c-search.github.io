@@ -1,7 +1,8 @@
 // Janela de abordagem: escolhe o tipo de oferta e a demonstração, vê a prévia no "WhatsApp" e envia.
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, CheckCheck, Copy, ExternalLink, MessageCircle, Pencil, Phone, RotateCcw, X } from "lucide-react";
+import { Check, CheckCheck, Copy, ExternalLink, MessageCircle, Pencil, Phone, RotateCcw, Smartphone, X } from "lucide-react";
+import QRCode from "qrcode";
 import { cn, telLink, type Lead } from "@/lib";
 import { exampleLink, type ExampleData } from "@/engine/example";
 import { CORES_SUGERIDAS } from "@/engine/niches";
@@ -28,7 +29,9 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
   const [cor, setCor] = useState<string | undefined>();
-  const [frase, setFrase] = useState("");
+  const frase = ""; // a frase da página vem pronta para cada tipo de negócio
+  const [verQr, setVerQr] = useState(false);
+  const [qr, setQr] = useState("");
   const [aba, setAba] = useState<"conversa" | "demo">("conversa");
   const [editando, setEditando] = useState(false);
   const [texto, setTexto] = useState<string | null>(null); // null = mensagem automática
@@ -39,6 +42,11 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
   const msg = texto ?? automatica;
   const p = proposta(l);
   const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  useEffect(() => {
+    if (!verQr) return;
+    QRCode.toDataURL(link, { errorCorrectionLevel: "L", margin: 1, width: 320 }).then(setQr).catch(() => setQr(""));
+  }, [verQr, link]);
 
   // pequena "montagem" visual ao trocar a demonstração
   useEffect(() => {
@@ -172,12 +180,25 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
                   className={cn("h-7 w-7 rounded-full transition cursor-pointer", cor === c && "ring-2 ring-white ring-offset-2 ring-offset-black")} style={{ background: c }} />
               ))}
             </div>
-            <input defaultValue={frase} onBlur={(e) => setFrase(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-              placeholder="Frase de destaque (opcional): Ex.: A melhor pizza da Mooca"
-              className="mt-3 h-9 w-full rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
-            <a href={link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-              <ExternalLink className="h-3.5 w-3.5" /> Abrir a demonstração em tela cheia
-            </a>
+            <div className="mt-3 flex flex-wrap gap-4 text-xs">
+              <a href={link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <ExternalLink className="h-3.5 w-3.5" /> Abrir em tela cheia
+              </a>
+              <button onClick={() => setVerQr(!verQr)} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer">
+                <Smartphone className="h-3.5 w-3.5" /> {verQr ? "Esconder QR code" : "Abrir no meu celular"}
+              </button>
+            </div>
+            {verQr && (
+              <div className="mt-3 flex items-center gap-4 rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/10">
+                {qr ? <img src={qr} alt="QR code da demonstração" className="h-36 w-36 shrink-0 rounded-lg bg-white p-1.5" /> : <div className="h-36 w-36 shrink-0 rounded-lg bg-white/10" />}
+                <div className="text-xs text-muted-foreground">
+                  Aponte a câmera do celular para o código: abre <b className="text-foreground">exatamente o mesmo link</b> que vai na mensagem.
+                  {/localhost|127\.0\.0\.1/.test(location.hostname) && (
+                    <span className="mt-2 block text-amber-200/80">Você está na versão do computador (localhost), esse link só abre aqui. Use o site publicado para mandar aos clientes.</span>
+                  )}
+                </div>
+              </div>
+            )}
           </Passo>
 
           <Passo n={3} t="Mensagem">
