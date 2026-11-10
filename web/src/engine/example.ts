@@ -19,6 +19,7 @@ export type ExampleData = {
   rc?: number; // nº de avaliações reais
   a?: string; // cor de destaque escolhida
   h?: string; // frase de destaque personalizada
+  img?: string[]; // fotos reais do lugar (URLs)
 };
 
 function b64urlEncode(s: string) {
@@ -40,9 +41,9 @@ export function exampleKind(l: Lead): ExampleData["k"] {
   return "site";
 }
 
-export type ExampleOpts = { meuNome: string; meuWhats: string; cor?: string; frase?: string; tipo?: ExampleData["k"] };
+export type ExampleOpts = { meuNome: string; meuWhats: string; cor?: string; frase?: string; tipo?: ExampleData["k"]; fotos?: string[] };
 
-export function exampleLink(l: Lead, o: ExampleOpts) {
+export function exampleData(l: Lead, o: ExampleOpts): ExampleData {
   const meu = o.meuWhats.replace(/\D/g, "");
   const d: ExampleData = {
     n: l.nome.replace(/^\[DEMO\]\s*/, ""),
@@ -59,11 +60,18 @@ export function exampleLink(l: Lead, o: ExampleOpts) {
     rc: l.avaliacoes ?? undefined,
     a: o.cor || undefined,
     h: o.frase?.trim() || undefined,
+    img: o.fotos?.length ? o.fotos : undefined,
   };
-  // sempre o endereço público: o cliente precisa conseguir abrir no celular dele,
-  // mesmo quando você usa o C-Search pela versão do computador (localhost)
-  const base = SITE_PUBLICO;
-  return `${base}#/exemplo?d=${b64urlEncode(JSON.stringify(d))}`;
+  return d;
+}
+
+/** Link longo (os dados vão dentro do próprio link). Sempre o endereço público. */
+export function linkLongo(d: ExampleData) {
+  return `${SITE_PUBLICO}#/exemplo?d=${b64urlEncode(JSON.stringify(d))}`;
+}
+
+export function exampleLink(l: Lead, o: ExampleOpts) {
+  return linkLongo(exampleData(l, o));
 }
 
 export function decodeExample(hash: string): ExampleData | null {

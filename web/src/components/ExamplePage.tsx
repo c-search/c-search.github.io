@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import * as I from "lucide-react";
 import { decodeExample, mapaEmbed, type ExampleData } from "@/engine/example";
-import { cardapioPara, foto, sitePara, type MenuItem, type SiteNicho } from "@/engine/niches";
+import { carregarDemo } from "@/engine/shortlink";
+import { cardapioPara, foto, sitePara, src, type MenuItem, type SiteNicho } from "@/engine/niches";
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const iniciais = (n: string) => n.split(/\s+/).filter((w) => w.length > 2 || /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || n[0];
@@ -23,6 +24,14 @@ const ICONES: Record<string, I.LucideIcon> = {
   sun: I.Sun, smile: I.Smile, shield: I.ShieldCheck, heart: I.HeartPulse, stethoscope: I.Stethoscope, calendar: I.CalendarCheck,
   phone: I.Smartphone, dumbbell: I.Dumbbell, users: I.Users, target: I.Target, truck: I.Truck, bag: I.ShoppingBag,
   home: I.Home, layers: I.Layers, ruler: I.Ruler, pen: I.PenTool, moon: I.Moon, clock: I.Clock3, tag: I.Tag, card: I.CreditCard,
+};
+
+/** Foto real que não carregou (site do dono bloqueou, por exemplo): troca por uma do banco. */
+const semFoto = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  if (img.dataset.trocada) return;
+  img.dataset.trocada = "1";
+  img.src = foto("1517248135467-4c7edcad34c4", 1200);
 };
 
 /* --------------------------- faixa "isto é um exemplo" --------------------------- */
@@ -84,7 +93,7 @@ function CardapioDigital({ d }: { d: ExampleData }) {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,620px)]">
         {/* Capa */}
         <header className="relative h-[62vh] min-h-[420px] overflow-hidden lg:sticky lg:top-0 lg:h-screen">
-          <motion.img src={foto(m.hero, 1600)} alt="" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
+          <motion.img src={src(d.img?.[0] || m.hero, 1600)} onError={semFoto} alt="" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0d0a08] via-[#0d0a08]/55 to-black/20" />
           <div className="relative flex h-full flex-col justify-end p-6 pb-8 sm:p-10">
@@ -261,7 +270,10 @@ function Info({ icon: Ic, t, v }: { icon: I.LucideIcon; t: string; v: string }) 
 
 /* =================================== SITE =================================== */
 function SiteCompleto({ d }: { d: ExampleData }) {
-  const s: SiteNicho = sitePara(d.c, d.n);
+  const base: SiteNicho = sitePara(d.c, d.n);
+  // fotos reais do lugar (escolhidas na abordagem) vêm primeiro; as do banco completam
+  const reais = d.img || [];
+  const s: SiteNicho = reais.length ? { ...base, hero: reais[0], galeria: [...reais.slice(1), ...base.galeria] } : base;
   const ac = d.a || s.cor;
   const escuro = s.tema === "escuro";
   const bairro = bairroDe(d.e);
@@ -301,7 +313,7 @@ function SiteCompleto({ d }: { d: ExampleData }) {
 
       {/* Hero */}
       <header className="relative flex min-h-[94vh] items-end overflow-hidden">
-        <motion.img src={foto(s.hero, 2000)} alt="" initial={{ scale: 1.15 }} animate={{ scale: 1.02 }} transition={{ duration: 6, ease: "easeOut" }}
+        <motion.img src={src(s.hero, 2000)} onError={semFoto} alt="" initial={{ scale: 1.15 }} animate={{ scale: 1.02 }} transition={{ duration: 6, ease: "easeOut" }}
           className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/30" />
         <div className="relative mx-auto w-full max-w-6xl px-6 pb-20 pt-40 text-white">
@@ -361,7 +373,7 @@ function SiteCompleto({ d }: { d: ExampleData }) {
       <section className={escuro ? "bg-white/[0.02]" : "bg-[#f1ede6]"}>
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 lg:grid-cols-2">
           <motion.div initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.8 }} className="relative">
-            <img src={foto(s.galeria[0] || s.hero, 1100, 1300)} alt="" className="aspect-[4/5] w-full rounded-[2rem] object-cover" loading="lazy" />
+            <img src={src(s.galeria[0] || s.hero, 1100, 1300)} onError={semFoto} alt="" className="aspect-[4/5] w-full rounded-[2rem] object-cover" loading="lazy" />
             <div className={`absolute -bottom-6 -right-2 rounded-3xl p-5 ring-1 sm:-right-6 ${escuro ? "bg-[#151517] ring-white/10" : "bg-white ring-black/5 shadow-xl"}`}>
               <div className="text-[13px] opacity-60">Atendimento</div>
               <div className="text-2xl font-semibold">Seg a Sáb</div>
@@ -390,7 +402,7 @@ function SiteCompleto({ d }: { d: ExampleData }) {
             {[s.hero, ...galeria].slice(0, [s.hero, ...galeria].length >= 5 ? 5 : 3).map((g, k) => (
               <motion.div key={g} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: k * 0.07 }}
                 className={`group overflow-hidden rounded-3xl ${k === 0 ? "col-span-2 row-span-2" : ""}`}>
-                <img src={foto(g, k === 0 ? 1200 : 700, k === 0 ? 900 : 500)} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
+                <img src={src(g, k === 0 ? 1200 : 700, k === 0 ? 900 : 500)} onError={semFoto} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" loading="lazy" />
               </motion.div>
             ))}
           </div>
@@ -473,7 +485,7 @@ function SiteCompleto({ d }: { d: ExampleData }) {
         {mapaEmbed(d.la, d.lo) ? (
           <iframe title="Mapa" src={mapaEmbed(d.la, d.lo)} className={`h-72 w-full rounded-3xl border-0 ${escuro ? "invert-[.9] hue-rotate-180" : ""}`} loading="lazy" />
         ) : (
-          <img src={foto(s.galeria[1] || s.hero, 900, 600)} alt="" className="h-72 w-full rounded-3xl object-cover" loading="lazy" />
+          <img src={src(s.galeria[1] || s.hero, 900, 600)} onError={semFoto} alt="" className="h-72 w-full rounded-3xl object-cover" loading="lazy" />
         )}
       </footer>
 
@@ -499,11 +511,25 @@ function Cabecalho({ kicker, t, i, ac, sub, centro }: { kicker: string; t: strin
 }
 
 export function ExamplePage() {
-  const d = useMemo(() => decodeExample(location.hash), []);
+  // link longo (#/exemplo?d=...) traz os dados no próprio link; link curto (#/p/slug) busca no GitHub
+  const slug = useMemo(() => (location.hash.match(/^#\/p\/([a-z0-9-]+)/) || [])[1], []);
+  const [d, setD] = useState<ExampleData | null>(() => (slug ? null : decodeExample(location.hash)));
+  const [carregando, setCarregando] = useState(!!slug);
+  useEffect(() => {
+    if (!slug) return;
+    carregarDemo(slug).then((x) => { setD(x); setCarregando(false); });
+  }, [slug]);
   useEffect(() => {
     if (d) document.title = `${d.n}`;
     window.scrollTo(0, 0);
   }, [d]);
+  if (carregando) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0b0b0c]">
+        <I.Loader2 className="h-8 w-8 animate-spin text-white/60" />
+      </div>
+    );
+  }
   if (!d) return <div className="flex min-h-screen items-center justify-center bg-white p-6 text-neutral-600">Link de exemplo inválido.</div>;
   const cardapio = d.k === "cardapio";
   const escuro = cardapio || sitePara(d.c, d.n).tema === "escuro";

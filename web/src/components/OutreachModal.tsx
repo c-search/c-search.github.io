@@ -1,10 +1,12 @@
 // Janela de abordagem: escolhe o tipo de oferta e a demonstração, vê a prévia no "WhatsApp" e envia.
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, CheckCheck, Copy, ExternalLink, MessageCircle, Pencil, Phone, RotateCcw, Smartphone, X } from "lucide-react";
+import { Check, CheckCheck, Copy, ExternalLink, ImageIcon, Link2, Loader2, MessageCircle, Pencil, Phone, RotateCcw, Smartphone, X } from "lucide-react";
 import QRCode from "qrcode";
 import { cn, telLink, type Lead } from "@/lib";
-import { exampleLink, type ExampleData } from "@/engine/example";
+import { exampleData, linkLongo, type ExampleData } from "@/engine/example";
+import { buscarFotos, type FotoAchada } from "@/engine/photos";
+import { criarLinkCurto } from "@/engine/shortlink";
 import { CORES_SUGERIDAS } from "@/engine/niches";
 import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, type Abordagem } from "@/engine/outreach";
 import { brl, proposta } from "@/engine/pricing";
@@ -14,6 +16,8 @@ type Props = {
   lead: Lead;
   meuNome: string;
   meuWhats: string;
+  serperKey: string;
+  githubToken: string;
   onClose: () => void;
   onSent: (l: Lead) => void;
   onCopy: (texto: string) => void;
@@ -25,7 +29,7 @@ const DEMOS: { id: ExampleData["k"]; nome: string }[] = [
   { id: "portfolio", nome: "Site + portfólio" },
 ];
 
-export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onCopy }: Props) {
+export function OutreachModal({ lead: l, meuNome, meuWhats, serperKey, githubToken, onClose, onSent, onCopy }: Props) {
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
   const [cor, setCor] = useState<string | undefined>();
@@ -37,7 +41,50 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
   const [texto, setTexto] = useState<string | null>(null); // null = mensagem automática
   const [gerando, setGerando] = useState(true);
 
-  const link = useMemo(() => exampleLink(l, { meuNome, meuWhats, cor, frase, tipo: demo }), [l, meuNome, meuWhats, cor, frase, demo]);
+  // fotos reais do lugar
+  const [fotosAchadas, setFotosAchadas] = useState<FotoAchada[] | null>(null);
+  const [fotos, setFotos] = useState<string[]>([]);
+  const [buscandoFotos, setBuscandoFotos] = useState(false);
+  const [erroFotos, setErroFotos] = useState("");
+
+  const dados = useMemo(() => exampleData(l, { meuNome, meuWhats, cor, frase, tipo: demo, fotos }), [l, meuNome, meuWhats, cor, frase, demo, fotos]);
+  const longo = useMemo(() => linkLongo(dados), [dados]);
+
+  // link curto: cria sozinho quando você para de mexer na demonstração (precisa do token do GitHub)
+  const [curto, setCurto] = useState<{ para: string; url: string } | null>(null);
+  const [criandoCurto, setCriandoCurto] = useState(false);
+  const [erroCurto, setErroCurto] = useState("");
+  useEffect(() => {
+    if (!githubToken) return;
+    setErroCurto("");
+    const t = setTimeout(async () => {
+      setCriandoCurto(true);
+      try {
+        const url = await criarLinkCurto(dados, githubToken);
+        setCurto({ para: longo, url });
+      } catch (e) {
+        setErroCurto((e as Error).message);
+      } finally {
+        setCriandoCurto(false);
+      }
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [longo, githubToken]);
+  const link = curto?.para === longo ? curto.url : longo; // vai na mensagem
+  const preview = longo; // prévia abre na hora, sem esperar o GitHub
+
+  async function procurarFotos() {
+    setBuscandoFotos(true);
+    setErroFotos("");
+    try {
+      setFotosAchadas(await buscarFotos(l, serperKey));
+    } catch (e) {
+      setErroFotos((e as Error).message);
+    } finally {
+      setBuscandoFotos(false);
+    }
+  }
+  const alternarFoto = (u: string) => setFotos((f) => (f.includes(u) ? f.filter((x) => x !== u) : f.length >= 4 ? f : [...f, u]));
   const automatica = mensagemAbordagem(abordagem, l, link, meuNome);
   const msg = texto ?? automatica;
   const p = proposta(l);
@@ -53,7 +100,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
     setGerando(true);
     const t = setTimeout(() => setGerando(false), 900);
     return () => clearTimeout(t);
-  }, [link]);
+  }, [preview]);
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -69,7 +116,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
   }
 
   // se o texto foi editado, mantém o link atualizado
-  const msgFinal = texto !== null ? texto.replace(/https?:\/\/\S*#\/exemplo\?d=\S+/g, link) : msg;
+  const msgFinal = texto !== null ? texto.replace(/https?:\/\/\S*#\/(exemplo\?d=|p\/)\S+/g, link) : msg;
   const waUrl = l.whatsapp ? `https://wa.me/${l.whatsapp}?text=${encodeURIComponent(msgFinal)}` : "";
 
   return (
@@ -110,7 +157,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
                         {gerando ? (
                           <div className="flex h-full items-center justify-center text-[11px] text-white/60">Montando demonstração…</div>
                         ) : (
-                          <iframe src={link} title="miniatura" tabIndex={-1} className="pointer-events-none h-[560px] w-[320px] origin-top-left scale-[0.84] border-0" />
+                          <iframe src={preview} title="miniatura" tabIndex={-1} className="pointer-events-none h-[560px] w-[320px] origin-top-left scale-[0.84] border-0" />
                         )}
                       </div>
                       <div className="px-2.5 py-2">
@@ -126,7 +173,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
             ) : gerando ? (
               <div className="flex h-full items-center justify-center text-sm text-white/60">Montando demonstração…</div>
             ) : (
-              <iframe key={link} src={link} title="Demonstração" className="h-full w-full border-0 bg-white" />
+              <iframe key={preview} src={preview} title="Demonstração" className="h-full w-full border-0 bg-white" />
             )}
           </div>
         </div>
@@ -164,6 +211,38 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
           </Passo>
 
           <Passo n={2} t="Demonstração que vai junto">
+            <div className="mb-3 rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/10">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-sm font-medium"><ImageIcon className="h-4 w-4" /> Fotos reais do lugar</div>
+                {serperKey ? (
+                  <button onClick={procurarFotos} disabled={buscandoFotos}
+                    className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ring-1 ring-white/15 hover:bg-white/5 disabled:opacity-50 cursor-pointer">
+                    {buscandoFotos ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Buscando…</> : fotosAchadas ? "Buscar de novo" : "Buscar fotos (1 crédito)"}
+                  </button>
+                ) : <span className="text-xs text-muted-foreground">precisa da chave do Serper</span>}
+              </div>
+              {erroFotos && <p className="mt-2 text-xs text-red-300">{erroFotos}</p>}
+              {fotosAchadas && (
+                fotosAchadas.length ? (
+                  <>
+                    <p className="mt-2 text-xs text-muted-foreground">Toque nas fotos <b className="text-foreground">que são mesmo do lugar</b> (até 4). A primeira vira a capa.</p>
+                    <div className="mt-2 grid grid-cols-4 gap-1.5">
+                      {fotosAchadas.map((f) => {
+                        const pos = fotos.indexOf(f.url);
+                        return (
+                          <button key={f.url} onClick={() => alternarFoto(f.url)} title={f.fonte}
+                            className={cn("relative aspect-square overflow-hidden rounded-lg ring-2 transition cursor-pointer", pos >= 0 ? "ring-white" : "ring-transparent opacity-80 hover:opacity-100")}>
+                            <img src={f.thumb} alt={f.titulo} className="h-full w-full object-cover" loading="lazy" />
+                            {pos >= 0 && <span className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[11px] font-bold text-black">{pos + 1}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : <p className="mt-2 text-xs text-muted-foreground">Não achei fotos desse lugar no Google. A demo usa fotos profissionais do tipo de negócio.</p>
+              )}
+              {!fotosAchadas && <p className="mt-1 text-xs text-muted-foreground">Sem fotos escolhidas, a demo usa fotos profissionais do tipo de negócio.</p>}
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {DEMOS.map((d) => (
                 <button key={d.id} onClick={() => setDemo(d.id)}
@@ -181,7 +260,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
               ))}
             </div>
             <div className="mt-3 flex flex-wrap gap-4 text-xs">
-              <a href={link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <a href={preview} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
                 <ExternalLink className="h-3.5 w-3.5" /> Abrir em tela cheia
               </a>
               <button onClick={() => setVerQr(!verQr)} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer">
@@ -200,6 +279,18 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, onClose, onSent, onC
           </Passo>
 
           <Passo n={3} t="Mensagem">
+            <div className="mb-3 flex items-center gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-xs ring-1 ring-white/10">
+              <Link2 className="h-4 w-4 shrink-0" />
+              {!githubToken ? (
+                <span className="text-muted-foreground">Link longo. Para um link curto, coloque o token do GitHub em Configurações.</span>
+              ) : criandoCurto || (!erroCurto && link === longo) ? (
+                <span className="flex items-center gap-1.5 text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Criando link curto…</span>
+              ) : erroCurto ? (
+                <span className="text-red-300">{erroCurto} (a mensagem vai com o link longo)</span>
+              ) : (
+                <span className="truncate"><span className="text-muted-foreground">Link curto: </span><b>{link.replace("https://", "")}</b></span>
+              )}
+            </div>
             {editando ? (
               <textarea value={msgFinal} onChange={(e) => setTexto(e.target.value)} rows={9}
                 className="w-full rounded-lg bg-black/40 p-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />

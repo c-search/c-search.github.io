@@ -24,7 +24,7 @@ export default function App() {
     window.addEventListener("hashchange", h);
     return () => window.removeEventListener("hashchange", h);
   }, []);
-  if (hash.startsWith("#/exemplo")) return <ExamplePage />;
+  if (hash.startsWith("#/exemplo") || hash.startsWith("#/p/")) return <ExamplePage />;
   return <Main />;
 }
 
@@ -39,6 +39,7 @@ function Main() {
   const [template, setTemplate] = useState(() => storageGet("csearch_template", DEFAULT_MSG));
   const [msgOpen, setMsgOpen] = useState(false);
   const [serperKey, setSerperKey] = useState(() => storageGet("csearch_serper_key", ""));
+  const [githubToken, setGithubToken] = useState(() => storageGet("csearch_github_token", ""));
   const [meuNome, setMeuNome] = useState(() => storageGet("csearch_meu_nome", ""));
   const [meuWhats, setMeuWhats] = useState(() => storageGet("csearch_meu_whats", ""));
   const [autoVerify, setAutoVerify] = useState(() => storageGet("csearch_auto_verify", "0") === "1");
@@ -220,7 +221,7 @@ function Main() {
       {/* Abordagem: mensagem + demonstração */}
       <AnimatePresence>
         {exemplo && (
-          <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} onClose={() => setExemplo(null)} onCopy={copy}
+          <OutreachModal key={exemplo.place_id} lead={exemplo} meuNome={meuNome} meuWhats={meuWhats} serperKey={serperKey.trim()} githubToken={githubToken.trim()} onClose={() => setExemplo(null)} onCopy={copy}
             onSent={(l) => contact(l, result?.busca || "Abordagem")} />
         )}
       </AnimatePresence>
@@ -266,6 +267,22 @@ function Main() {
                   <input type="checkbox" checked={autoVerify} onChange={(e) => { setAutoVerify(e.target.checked); storageSet("csearch_auto_verify", e.target.checked ? "1" : "0"); }} />
                   Verificar automaticamente os 10 melhores depois de cada busca <span className="text-muted-foreground">(até 30 créditos)</span>
                 </label>
+              </div>
+
+              <div className="mb-6 -mt-2 rounded-xl bg-white/[0.03] p-4 ring-1 ring-white/10">
+                <div className="mb-1 text-sm font-medium">Token do GitHub <span className="font-normal text-muted-foreground">(link curto da demonstração)</span></div>
+                <ol className="mb-3 list-decimal space-y-0.5 pl-4 text-xs text-muted-foreground">
+                  <li>Abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer" className="underline hover:text-foreground">github.com/settings/personal-access-tokens/new</a> (logado como ryandamasio).</li>
+                  <li>Nome: <b>csearch-demos</b> · Validade: a que preferir (ex.: 1 ano).</li>
+                  <li>Em <b>Repository access</b>, escolha <b>Only select repositories</b> → <b>csearch</b>.</li>
+                  <li>Em <b>Permissions → Repository permissions → Contents</b>, escolha <b>Read and write</b>.</li>
+                  <li>Clique em <b>Generate token</b>, copie e cole aqui. Ele fica salvo só neste navegador.</li>
+                </ol>
+                <input type="password" value={githubToken}
+                  onChange={(e) => { setGithubToken(e.target.value); storageSet("csearch_github_token", e.target.value.trim()); }}
+                  placeholder="Cole o token (começa com github_pat_)"
+                  className="h-10 w-full rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
+                <div className="mt-2 text-xs text-muted-foreground">{githubToken ? "✓ Token salvo: as demonstrações saem com link curto" : "Sem token: a mensagem vai com o link longo (funciona igual, só é maior)"}</div>
               </div>
 
               <div className="mb-3">

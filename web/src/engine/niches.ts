@@ -4,6 +4,9 @@
 export const foto = (id: string, w = 1200, h?: number) =>
   `https://images.unsplash.com/photo-${id}?w=${w}${h ? `&h=${h}` : ""}&q=75&auto=format&fit=crop`;
 
+/** Foto do banco (id do Unsplash) ou foto real do lugar (URL completa). */
+export const src = (x: string, w = 1200, h?: number) => (x.startsWith("http") ? x : foto(x, w, h));
+
 export type MenuItem = { nome: string; desc: string; preco: number; foto?: string; destaque?: boolean };
 export type Cardapio = {
   id: string;
