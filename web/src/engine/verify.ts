@@ -325,11 +325,14 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
 
 /** Você diz que o site/rede encontrado era de outro lugar: volta a ser "sem site". */
 export function contestarVerificacao(l: Lead): Lead {
-  const verificacao: Verificacao = {
-    status: "sem_site", resumo: "Corrigido por você: o site encontrado era de outro lugar", links: [],
-    quando: agora(), fonte: l.verificacao?.fonte, confirmado: true, versao: 3, manual: true,
-  };
-  const novo = scoreLead({ ...l, site: "" }, "");
+  // contestou o SITE: tira só o site e mantém Instagram/cardápio que eram do lugar
+  const restantes = l.verificacao?.status === "site" ? (l.verificacao.links || []).filter((k) => k.tipo !== "Site") : [];
+  const base = { quando: agora(), fonte: l.verificacao?.fonte, confirmado: true, versao: 3, manual: true, dadosConferidos: 2 };
+  const verificacao: Verificacao = restantes.length
+    ? { ...base, status: "social", links: restantes, url: restantes[0].url,
+        resumo: `Corrigido por você: sem site próprio, mas tem ${restantes.map((k) => k.tipo.toLowerCase()).join(" e ")}` }
+    : { ...base, status: "sem_site", links: [], resumo: "Corrigido por você: o site encontrado era de outro lugar" };
+  const novo = scoreLead({ ...l, site: restantes[0]?.url || "" }, "");
   return { ...novo, whatsapp: l.whatsapp || novo.whatsapp, maps_url: l.maps_url, verificacao, motivos: [verificacao.resumo, novo.motivos].filter(Boolean).join(" · ") };
 }
 
