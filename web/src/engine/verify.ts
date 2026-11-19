@@ -117,7 +117,9 @@ export function pontuarFicha(l: Lead, p: Place) {
     const d = distanciaM(l.lat, l.lon, p.latitude, p.longitude);
     s += d < 80 ? 40 : d < 250 ? 25 : d < 600 ? 10 : d > 2000 ? -40 : 0;
   }
-  if (palavraEmComum(l.nome, p.title) || palavraEmComum(p.title, l.nome)) s += 25;
+  // nome idêntico (ex.: "KIT LANCHES E COFFE BREAK EM SJC") já identifica, mesmo sem coordenada na resposta
+  if (compactar(l.nome) === compactar(p.title) && compactar(l.nome).length >= 8) s += 50;
+  else if (palavraEmComum(l.nome, p.title) || palavraEmComum(p.title, l.nome)) s += 25;
   const numL = (l.endereco.match(/\b\d{1,5}\b/) || [])[0];
   if (numL && p.address && new RegExp(`\\b${numL}\\b`).test(p.address)) s += 15;
   return s;
