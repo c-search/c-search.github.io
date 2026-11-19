@@ -43,7 +43,8 @@ function Main() {
   const [serperKey, setSerperKey] = useState(() => storageGet("csearch_serper_key", ""));
   const [githubToken, setGithubToken] = useState(() => storageGet("csearch_github_token", ""));
   const [meuNome, setMeuNome] = useState(() => storageGet("csearch_meu_nome", "Ryan"));
-  const [empresa, setEmpresa] = useState(() => storageGet("csearch_empresa", "C-Search"));
+  // "C-Search" é só o nome do programa; quem guardou esse valor antes passa para o nome da empresa
+  const [empresa, setEmpresa] = useState(() => { const e = storageGet("csearch_empresa", "Syde Studio"); return e === "C-Search" ? "Syde Studio" : e; });
   const [meuWhats, setMeuWhats] = useState(() => storageGet("csearch_meu_whats", ""));
   const [autoVerify, setAutoVerify] = useState(() => storageGet("csearch_auto_verify", "0") === "1");
   const [verifying, setVerifying] = useState<{ done: number; total: number } | null>(null);
@@ -285,7 +286,7 @@ function Main() {
                   <input value={meuNome} onChange={(e) => { setMeuNome(e.target.value); storageSet("csearch_meu_nome", e.target.value); }}
                     placeholder="Seu nome, ex.: Ryan" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
                   <input value={empresa} onChange={(e) => { setEmpresa(e.target.value); storageSet("csearch_empresa", e.target.value); }}
-                    placeholder="Nome da empresa, ex.: C-Search" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
+                    placeholder="Nome da empresa, ex.: Syde Studio" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
                   <input value={meuWhats} onChange={(e) => { setMeuWhats(e.target.value); storageSet("csearch_meu_whats", e.target.value); }}
                     placeholder="Seu WhatsApp, ex.: 11 91234-5678" className="h-10 rounded-lg bg-black/40 px-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
                 </div>

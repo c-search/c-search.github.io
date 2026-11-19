@@ -158,7 +158,7 @@ export function fillTemplate(t: string, l: Lead, cidade = "") {
     .replaceAll("{cidade}", cidade)
     .replaceAll("{avaliacoes}", String(l.avaliacoes ?? 0))
     .replaceAll("{meunome}", storageGet("csearch_meu_nome", "Ryan") || "Ryan")
-    .replaceAll("{empresa}", storageGet("csearch_empresa", "C-Search") || "C-Search");
+    .replaceAll("{empresa}", ((e) => (!e || e === "C-Search" ? "Syde Studio" : e))(storageGet("csearch_empresa", "Syde Studio")));
 }
 
 export function waLink(l: Lead, template: string, cidade = "") {
