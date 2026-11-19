@@ -242,8 +242,8 @@ function Main() {
       <Hero onSearch={(p) => search(p)} recentes={recentesLista} onAbrirRecente={(id) => { const r = abrirBusca(id); if (r) mostrarBusca(r); }} onApagarRecente={(id) => { apagarBusca(id); setRecentesLista(recentes()); }} loading={loading} progress={progress} result={result} hasGoogleKey={hasKey} hasSerper={!!serperKey.trim()} serperKey={serperKey.trim()} paginas={paginas} onPaginas={(n) => { setPaginas(n); storageSet("csearch_paginas", String(n)); }} savedCount={saved.length} onOpenMessage={() => setMsgOpen(true)} />
       {result && <Results key={result.busca + result.area} result={result} fonte={fonteAtual} salvaEm={buscaAtual?.quando} onAtualizar={buscaAtual ? () => search(buscaAtual.params, true) : undefined} atualizando={loading} template={template} savedIds={savedIds} onSave={save}
         onVerify={(ls) => verify(ls)} verifying={verifying} verifyingIds={verifyingIds}
-        onExample={setExemplo} onContact={contact} onDiscard={discard} onContestar={(l) => {
-          const c = contestarVerificacao(l);
+        onExample={setExemplo} onContact={contact} onDiscard={discard} onContestar={(l, url) => {
+          const c = contestarVerificacao(l, url);
           salvarVerificacao(c);
           setResult((r) => (r ? { ...r, leads: r.leads.map((x) => (x.place_id === c.place_id ? c : x)) } : r));
           refreshLeads([c]);

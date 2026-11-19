@@ -323,16 +323,18 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
   };
 }
 
-/** Você diz que o site/rede encontrado era de outro lugar: volta a ser "sem site". */
-export function contestarVerificacao(l: Lead): Lead {
-  // contestou o SITE: tira só o site e mantém Instagram/cardápio que eram do lugar
-  const restantes = l.verificacao?.status === "site" ? (l.verificacao.links || []).filter((k) => k.tipo !== "Site") : [];
+/** Você diz que UM link encontrado era de outro lugar: tira só ele e mantém os outros. */
+export function contestarVerificacao(l: Lead, url: string): Lead {
+  const restantes = (l.verificacao?.links || []).filter((k) => k.url !== url);
+  const site = restantes.find((k) => k.tipo === "Site");
   const base = { quando: agora(), fonte: l.verificacao?.fonte, confirmado: true, versao: 3, manual: true, dadosConferidos: 2 };
-  const verificacao: Verificacao = restantes.length
+  const verificacao: Verificacao = site
+    ? { ...base, status: "site", links: restantes, url: site.url, resumo: `Já tem site: ${host(site.url)}` }
+    : restantes.length
     ? { ...base, status: "social", links: restantes, url: restantes[0].url,
         resumo: `Corrigido por você: sem site próprio, mas tem ${restantes.map((k) => k.tipo.toLowerCase()).join(" e ")}` }
-    : { ...base, status: "sem_site", links: [], resumo: "Corrigido por você: o site encontrado era de outro lugar" };
-  const novo = scoreLead({ ...l, site: restantes[0]?.url || "" }, "");
+    : { ...base, status: "sem_site", links: [], resumo: "Corrigido por você: o link encontrado era de outro lugar" };
+  const novo = scoreLead({ ...l, site: (site || restantes[0])?.url || "" }, "");
   return { ...novo, whatsapp: l.whatsapp || novo.whatsapp, maps_url: l.maps_url, verificacao, motivos: [verificacao.resumo, novo.motivos].filter(Boolean).join(" · ") };
 }
 

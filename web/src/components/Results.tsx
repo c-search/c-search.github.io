@@ -19,7 +19,7 @@ type Props = {
   onExample: (l: Lead) => void;
   onContact: (l: Lead, busca: string) => void;
   onDiscard: (l: Lead, busca: string) => void;
-  onContestar: (l: Lead) => void;
+  onContestar: (l: Lead, url: string) => void;
   fonte?: string;
   salvaEm?: string;
   onAtualizar?: () => void;
@@ -276,7 +276,7 @@ export function Results({ result, fonte, salvaEm, onAtualizar, atualizando, temp
               onVerify={() => onVerify([l])}
               onExample={() => onExample(l)}
               onContact={() => onContact(l, busca)}
-              onContestar={() => onContestar(l)}
+              onContestar={(url: string) => onContestar(l, url)}
               checking={verifyingIds.has(l.place_id)}
             />
           ))}
@@ -359,7 +359,7 @@ function ResumoChip({ ativo, onClick, n, label, tom }: { ativo: boolean; onClick
   );
 }
 
-export function VerifBadge({ lead: l, onContestar }: { lead: Lead; onContestar?: () => void }) {
+export function VerifBadge({ lead: l, onContestar }: { lead: Lead; onContestar?: (url: string) => void }) {
   const v = l.verificacao;
   if (!v && !l.rede) return null;
   return (
@@ -386,16 +386,18 @@ export function VerifBadge({ lead: l, onContestar }: { lead: Lead; onContestar?:
           {v.resumo}
         </span>
       )}
-      {onContestar && v && (v.status === "site" || v.status === "social") && !v.manual && (
-        <button onClick={onContestar} title="O site/rede encontrado é de outro estabelecimento"
-          className="text-[11px] text-amber-200/80 underline-offset-2 hover:text-amber-100 hover:underline cursor-pointer">
-          não é deste lugar?
-        </button>
-      )}
       {v?.links.map((k) => (
-        <a key={k.url} href={k.url} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-          {k.tipo} ↗
-        </a>
+        <span key={k.url} className="inline-flex items-center gap-1">
+          <a href={k.url} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+            {k.tipo} ↗
+          </a>
+          {onContestar && (
+            <button onClick={() => onContestar(k.url)} title={`Este link (${k.tipo.toLowerCase()}) é de outro lugar: tirar só ele`}
+              className="rounded px-1 text-[11px] text-amber-200/80 hover:bg-white/10 hover:text-amber-100 cursor-pointer">
+              ✕ não é daqui
+            </button>
+          )}
+        </span>
       ))}
       {v && <span className="text-[11px] text-neutral-500">verificado em {formatarData(v.quando)}</span>}
       {l.rede && !v && (
@@ -405,7 +407,7 @@ export function VerifBadge({ lead: l, onContestar }: { lead: Lead; onContestar?:
   );
 }
 
-function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onContact, onContestar, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; onExample: () => void; onContact: () => void; onContestar: () => void; checking: boolean }) {
+function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onContact, onContestar, checking }: { lead: Lead; index: number; saved: boolean; wa: string; onSave: () => void; onVerify: () => void; onExample: () => void; onContact: () => void; onContestar: (url: string) => void; checking: boolean }) {
   const tone = nivelTone(l.score);
   return (
     <motion.div
