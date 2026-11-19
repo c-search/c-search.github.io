@@ -146,9 +146,7 @@ export const api = {
 
 export const DEFAULT_MSG =
   "Olá, {nome}! Tudo bem?\n\n" +
-  "Meu nome é {meunome}. Eu tenho uma empresa chamada {empresa}, que ajuda estabelecimentos que ainda não têm cardápio digital, site ou uma presença forte na internet. Trabalho com sites, cardápios digitais, portfólios e também com vídeos para divulgação nas redes sociais.
-
-" +
+  "Meu nome é {meunome}. Eu tenho uma empresa chamada {empresa}, que ajuda estabelecimentos que ainda não têm cardápio digital, site ou uma presença forte na internet. Trabalho com sites, cardápios digitais, portfólios e também com vídeos para divulgação nas redes sociais.\n\n" +
   "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Procurei, mas não encontrei um {oferta} de vocês. " +
   "Se ainda não tiverem, acho que pode ser uma ótima forma de mostrar o trabalho de vocês para mais clientes.\n\n" +
   "Posso te enviar um exemplo de como ficaria, sem compromisso?";
