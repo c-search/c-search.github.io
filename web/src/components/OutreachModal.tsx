@@ -379,6 +379,18 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
                 </a>
               )}
             </div>
+            {l.email && (
+              <a href={`mailto:${l.email}?subject=${encodeURIComponent(`Uma ideia para a ${l.nome.replace(/^\[DEMO\]\s*/, "")}`)}&body=${encodeURIComponent(msgFinal)}`}
+                onClick={() => setPerguntar(true)}
+                className="flex h-11 items-center justify-center gap-2 rounded-xl text-sm ring-1 ring-white/15 hover:bg-white/5">
+                ✉ Mandar por e-mail · {l.email}
+              </a>
+            )}
+            {!l.whatsapp && (
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Sem WhatsApp? Ligue no fixo e peça um WhatsApp ou e-mail para mandar o exemplo, ou passe lá com a demonstração aberta no celular.
+              </p>
+            )}
             {marcado ? (
               <div className="rounded-xl bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200 ring-1 ring-emerald-400/20">
                 ✓ Marcado como "{modo === "confirmar" ? "Aguardando confirmação" : "Contatado"}" em Meus leads

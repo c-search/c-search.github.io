@@ -433,6 +433,7 @@ function LeadRow({ lead: l, index, saved, wa, onSave, onVerify, onExample, onCon
           {l.avaliacoes !== null && <> · {l.avaliacoes} avaliações{l.nota ? ` (${l.nota}★)` : ""}</>}
         </div>
         <VerifBadge lead={l} onContestar={onContestar} />
+        {l.email && <div className="mt-1 truncate text-[11px] text-muted-foreground">✉ {l.email}</div>}
         <ProposalChip lead={l} />
       </div>
 

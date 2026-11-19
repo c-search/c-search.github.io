@@ -24,7 +24,7 @@ export type Verificacao = {
   confirmado?: boolean; // false = só olhamos a ficha do Maps; true = conferimos também na busca do Google
   versao?: number; // 3 = exige prova de local (cidade/telefone) nos resultados da busca
   manual?: boolean; // você corrigiu na mão
-  dadosConferidos?: boolean; // telefone/endereço completados pela ficha do Maps
+  dadosConferidos?: boolean | number; // 2 = completou telefone/endereço pela ficha do Maps e pelo quadro do Google
 };
 
 const DELIVERY = ["ifood.com.br", "goomer", "anota.ai", "aiqfome", "rappi", "ubereats", "deliverymuch", "menudino", "cardapioweb", "olaclick", "neemo", "saipos", "instadelivery", "pedir.delivery", "cardapio.app", "bit.ly", "linktr.ee", "linkr.bio", "beacons.ai", "bio.link", "taplink", "lnk.bio"];
@@ -286,13 +286,23 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
     creditos++;
   }
 
-  const verificacao = { ...decidir(l, ficha, busca), creditos, dadosConferidos: true };
+  const verificacao = { ...decidir(l, ficha, busca), creditos, dadosConferidos: 2 };
 
   // recalcula com o que o Google mostrou (site, avaliações, telefone)
   let siteFinal = l.site;
   if (verificacao.status === "site") siteFinal = verificacao.url!;
   else if (verificacao.status === "social" && siteKind(l.site) !== "proprio") siteFinal = l.site || verificacao.url!;
-  const telefone = l.telefone || ficha?.phoneNumber || "";
+  // telefone e e-mail também vêm do quadro do Google (knowledge graph) e dos trechos da busca
+  const kg = busca?.knowledgeGraph;
+  const attrs = kg?.attributes || {};
+  const telKg = Object.entries(attrs).find(([k]) => /telefone|phone/i.test(k))?.[1] || "";
+  const prova = provaDeLocal(l, ficha);
+  const textos = [kg?.description || "", ...Object.values(attrs), ...(busca?.organic || [])
+    .filter((o) => prova(`${o.title} ${o.snippet || ""} ${o.link}`) || palavraEmComum(l.nome, o.title))
+    .map((o) => o.snippet || "")].join(" ");
+  const email = (textos.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [])
+    .find((e) => !/example|exemplo|sentry|wixpress|domain|seuemail|email\.com$/i.test(e)) || l.email || "";
+  const telefone = l.telefone || ficha?.phoneNumber || telKg || "";
   const raw: RawPlace = {
     ...l,
     site: siteFinal,
@@ -305,6 +315,7 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
   return {
     ...novo,
     whatsapp: novo.whatsapp || whatsappNumber(telefone),
+    email: email || undefined,
     // achou a ficha: o botão Maps passa a abrir exatamente ela
     maps_url: ficha?.cid ? `https://www.google.com/maps?cid=${ficha.cid}` : l.maps_url,
     verificacao,
@@ -326,7 +337,7 @@ export function contestarVerificacao(l: Lead): Lead {
 export function precisaConfirmar(l: Lead) {
   return !l.verificacao || (l.verificacao.status === "sem_site" && l.verificacao.confirmado === false)
     // verificado antes de completarmos telefone/endereço pela ficha do Maps
-    || ((!l.telefone || !l.endereco) && !l.verificacao.dadosConferidos && !l.verificacao.manual);
+    || ((!l.telefone || !l.endereco) && l.verificacao.dadosConferidos !== 2 && !l.verificacao.manual);
 }
 
 // ---- cache das verificações (não gastar crédito duas vezes) ----

@@ -29,6 +29,7 @@ export type Lead = {
   motivos: string;
   oferta: string;
   verificacao?: Verificacao; // preenchido depois de conferir no Google
+  email?: string; // achado na busca do Google ao verificar
   lat?: number;
   lon?: number;
   rede?: number; // quantas unidades com o mesmo nome apareceram (possível franquia)
