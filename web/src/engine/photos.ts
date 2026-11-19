@@ -9,7 +9,7 @@ const BLOQUEADOS = ["logo", "vector", "icon", "clipart", "shutterstock", "istock
 
 export async function buscarFotos(l: Lead, key: string): Promise<FotoAchada[]> {
   const nome = l.nome.replace(/^\[DEMO\]\s*/, "");
-  const bairro = (l.endereco.match(/\d+\s*-\s*([^,]+)/) || [])[1]?.trim() || l.endereco.split(",").slice(-2, -1)[0]?.trim() || "";
+  const bairro = (l.endereco.match(/-\s*([A-Za-zÀ-ú][^,\d]*?)\s*,/) || [])[1]?.trim() || l.endereco.split(",").slice(-2, -1)[0]?.trim() || "";
   const pedir = (body: object) => fetch("https://google.serper.dev/images", {
     method: "POST",
     headers: { "X-API-KEY": key, "Content-Type": "application/json" },

@@ -24,6 +24,7 @@ export type Verificacao = {
   confirmado?: boolean; // false = só olhamos a ficha do Maps; true = conferimos também na busca do Google
   versao?: number; // 3 = exige prova de local (cidade/telefone) nos resultados da busca
   manual?: boolean; // você corrigiu na mão
+  dadosConferidos?: boolean; // telefone/endereço completados pela ficha do Maps
 };
 
 const DELIVERY = ["ifood.com.br", "goomer", "anota.ai", "aiqfome", "rappi", "ubereats", "deliverymuch", "menudino", "cardapioweb", "olaclick", "neemo", "saipos", "instadelivery", "pedir.delivery", "cardapio.app", "bit.ly", "linktr.ee", "linkr.bio", "beacons.ai", "bio.link", "taplink", "lnk.bio"];
@@ -238,6 +239,23 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
     : null;
   let m: { p: Place; s: number } | undefined;
 
+  // A busca por categoria às vezes volta sem telefone/endereço; a busca pelo nome do lugar traz a ficha completa
+  if (ficha && (!l.telefone || !l.endereco)) {
+    const r0 = await serper("places", { q: l.nome + local, ...(ll ? { ll } : {}) }, key);
+    creditos++;
+    m = melhor(r0.places || []);
+    if (m && m.s >= 50) {
+      const p = m.p;
+      ficha = {
+        ...ficha,
+        phoneNumber: ficha.phoneNumber || p.phoneNumber,
+        address: ficha.address || p.address,
+        website: ficha.website || p.website,
+        cid: ficha.cid || p.cid,
+      };
+    }
+  }
+
   // 1) ficha do Google Maps pelo nome, perto do lugar
   if (!ficha) {
     const r1 = await serper("places", { q: l.nome + local, ...(ll ? { ll } : {}) }, key);
@@ -260,12 +278,13 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
     const nome = ficha?.title || l.nome;
     // bairro: no endereço do Google vem depois do número ("R. da Mooca, 1000 - Mooca, São Paulo - SP" → "Mooca")
     const end = ficha?.address || l.endereco;
-    const bairro = (end.match(/\d+\s*-\s*([^,]+)/) || [])[1]?.trim() || l.endereco.split(",").slice(-2, -1)[0]?.trim() || regiao.split(",")[0];
+    // "Rua X, 10 - Bairro," ou "Av. X - Bairro,": o bairro começa com letra (não pega o CEP "12227-801")
+    const bairro = (end.match(/-\s*([A-Za-zÀ-ú][^,\d]*?)\s*,/) || [])[1]?.trim() || l.endereco.split(",").slice(-2, -1)[0]?.trim() || regiao.split(",")[0];
     busca = await serper("search", { q: `${nome} ${bairro}`.trim(), num: 10 }, key);
     creditos++;
   }
 
-  const verificacao = { ...decidir(l, ficha, busca), creditos };
+  const verificacao = { ...decidir(l, ficha, busca), creditos, dadosConferidos: true };
 
   // recalcula com o que o Google mostrou (site, avaliações, telefone)
   let siteFinal = l.site;
@@ -276,6 +295,7 @@ export async function verificarLead(l: Lead, regiao: string, key: string): Promi
     ...l,
     site: siteFinal,
     telefone,
+    endereco: l.endereco || ficha?.address || "",
     avaliacoes: typeof ficha?.ratingCount === "number" ? ficha.ratingCount : l.avaliacoes,
     nota: typeof ficha?.rating === "number" ? ficha.rating : l.nota,
   };
@@ -302,7 +322,9 @@ export function contestarVerificacao(l: Lead): Lead {
 
 /** Ainda vale conferir no Google? (nunca verificado, ou só vimos a ficha do Maps sem site) */
 export function precisaConfirmar(l: Lead) {
-  return !l.verificacao || (l.verificacao.status === "sem_site" && l.verificacao.confirmado === false);
+  return !l.verificacao || (l.verificacao.status === "sem_site" && l.verificacao.confirmado === false)
+    // verificado antes de completarmos telefone/endereço pela ficha do Maps
+    || ((!l.telefone || !l.endereco) && !l.verificacao.dadosConferidos && !l.verificacao.manual);
 }
 
 // ---- cache das verificações (não gastar crédito duas vezes) ----
