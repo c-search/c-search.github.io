@@ -10,7 +10,7 @@ import { criarLinkCurto } from "@/engine/shortlink";
 import { CORES_SUGERIDAS } from "@/engine/niches";
 import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, mensagemConfirmacao, mensagemRobo, type Abordagem } from "@/engine/outreach";
 import { brl, proposta } from "@/engine/pricing";
-import { mensagemRetorno } from "@/engine/replies";
+import { CASOS_RETORNO, casoPadrao, mensagemRetorno, type CasoRetorno } from "@/engine/replies";
 import { VerifBadge } from "./Results";
 
 type Props = {
@@ -39,6 +39,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
   const [perguntar, setPerguntar] = useState(false);
   const [marcado, setMarcado] = useState(false);
   const [modo, setModo] = useState<"confirmar" | "proposta" | "robo" | "retorno">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta");
+  const [caso, setCaso] = useState<CasoRetorno>(() => casoPadrao(statusSalvo));
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
   const [cor, setCor] = useState<string | undefined>();
@@ -94,7 +95,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
     }
   }
   const alternarFoto = (u: string) => setFotos((f) => (f.includes(u) ? f.filter((x) => x !== u) : f.length >= 4 ? f : [...f, u]));
-  const automatica = modo === "retorno" ? mensagemRetorno({ ...l, status: statusSalvo }) : modo === "robo" ? mensagemRobo(l, meuNome, empresa) : modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa);
+  const automatica = modo === "retorno" ? mensagemRetorno({ ...l, status: statusSalvo }, caso) : modo === "robo" ? mensagemRobo(l, meuNome, empresa) : modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa);
   const msg = texto ?? automatica;
   // retorno não muda a etapa: continua onde estava
   const statusEnvio = modo === "proposta" ? "Contatado" : modo === "retorno" ? statusSalvo || "Aguardando confirmação" : "Aguardando confirmação";
@@ -237,6 +238,15 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
             <p className="mt-3 text-xs text-muted-foreground">
               Mensagem leve para <b className="text-foreground">tentar de novo</b> quando não responderam. Espere uns 2 ou 3 dias depois da primeira e mande só uma vez: se não responderem, deixe o lugar descansar.
               <button onClick={() => { setModo(jaConfirmando || !statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta"); setTexto(null); }} className="ml-1 underline hover:text-foreground cursor-pointer">voltar</button>
+              <span className="mt-2 block text-foreground">Qual mensagem ficou sem resposta?</span>
+              <span className="mt-1.5 flex flex-wrap gap-1.5">
+                {CASOS_RETORNO.map((c) => (
+                  <button key={c.id} onClick={() => { setCaso(c.id); setTexto(null); setEditando(false); }}
+                    className={cn("rounded-full px-3 py-1 ring-1 transition cursor-pointer", caso === c.id ? "bg-foreground text-background ring-foreground" : "ring-white/15 hover:ring-white/40")}>
+                    {c.nome}
+                  </button>
+                ))}
+              </span>
             </p>
           ) : (
             <div className="mt-3 flex flex-col items-start gap-1.5">

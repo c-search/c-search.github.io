@@ -12,12 +12,24 @@ function produto(l: Lead) {
   return "site";
 }
 
+/** Qual mensagem ficou sem resposta: a pergunta do número, a do robô (pedi o responsável) ou a proposta. */
+export type CasoRetorno = "numero" | "robo" | "proposta";
+export const CASOS_RETORNO: { id: CasoRetorno; nome: string }[] = [
+  { id: "numero", nome: "Pergunta do número" },
+  { id: "robo", nome: "Mensagem do robô" },
+  { id: "proposta", nome: "Proposta enviada" },
+];
+export const casoPadrao = (status?: string): CasoRetorno => (status === "Contatado" ? "proposta" : "numero");
+
 /** 2ª tentativa quando não responderam: curta, leve, sem cobrar resposta. */
-export function mensagemRetorno(l: Lead & { status?: string }) {
+export function mensagemRetorno(l: Lead & { status?: string }, caso: CasoRetorno = casoPadrao(l.status)) {
   const h = new Date().getHours();
   const saudacao = h < 12 ? "bom dia" : h < 18 ? "boa tarde" : "boa noite";
-  if (!l.status || l.status === "Novo" || l.status === "Aguardando confirmação")
+  if (caso === "numero")
     return `Oi, ${saudacao}! Não sei se minha mensagem chegou, então passando só para confirmar: esse número é da ${limpar(l.nome)}? 🙂`;
+  if (caso === "robo")
+    return `Oi, ${saudacao}! Passando só para retomar minha última mensagem: preparei um projeto especialmente para a ${limpar(l.nome)} ` +
+      `e gostaria de mostrar ao responsável. Posso enviar por aqui? Sem pressa 🙂`;
   return `Oi, ${saudacao}! Passando só para saber se vocês conseguiram ver o projeto que preparei para a ${limpar(l.nome)}. ` +
     `Sem pressa nenhuma, fico à disposição se quiserem conversar. 🙂`;
 }
