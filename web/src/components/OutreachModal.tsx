@@ -215,8 +215,8 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
             </div>
           )}
 
-          <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-white/[0.03] p-1 ring-1 ring-white/10">
-            {([["confirmar", "1. Confirmar o número", "Mensagem curta: \"É da …?\""], ["proposta", "2. Mandar a proposta", jaConfirmando ? "Já perguntou: agora a demo" : "Mensagem completa com a demo"]] as const).map(([k, t, d]) => (
+          <div className="mt-5 grid grid-cols-3 gap-1.5 rounded-2xl bg-white/[0.03] p-1 ring-1 ring-white/10">
+            {([["confirmar", "1. Confirmar o número", "Mensagem curta: \"É da …?\""], ["proposta", "2. Mandar a proposta", jaConfirmando ? "Já perguntou: agora a demo" : "Mensagem completa com a demo"], ["retorno", "3. Não responderam", "Tentar de novo, de leve"]] as const).map(([k, t, d]) => (
               <button key={k} onClick={() => { setModo(k); setTexto(null); setEditando(false); }}
                 className={cn("rounded-xl px-3 py-2 text-left transition cursor-pointer", modo === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
                 <div className="text-sm font-semibold">{t}</div>
@@ -237,7 +237,6 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
           ) : modo === "retorno" ? (
             <p className="mt-3 text-xs text-muted-foreground">
               Mensagem leve para <b className="text-foreground">tentar de novo</b> quando não responderam. Espere uns 2 ou 3 dias depois da primeira e mande só uma vez: se não responderem, deixe o lugar descansar.
-              <button onClick={() => { setModo(jaConfirmando || !statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta"); setTexto(null); }} className="ml-1 underline hover:text-foreground cursor-pointer">voltar</button>
               <span className="mt-2 block text-foreground">Qual mensagem ficou sem resposta?</span>
               <span className="mt-1.5 flex flex-wrap gap-1.5">
                 {CASOS_RETORNO.map((c) => (
@@ -250,12 +249,6 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
             </p>
           ) : (
             <div className="mt-3 flex flex-col items-start gap-1.5">
-              {statusSalvo && statusSalvo !== "Novo" && (
-                <button onClick={() => { setModo("retorno"); setTexto(null); setEditando(false); }}
-                  className="text-left text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
-                  ⏳ Não responderam? Mande uma mensagem de retorno, curta e leve
-                </button>
-              )}
               <button onClick={() => { setModo("robo"); setTexto(null); setEditando(false); }}
                 className="text-left text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
                 🤖 Respondeu um robô (atendimento automático)? Use a mensagem curta
