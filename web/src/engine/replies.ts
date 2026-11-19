@@ -13,13 +13,17 @@ function produto(l: Lead) {
 }
 
 /** Qual mensagem ficou sem resposta: a pergunta do número, a do robô (pedi o responsável) ou a proposta. */
-export type CasoRetorno = "numero" | "robo" | "proposta";
+export type CasoRetorno = "numero" | "robo" | "proposta" | "viram" | "preco" | "pensar";
 export const CASOS_RETORNO: { id: CasoRetorno; nome: string }[] = [
   { id: "numero", nome: "Pergunta do número" },
   { id: "robo", nome: "Mensagem do robô" },
   { id: "proposta", nome: "Proposta enviada" },
+  { id: "viram", nome: "Viram o projeto e pararam" },
+  { id: "preco", nome: "Sumiram depois do preço" },
+  { id: "pensar", nome: "Disseram que iam pensar" },
 ];
-export const casoPadrao = (status?: string): CasoRetorno => (status === "Contatado" ? "proposta" : "numero");
+export const casoPadrao = (status?: string): CasoRetorno =>
+  status === "Contatado" ? "proposta" : status === "Respondeu" ? "viram" : status === "Negociando" ? "preco" : "numero";
 
 /** 2ª tentativa quando não responderam: curta, leve, sem cobrar resposta. */
 export function mensagemRetorno(l: Lead & { status?: string }, caso: CasoRetorno = casoPadrao(l.status)) {
@@ -27,6 +31,15 @@ export function mensagemRetorno(l: Lead & { status?: string }, caso: CasoRetorno
   const saudacao = h < 12 ? "bom dia" : h < 18 ? "boa tarde" : "boa noite";
   if (caso === "numero")
     return `Oi, ${saudacao}! Não sei se minha mensagem chegou, então passando só para confirmar: esse número é da ${limpar(l.nome)}? 🙂`;
+  if (caso === "viram")
+    return `Oi, ${saudacao}! Tudo bem por aí? Passando só para saber o que acharam do projeto da ${limpar(l.nome)}. ` +
+      `Se quiserem mudar alguma coisa, como cores, fotos ou produtos, é só me falar que eu ajusto. 🙂`;
+  if (caso === "preco")
+    return `Oi, ${saudacao}! Tudo bem? Passando só para saber se ficou alguma dúvida sobre os valores. ` +
+      `Se preferirem, dá para começar com algo mais simples e ir completando aos poucos, do jeito que ficar melhor para vocês. 🙂`;
+  if (caso === "pensar")
+    return `Oi, ${saudacao}! Tudo bem? Sem querer apressar, só passando para saber se conseguiram pensar sobre o projeto da ${limpar(l.nome)}. ` +
+      `Qualquer dúvida, estou por aqui. 🙂`;
   if (caso === "robo")
     return `Oi, ${saudacao}! Passando só para retomar minha última mensagem: preparei um projeto especialmente para a ${limpar(l.nome)} ` +
       `e gostaria de mostrar ao responsável. Posso enviar por aqui? Sem pressa 🙂`;
