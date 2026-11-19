@@ -40,13 +40,12 @@ export function demoDaAbordagem(a: Abordagem, l: Lead): ExampleData["k"] {
 }
 
 /** "Meu nome é Ryan e eu tenho a C-Search…" (usa o nome e a empresa de Configurações). */
-function apresentacao(meuNome: string, empresa: string) {
-  const n = meuNome.trim();
+/** A empresa e todos os serviços (vai na proposta, não na confirmação). */
+function apresentacao(empresa: string) {
   const e = empresa.trim();
-  if (n && e) return `Meu nome é ${n} e eu tenho a ${e}, uma empresa que cria sites e cardápios digitais para negócios locais.`;
-  if (n) return `Meu nome é ${n} e eu crio sites e cardápios digitais para negócios locais.`;
-  if (e) return `Aqui é da ${e}, uma empresa que cria sites e cardápios digitais para negócios locais.`;
-  return "";
+  const quem = e ? `Eu tenho uma empresa chamada ${e}, que` : "Eu";
+  return `${quem} ajuda estabelecimentos que ainda não têm cardápio digital, site ou uma presença forte na internet. Trabalho com sites, cardápios digitais, portfólios e também com vídeos para divulgação nas redes sociais.`
+    .replace("Eu ajuda", "Eu ajudo");
 }
 
 function saudacao() {
@@ -55,20 +54,19 @@ function saudacao() {
 }
 
 /** 1ª mensagem curta só para confirmar que o número é mesmo do lugar. */
-export function mensagemConfirmacao(l: Lead, meuNome = "", empresa = "") {
-  const n = meuNome.trim();
-  const e = empresa.trim();
-  const quem = n && e ? ` Meu nome é ${n}, da ${e}.` : n ? ` Meu nome é ${n}.` : e ? ` Aqui é da ${e}.` : "";
-  return `Olá, ${saudacao()}!${quem} Esse é o WhatsApp da ${limpar(l.nome)}?`;
+// _empresa: a empresa só aparece na proposta, depois que confirmarem o número
+export function mensagemConfirmacao(l: Lead, meuNome = "", _empresa = "") {
+  const quem = meuNome.trim() ? ` Meu nome é ${meuNome.trim()}.` : "";
+  return `Olá, ${saudacao()}!${quem} Esse número é da ${limpar(l.nome)}?`;
 }
 
-/** Proposta com a demonstração. continuacao = a pessoa já respondeu a confirmação (você já se apresentou). */
+/** Proposta com a demonstração. continuacao = já confirmaram o número (você já disse seu nome). */
 export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: string, continuacao = false, empresa = "") {
-  const ap = apresentacao(meuNome, empresa);
+  const n = meuNome.trim();
   const abertura = continuacao
-    ? "Que bom, obrigado por responder!" + (ap ? " Como falei, " + ap.charAt(0).toLowerCase() + ap.slice(1) : "")
-    : `Olá, ${limpar(l.nome)}! Tudo bem?` + (ap ? PARAGRAFO + ap : "");
-  return abertura + PARAGRAFO + corpo(a, link);
+    ? "Que bom, obrigado por responder!"
+    : `Olá, ${limpar(l.nome)}! Tudo bem?${n ? ` Meu nome é ${n}.` : ""}`;
+  return abertura + PARAGRAFO + apresentacao(empresa) + PARAGRAFO + corpo(a, link);
 }
 
 function corpo(a: Abordagem, link: string) {
