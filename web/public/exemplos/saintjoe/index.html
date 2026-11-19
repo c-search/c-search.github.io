@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Saint Joe Burgerhouse · São José dos Campos</title>
+<meta name="description" content="Saint Joe Burgerhouse: blend de 180 g moído todo dia, pão artesanal e cheddar inglês. Av. Cassiano Ricardo, 319, São José dos Campos." />
+<meta property="og:title" content="Saint Joe Burgerhouse" />
+<meta property="og:description" content="Moído hoje. No ponto que você escolher. Av. Cassiano Ricardo, 319 · SJC." />
+<meta property="og:image" content="https://images.pexels.com/photos/38660122/pexels-photo-38660122.jpeg?auto=compress&cs=tinysrgb&w=1200" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="preload" as="image" href="https://images.pexels.com/photos/38660122/pexels-photo-38660122.jpeg?auto=compress&cs=tinysrgb&w=1600" />
+<script>document.documentElement.classList.add('js');</script>
+<style>
+html, body { background: #0D0A08; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0D0A08; --bg2: #15100C; --cream: #F4EDE4; --muted: rgba(244,237,228,.62); --faint: rgba(244,237,228,.55);
+  --ember: #FF5A1F; --ember2: #FF8A3D; --cheddar: #F2A33A; --line: rgba(244,237,228,.12);
+  --display: 'Anton', Impact, 'Arial Narrow', sans-serif;
+  --body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+body { color: var(--cream); font-family: var(--body); font-size: 16px; line-height: 1.5; overflow-x: clip; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+img, video { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--cheddar); outline-offset: 3px; border-radius: 6px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- botões ---------- */
+.btn { display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 24px; border-radius: 999px; font: 500 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; transition: background .25s, color .25s, transform .25s, border-color .25s; white-space: nowrap; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn-fire { background: var(--ember); color: #160A04; }
+.btn-fire:hover { background: var(--ember2); transform: translateY(-1px); }
+.btn-ghost { border: 1px solid rgba(244,237,228,.35); color: var(--cream); }
+.btn-ghost:hover { border-color: var(--cream); background: rgba(244,237,228,.08); }
+
+/* ---------- nav ---------- */
+.nav { position: fixed; z-index: 40; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: calc(env(safe-area-inset-top, 0px) + 22px) clamp(18px, 4vw, 56px) 0; pointer-events: none; }
+.nav > * { pointer-events: auto; }
+.brand { display: flex; flex-direction: column; line-height: 1; }
+.brand b { font: 400 26px/1 var(--display); letter-spacing: .04em; }
+.brand small { font: 500 9.5px/1 var(--mono); letter-spacing: .32em; color: var(--muted); margin-top: 5px; }
+.links { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 999px; background: rgba(20,14,10,.42); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px rgba(244,237,228,.1); }
+.links a { height: 36px; display: flex; align-items: center; padding: 0 18px; border-radius: 999px; font: 400 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(244,237,228,.85); transition: background .25s, color .25s; }
+.links a:hover { background: rgba(244,237,228,.12); color: #fff; }
+.nav .btn { height: 42px; padding: 0 20px; font-size: 12px; }
+.nav.solid::before { content: ''; position: absolute; inset: 0 0 -34px; background: linear-gradient(180deg, #0D0A08 0%, rgba(13,10,8,.92) 55%, rgba(13,10,8,0)); z-index: -1; pointer-events: none; }
+
+/* ---------- abertura (tampa da chapa) ---------- */
+.lid { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.lid i { position: absolute; top: 0; bottom: 0; width: 50.5%; background:
+  repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 2px, transparent 2px 34px),
+  linear-gradient(180deg, #17110D, #0B0807 60%, #120D0A); }
+.lid i:first-child { left: 0; box-shadow: inset -1px 0 0 rgba(255,138,61,.35); }
+.lid i:nth-child(2) { right: 0; box-shadow: inset 1px 0 0 rgba(255,138,61,.35); }
+.seal { position: absolute; left: 50%; top: 50%; width: 168px; height: 168px; margin: -84px 0 0 -84px; border-radius: 50%; display: grid; place-items: center; text-align: center; border: 1px solid rgba(244,237,228,.22); background: radial-gradient(circle at 50% 40%, #1E1611, #0E0A08); }
+.seal b { display: block; font: 400 40px/1 var(--display); letter-spacing: .03em; }
+.seal span { display: block; font: 500 9px/1 var(--mono); letter-spacing: .34em; color: var(--muted); margin-top: 8px; }
+.seal em { display: block; font: 500 9px/1 var(--mono); letter-spacing: .2em; color: var(--ember2); margin-top: 10px; font-style: normal; }
+.no-js .lid, .rm .lid { display: none; }
+
+/* ---------- hero ---------- */
+.hwrap { position: relative; height: 175vh; }
+.hero { position: sticky; top: 0; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; isolation: isolate; background: var(--bg); }
+.hero video.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.hero .shade { position: absolute; inset: 0; z-index: 1; background:
+  radial-gradient(120% 80% at 50% 45%, rgba(13,10,8,0) 30%, rgba(13,10,8,.7) 100%),
+  linear-gradient(180deg, rgba(13,10,8,.7) 0%, rgba(13,10,8,.25) 28%, rgba(13,10,8,.35) 55%, rgba(13,10,8,.92) 82%, #0D0A08 100%); }
+.word { position: absolute; z-index: 2; left: 0; right: 0; top: 23%; text-align: center; pointer-events: none; }
+.kicker { display: inline-flex; align-items: center; gap: 12px; font: 500 12px/1 var(--mono); letter-spacing: .3em; text-transform: uppercase; color: var(--cheddar); margin-bottom: 2.6vh; }
+.kicker::before, .kicker::after { content: ''; width: 34px; height: 1px; background: currentColor; opacity: .6; }
+.giant { font: 400 min(20.5vw, 41vh)/.84 var(--display); letter-spacing: .005em; text-transform: uppercase; color: var(--cream); white-space: nowrap; }
+.giant .l { display: inline-block; }
+.giant .sp { display: inline-block; width: .22em; }
+.giant .br { display: none; }
+.burger { position: absolute; z-index: 3; left: 50%; bottom: -3vh; width: min(84vw, 128vh); aspect-ratio: 3 / 2; transform: translateX(-50%); pointer-events: none;
+  -webkit-mask: radial-gradient(ellipse 31% 56% at 50% 95%, #000 93%, transparent 100%); mask: radial-gradient(ellipse 31% 56% at 50% 95%, #000 93%, transparent 100%); }
+.burger img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.08) contrast(1.05); }
+.hfoot { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding: 0 clamp(18px, 4vw, 56px) calc(env(safe-area-inset-bottom, 0px) + clamp(22px, 5vh, 48px)); }
+.lede { max-width: 330px; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.lede strong { color: var(--cream); font-weight: 500; }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.hero .btn-ghost { background: rgba(13,10,8,.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.where { text-align: right; font: 400 11.5px/1.7 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.where b { display: block; color: var(--cream); font-weight: 500; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ember); margin-right: 8px; box-shadow: 0 0 0 4px rgba(255,90,31,.18); vertical-align: 1px; }
+.glow { position: absolute; inset: 0; z-index: 8; pointer-events: none; display: none; }
+.js .hero .anim { opacity: 0; }
+.js .burger.anim { opacity: 1; transform: translate(-50%, 70%); }
+
+/* ---------- a casa ---------- */
+.casa { position: relative; z-index: 3; padding: 0 clamp(18px, 4vw, 56px); }
+.casa-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 110px); max-width: 1320px; margin: 0 auto; }
+.pin { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; gap: 30px; padding: 104px 0 40px; }
+.ph { position: relative; aspect-ratio: 16 / 9; width: min(100%, 460px); overflow: hidden; border-radius: 4px; background: #24160E; }
+.ph img { width: 100%; height: 100%; object-fit: cover; }
+.ph figcaption { position: absolute; left: 14px; bottom: 12px; font: 500 10px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(244,237,228,.8); }
+.big { font: 400 clamp(52px, min(6.6vw, 10.5vh), 100px)/.95 var(--display); text-transform: uppercase; letter-spacing: .01em; }
+.big .ln { display: block; white-space: nowrap; }
+.big .hot { color: var(--ember); }
+.col { padding: 22vh 0 18vh; }
+.overline { font: 700 13px/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--ember2); margin-bottom: 22px; }
+.intro p { font-size: clamp(16px, 1.25vw, 18.5px); line-height: 1.55; color: var(--muted); max-width: 470px; }
+.intro p + p { margin-top: 18px; }
+.intro p strong { color: var(--cream); font-weight: 500; }
+.nums { list-style: none; margin-top: 12vh; max-width: 440px; }
+.nums li { position: relative; padding: 34px 0 30px; }
+.nums li::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--line); transform-origin: left; transform: scaleX(var(--hl, 1)); }
+.nums .n { font: 400 clamp(64px, 6.4vw, 96px)/1 var(--display); color: var(--cheddar); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nums .n small { font-size: .42em; margin-left: .12em; color: var(--ember2); }
+.nums .c { margin-top: 8px; font-size: 15px; color: var(--muted); }
+
+/* ---------- cardápio (cena com rolagem lateral) ---------- */
+.track { position: relative; z-index: 4; }
+.scene { position: sticky; top: 0; height: 100vh; height: 100lvh; overflow: hidden; background: #0A0706; }
+.scene video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+.scene .veil { position: absolute; inset: 0; background: linear-gradient(180deg, #0D0A08 0%, rgba(13,10,8,.35) 22%, rgba(13,10,8,.45) 70%, #0D0A08 100%), radial-gradient(90% 70% at 50% 50%, transparent 40%, rgba(13,10,8,.8)); }
+.letters { position: absolute; left: 0; top: 50%; transform: translate(4vw, -58%); font: 400 min(36vw, 70vh)/.8 var(--display); text-transform: uppercase; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px rgba(244,237,228,.16); letter-spacing: .01em; pointer-events: none; will-change: transform; }
+.strip { position: absolute; left: 0; top: 50%; display: flex; align-items: center; gap: clamp(18px, 2vw, 28px); transform: translate(100vw, -50%); will-change: transform; }
+.lead { flex: none; width: clamp(280px, 30vw, 440px); padding-right: clamp(20px, 3vw, 60px); }
+.lead h2 { font: 400 clamp(46px, 4.9vw, 74px)/.95 var(--display); text-transform: uppercase; }
+.lead h2 span { display: block; white-space: nowrap; }
+.lead h2 .hot { color: var(--ember); }
+.lead p { margin-top: 20px; font-size: 15px; color: var(--muted); max-width: 330px; }
+.card { flex: none; width: clamp(258px, 23vw, 330px); background: rgba(21,16,12,.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.card figure { aspect-ratio: 4 / 3; overflow: hidden; background: #1c130d; }
+.card img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+.card:hover img { transform: scale(1.05); }
+.card .tx { padding: 20px 22px 22px; }
+.card .tag { font: 500 10px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--cheddar); }
+.card h3 { margin-top: 10px; font: 400 32px/1 var(--display); text-transform: uppercase; letter-spacing: .01em;
+  background: linear-gradient(90deg, var(--cream) calc(var(--s, 100%) - 30%), var(--ember) calc(var(--s, 100%) - 6%), transparent calc(var(--s, 100%) + 24%)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.card p { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--muted); min-height: 63px; }
+.card a { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; font: 500 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ember2); }
+.card a:hover { color: var(--cream); }
+.card a svg { width: 14px; height: 14px; transition: transform .25s; }
+.card a:hover svg { transform: translateX(3px); }
+.mlabel { position: absolute; left: clamp(18px, 4vw, 56px); bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); font: 400 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 14px; }
+.bar { width: 120px; height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
+.bar i { display: block; height: 100%; width: 100%; background: var(--ember); transform-origin: left; transform: scaleX(0); }
+
+/* ---------- visite ---------- */
+.visite { position: relative; z-index: 5; padding: clamp(96px, 16vh, 170px) clamp(18px, 4vw, 56px) 48px; background: radial-gradient(70% 60% at 50% 0%, rgba(255,90,31,.16), transparent 70%), var(--bg); }
+.vgrid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(36px, 6vw, 96px); align-items: end; }
+.fome { font: 400 clamp(76px, 12.5vw, 196px)/.86 var(--display); text-transform: uppercase; }
+.fome span { display: block; white-space: nowrap; }
+.fome .hot { color: var(--ember); }
+.info { display: grid; gap: 26px; }
+.info dl { display: grid; grid-template-columns: 110px 1fr; gap: 14px 18px; font-size: 15.5px; }
+.info dt { font: 500 11px/1.9 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.info dd a:hover { color: var(--ember2); }
+.map { margin-top: clamp(56px, 9vh, 96px); max-width: 1320px; margin-left: auto; margin-right: auto; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); height: clamp(260px, 38vh, 380px); background: #15100C; }
+.map iframe { width: 100%; height: 100%; border: 0; filter: invert(.92) hue-rotate(180deg) saturate(.6) brightness(.9); }
+footer { max-width: 1320px; margin: 48px auto 0; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 400 11.5px/1.6 var(--mono); letter-spacing: .06em; color: var(--faint); }
+footer a:hover { color: var(--cream); }
+
+/* ---------- celular e tablet ---------- */
+@media (max-width: 900px) {
+  .links { display: none; }
+  .casa-grid { grid-template-columns: 1fr; gap: 0; }
+  .pin { position: relative; height: auto; padding: 18vh 0 0; gap: 28px; }
+  .ph { width: 100%; }
+  .col { padding: 48px 0 96px; }
+  .nums { margin-top: 56px; }
+  .vgrid { grid-template-columns: 1fr; }
+}
+@media (max-aspect-ratio: 4/5) {
+  .giant { font-size: min(39vw, 24vh); line-height: .86; }
+  .giant .br { display: block; }
+  .giant .sp { display: none; }
+  .word { top: 15%; }
+  .burger { width: 150vw; bottom: 22vh; }
+  .hfoot { flex-direction: column; align-items: stretch; gap: 18px; padding-top: 70px; background: linear-gradient(180deg, rgba(13,10,8,0), rgba(13,10,8,.88) 38%, #0D0A08); }
+  .lede { max-width: none; font-size: 14.5px; }
+  .ctas .btn { flex: 1; justify-content: center; padding: 0 14px; }
+  .where { text-align: left; display: none; }
+  .card p { min-height: 0; }
+}
+@media (max-width: 560px) {
+  .nav { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+  .brand b { font-size: 22px; }
+  .nav .btn { height: 38px; padding: 0 14px; font-size: 11px; }
+  .card { width: 76vw; }
+  .lead { width: 82vw; }
+  .info dl { grid-template-columns: 1fr; gap: 2px; }
+  .info dd { margin-bottom: 12px; }
+}
+@media (max-height: 520px) and (min-aspect-ratio: 4/5) {
+  .hwrap { height: auto; } .hero { position: relative; }
+  .giant { font-size: min(18vw, 46vh); } .word { top: 20%; }
+  .card figure { aspect-ratio: 16 / 9; } .card p { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .hero .anim { opacity: 1 !important; }
+  .js .burger.anim { transform: translateX(-50%) !important; }
+  .card img, .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="lid" aria-hidden="true">
+  <i></i><i></i>
+  <div class="seal"><div><b>ST. JOE</b><span>BURGERHOUSE</span><em>SJC · 2015</em></div></div>
+</div>
+
+<header class="nav anim" id="nav">
+  <a class="brand" href="#topo" aria-label="Saint Joe Burgerhouse, início"><b>ST. JOE</b><small>BURGERHOUSE</small></a>
+  <nav class="links" aria-label="Seções">
+    <a href="#cardapio">Cardápio</a>
+    <a href="#casa">A casa</a>
+    <a href="#visite">Visite</a>
+  </nav>
+  <a class="btn btn-fire wa" href="#" target="_blank" rel="noopener">Pedir agora</a>
+</header>
+
+<main id="topo">
+  <div class="hwrap" id="hwrap">
+    <section class="hero" id="hero" aria-label="Saint Joe Burgerhouse">
+      <video class="bg" id="heroVid" muted loop playsinline preload="auto" aria-hidden="true"></video>
+      <div class="shade"></div>
+
+      <div class="word" id="word">
+        <p class="kicker anim" id="kicker">Burgerhouse · desde 2015</p>
+        <h1 class="giant" id="giant" aria-label="Saint Joe Burgerhouse"></h1>
+      </div>
+
+      <div class="burger anim" id="burger">
+        <img src="https://images.pexels.com/photos/38660122/pexels-photo-38660122.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Cheeseburger com cheddar derretido e pão brilhante" fetchpriority="high" />
+      </div>
+
+      <div class="hfoot" id="hfoot">
+        <div class="anim" id="ledeBox">
+          <p class="lede"><strong>Blend de 180 g moído todo dia.</strong> Pão artesanal, cheddar inglês de verdade e o ponto da carne do jeito que você pedir.</p>
+          <div class="ctas">
+            <a class="btn btn-fire wa" href="#" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20.5l1.3-4A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c.3 2.4 2.1 4.3 4.5 4.8l1-1.2 2 .8-.3 1.6c-3.8.6-8-3.5-7.4-7.4l1.6-.3.8 2z"/></svg>
+              Pedir no WhatsApp
+            </a>
+            <a class="btn btn-ghost" href="#cardapio">Ver cardápio</a>
+          </div>
+        </div>
+        <p class="where anim" id="where"><b><span class="dot"></span>Av. Cassiano Ricardo, 319</b>Jardim Aquarius · São José dos Campos</p>
+      </div>
+
+      <div class="glow" id="glow"></div>
+    </section>
+  </div>
+
+  <section class="casa" id="casa" aria-labelledby="casaTitulo">
+    <div class="casa-grid">
+      <div class="pin">
+        <figure class="ph rv-photo">
+          <img src="https://images.pexels.com/photos/19071470/pexels-photo-19071470.jpeg?auto=compress&cs=tinysrgb&w=1100" alt="Luminárias sobre a chapa com hambúrgueres prontos" loading="lazy" />
+          <figcaption>Chapa quente desde 2015</figcaption>
+        </figure>
+        <h2 class="big" id="casaTitulo">
+          <span class="ln gl">Moído hoje.</span>
+          <span class="ln gl">No ponto</span>
+          <span class="ln gl">que você</span>
+          <span class="ln gl hot">escolher.</span>
+        </h2>
+      </div>
+      <div class="col">
+        <div class="intro rv-up">
+          <p class="overline">A casa</p>
+          <p>Dois amigos, uma chapa quente e uma regra simples: <strong>nada de atalho.</strong> Desde 2015 na Cassiano Ricardo, servindo o hambúrguer que a gente gostaria de comer.</p>
+          <p>A carne é moída no dia, a batata é cortada no dia e o milkshake leva sorvete feito na casa. Sem pressa na cozinha, sem segredo no prato.</p>
+        </div>
+        <ul class="nums">
+          <li><div class="n" data-to="180" data-suf="g">180<small>g</small></div><div class="c">de blend em cada burger, moído todo dia</div></li>
+          <li><div class="n" data-txt="2015">2015</div><div class="c">o ano em que a chapa ligou na Cassiano Ricardo</div></li>
+          <li><div class="n" data-to="1500" data-suf="+">1 500<small>+</small></div><div class="c">avaliações de clientes na internet</div></li>
+          <li><div class="n" data-txt="NA HORA">NA HORA</div><div class="c">tudo montado quando você pede, nada esperando na estufa</div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="track" id="cardapio" aria-label="Cardápio">
+    <div class="scene" id="scene">
+      <video id="menuVid" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="veil"></div>
+      <div class="letters" id="letters" aria-hidden="true">Cardápio</div>
+      <div class="strip" id="strip">
+        <div class="lead">
+          <p class="overline">Cardápio</p>
+          <h2><span>O clássico,</span><span>bem feito.</span><span class="hot">Sem atalho.</span></h2>
+          <p>Todos os burgers vêm com o blend de 180 g no ponto que você escolher. Arrasta pro lado e escolhe o seu.</p>
+        </div>
+        <!-- cards gerados pelo script a partir de MENU -->
+      </div>
+      <div class="mlabel" aria-hidden="true"><span id="mcount">01 / 07</span><span class="bar"><i id="mbar"></i></span><span>role para ver</span></div>
+    </div>
+  </section>
+
+  <section class="visite" id="visite" aria-labelledby="visiteTitulo">
+    <div class="vgrid">
+      <h2 class="fome" id="visiteTitulo"><span>Vem com</span><span class="hot">fome.</span></h2>
+      <div class="info">
+        <dl>
+          <dt>Endereço</dt><dd>Av. Cassiano Ricardo, 319<br />Jardim Aquarius · São José dos Campos – SP</dd>
+          <dt>Telefone</dt><dd><a href="tel:+551233222512">(12) 3322-2512</a></dd>
+          <dt>Serviço</dt><dd>Almoço e jantar · mesa e retirada</dd>
+        </dl>
+        <div class="ctas">
+          <a class="btn btn-fire wa" href="#" target="_blank" rel="noopener">Pedir no WhatsApp</a>
+          <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Saint+Joe+Burgerhouse+Av.+Cassiano+Ricardo+319+S%C3%A3o+Jos%C3%A9+dos+Campos" target="_blank" rel="noopener">Como chegar</a>
+        </div>
+      </div>
+    </div>
+    <div class="map">
+      <iframe title="Mapa: Saint Joe Burgerhouse" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Saint%20Joe%20Burgerhouse%2C%20Av.%20Cassiano%20Ricardo%2C%20319%2C%20S%C3%A3o%20Jos%C3%A9%20dos%20Campos&z=16&output=embed"></iframe>
+    </div>
+    <footer>
+      <span>© Saint Joe Burgerhouse · Av. Cassiano Ricardo, 319 · São José dos Campos – SP</span>
+      <span>Site criado pelo <a href="https://c-search.github.io/" target="_blank" rel="noopener">Syde Studio</a></span>
+    </footer>
+  </section>
+</main>
+
+<script>
+(() => {
+  const WHATS = '5512976160016';
+  const PEX = (id, w) => `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
+  const MENU = [
+    { tag: 'O de sempre', nome: 'Cheeseburger', desc: 'Blend 180 g, cheddar inglês derretido e pão artesanal selado na manteiga.', img: 3727243 },
+    { tag: 'Defumado', nome: 'Bacon BBQ', desc: 'Bacon crocante, barbecue defumado, cheddar e cebola na chapa.', img: 18713424 },
+    { tag: 'Pra quem gosta de queijo', nome: 'Blue', desc: 'Queijo azul, bacon, rúcula e cebola caramelizada.', img: 22119687 },
+    { tag: 'Fresco', nome: 'Burger Salad', desc: 'Alface, tomate, cebola roxa e maionese da casa.', img: 30500752 },
+    { tag: 'Sem carne', nome: 'Veggie', desc: 'Burger vegetal grelhado, queijo, folhas e molho da casa.', img: 37881956 },
+    { tag: 'Acompanha', nome: 'Fritas da casa', desc: 'Batata cortada no dia, alecrim e sal grosso.', img: 31806278 },
+    { tag: 'Sobremesa', nome: 'Milkshake', desc: 'Batido com sorvete feito aqui, do jeito clássico.', img: 3727250 },
+  ];
+  const wa = (txt) => `https://wa.me/${WHATS}?text=${encodeURIComponent(txt)}`;
+  document.querySelectorAll('.wa').forEach((a) => (a.href = wa('Olá! Vim pelo site e quero fazer um pedido.')));
+
+  const strip = document.getElementById('strip');
+  const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  MENU.forEach((m) => {
+    const el = document.createElement('article');
+    el.className = 'card';
+    el.innerHTML = `<figure><img src="${PEX(m.img, 700)}" alt="${m.nome}" loading="lazy" /></figure>
+      <div class="tx"><div class="tag">${m.tag}</div><h3>${m.nome}</h3><p>${m.desc}</p>
+      <a href="${wa('Olá! Quero pedir um ' + m.nome + '.')}" target="_blank" rel="noopener">Pedir este ${arrow}</a></div>`;
+    strip.appendChild(el);
+  });
+  const cards = [...strip.querySelectorAll('.card')];
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) document.documentElement.classList.add('rm');
+  const $ = (id) => document.getElementById(id);
+  const hero = $('hero'), hwrap = $('hwrap'), glow = $('glow'), word = $('word'), giant = $('giant');
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+
+  // giant word, letter by letter ("SAINT JOE"; breaks into two lines on tall phones)
+  'SAINT JOE'.split('').forEach((ch) => {
+    if (ch === ' ') { giant.insertAdjacentHTML('beforeend', '<span class="sp"></span><span class="br"></span>'); return; }
+    const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); giant.appendChild(s);
+  });
+  const letters = [...giant.querySelectorAll('.l')];
+
+  // videos: vertical on tall screens, light 720p on smaller ones
+  const tall = innerHeight > innerWidth * 1.15;
+  const heroVid = $('heroVid');
+  heroVid.src = tall ? 'https://videos.pexels.com/video-files/31176159/13318023_720_1280_30fps.mp4'
+    : innerWidth > 1500 ? 'https://videos.pexels.com/video-files/39073904/16626456_1920_1080_60fps.mp4'
+    : 'https://videos.pexels.com/video-files/39073904/16626455_1280_720_60fps.mp4';
+  const menuVid = $('menuVid');
+  menuVid.src = innerWidth > 900 ? 'https://videos.pexels.com/video-files/34556299/14641960_1280_720_24fps.mp4' : 'https://videos.pexels.com/video-files/34556299/14641958_960_540_24fps.mp4';
+  if (!reduce) heroVid.play().catch(() => {});
+  new IntersectionObserver(([e]) => { if (reduce) return; e.isIntersecting ? menuVid.play().catch(() => {}) : menuVid.pause(); }).observe($('scene'));
+
+  // ---------- opening ----------
+  const done = () => document.querySelectorAll('.hero .anim, #nav').forEach((el) => { el.classList.remove('anim'); el.style.opacity = ''; });
+  const A = (el, kf, o) => el.animate(kf, { fill: 'both', ...o });
+  function intro() {
+    const lid = document.querySelector('.lid');
+    if (reduce) { lid.remove(); done(); return; }
+    const [L, R] = lid.querySelectorAll('i');
+    A(lid.querySelector('.seal'), [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.92)' }], { duration: 380, delay: 380, easing: 'cubic-bezier(.4,0,.6,1)' });
+    A(L, [{ transform: 'translateX(0)' }, { transform: 'translateX(-101%)' }], { duration: 1150, delay: 620, easing: 'cubic-bezier(.75,0,.2,1)' });
+    A(R, [{ transform: 'translateX(0)' }, { transform: 'translateX(101%)' }], { duration: 1150, delay: 660, easing: 'cubic-bezier(.75,0,.2,1)' }).finished.then(() => lid.remove());
+    const t0 = 1250;
+    A($('kicker'), [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: t0, easing: 'cubic-bezier(.2,.65,.3,1)' });
+    letters.forEach((l, i) => A(l, [{ opacity: 0, transform: 'translateY(.32em)', filter: 'blur(8px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 760, delay: t0 + 80 + i * 62, easing: 'cubic-bezier(.2,.65,.3,1)' }));
+    A(word, [{ transform: 'translateY(4%)' }, { transform: 'none' }], { duration: 2000, delay: t0 + 500, easing: 'cubic-bezier(.3,0,.4,1)' });
+    const b = $('burger'); b.classList.remove('anim');
+    A(b, [{ transform: 'translate(-50%, 70%)', offset: 0 }, { transform: 'translate(-50%, -2.5%)', offset: .7 }, { transform: 'translate(-50%, 0)', offset: 1 }], { duration: 2300, delay: t0 + 650, easing: 'cubic-bezier(.2,.5,.2,1)' });
+    A($('nav'), [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: t0 + 400, easing: 'ease-out' });
+    [$('ledeBox'), $('where')].forEach((el, i) => A(el, [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: t0 + 1500 + i * 120, easing: 'cubic-bezier(.2,.7,.2,1)' }));
+    setTimeout(() => { document.querySelectorAll('.hero .anim, #nav').forEach((el) => el.classList.remove('anim')); }, t0 + 50);
+  }
+  let started = false;
+  const go = () => { if (started) return; started = true; intro(); };
+  const img = $('burger').querySelector('img');
+  (img.complete ? Promise.resolve() : new Promise((r) => { img.onload = r; img.onerror = r; })).then(() => setTimeout(go, 120));
+  setTimeout(go, 2500); // failsafe
+
+  // ---------- glitch reveal (ember ghost) ----------
+  const glitch = (el, delay = 0) => el.animate([
+    { opacity: 0, clipPath: 'inset(0 100% 0 0)', transform: 'translateX(-.05em)', textShadow: '-.12em 0 0 rgba(255,90,31,.85), .07em 0 0 rgba(242,163,58,.35)' },
+    { opacity: 1, clipPath: 'inset(0 38% 0 0)', transform: 'translateX(.035em)', textShadow: '.09em 0 0 rgba(255,90,31,.7), -.05em 0 0 rgba(242,163,58,.35)', offset: .3 },
+    { opacity: .8, clipPath: 'inset(0 0 0 0)', transform: 'translateX(-.018em)', textShadow: '-.045em 0 0 rgba(255,90,31,.55), .025em 0 0 rgba(242,163,58,.25)', offset: .55 },
+    { opacity: 1, clipPath: 'inset(0 0 0 0)', transform: 'translateX(.008em)', textShadow: '.015em 0 0 rgba(255,90,31,.35)', offset: .78 },
+    { opacity: 1, clipPath: 'inset(0 0 0 0)', transform: 'none', textShadow: 'none' },
+  ], { duration: 900, delay, easing: 'steps(14, end)', fill: 'backwards' });
+
+  const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const count = (el) => {
+    const to = +el.dataset.to, suf = el.dataset.suf, t0 = performance.now();
+    const tick = (t) => { const k = clamp((t - t0) / 1600), e = 1 - Math.pow(1 - k, 3);
+      el.innerHTML = `${fmt(to * e)}<small>${suf}</small>`; if (k < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  };
+  if (!reduce) {
+    document.querySelectorAll('.nums .n[data-to]').forEach((el) => (el.innerHTML = `0<small>${el.dataset.suf}</small>`));
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return; io.unobserve(e.target); const el = e.target;
+      if (el.classList.contains('big')) el.querySelectorAll('.gl').forEach((ln, i) => glitch(ln, i * 130));
+      else if (el.classList.contains('rv-photo')) {
+        el.animate([{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 1100, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'backwards' });
+        el.querySelector('img').animate([{ transform: 'scale(1.14)' }, { transform: 'scale(1)' }], { duration: 1600, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      } else if (el.classList.contains('rv-up')) el.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 150, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards' });
+      else if (el.tagName === 'LI') {
+        el.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 700, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards' });
+        el.animate([{ '--hl': 0 }, { '--hl': 1 }], { duration: 900, delay: 60, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'backwards' });
+        const n = el.querySelector('.n'); glitch(n, 60); if (n.dataset.to) setTimeout(() => count(n), 120);
+      }
+    }), { rootMargin: '0px 0px -15% 0px' });
+    document.querySelectorAll('.big, .rv-photo, .rv-up, .nums li').forEach((el) => io.observe(el));
+    try { CSS.registerProperty({ name: '--hl', syntax: '<number>', inherits: false, initialValue: '1' }); } catch (e) {}
+  }
+
+  // ---------- scroll: ember glow + side menu ----------
+  const track = $('cardapio'), scene = $('scene'), lettersEl = $('letters'), bar = $('mbar'), mcount = $('mcount'), nav = $('nav');
+  let vw = 0, vh = 0, trackTop = 0, stripW = 0, lettersW = 0, hwrapH = 0;
+  function measure() {
+    vw = document.documentElement.clientWidth; vh = window.innerHeight;
+    stripW = strip.scrollWidth; lettersW = lettersEl.scrollWidth;
+    const travel = stripW + vw * 0.12;
+    track.style.height = `${vh + travel * 1.05}px`;
+    trackTop = track.getBoundingClientRect().top + scrollY; hwrapH = hwrap.offsetHeight;
+  }
+  function frame() {
+    const y = scrollY;
+    // ember horizon rising over the hero
+    const sticky = hwrapH > hero.offsetHeight + 10;
+    if (sticky) {
+      const p = clamp(y / (hwrapH - hero.offsetHeight));
+      const edge = 1.08 - 1.62 * p; // in screen heights from the top
+      if (p <= 0.001) glow.style.display = 'none';
+      else {
+        glow.style.display = 'block';
+        const Rx = Math.max(.78 * vw, .95 * vh), Ry = .7 * vh, cy = edge * vh - Ry, k = (n) => `${(n * Rx).toFixed(1)}px`;
+        glow.style.background = `radial-gradient(${Rx}px ${Ry}px at 50% ${cy}px, rgba(13,10,8,0) 0, rgba(13,10,8,0) ${k(.985)}, rgba(255,150,80,.55) ${k(1)}, #FFB067 ${k(1.05)}, #FF8A3D ${k(1.11)}, #FF5A1F ${k(1.19)}, #B8340F ${k(1.29)}, #4A1A0B ${k(1.42)}, #1A0F0A ${k(1.55)}, #0D0A08 ${k(1.68)})`;
+      }
+      const kk = clamp((0.98 - edge) / 0.5);
+      const j = kk > 0 && kk < 1 ? (((Math.floor(kk * 16) * 9301 + 49297) % 233280) / 233280 - .5) : 0;
+      word.style.transform = kk ? `translateX(${(j * 0.05).toFixed(3)}em) translateY(${(-6 * kk).toFixed(2)}vh)` : '';
+      $('kicker').style.opacity = kk ? String(1 - clamp(kk * 2.2)) : '';
+      giant.style.clipPath = kk ? `inset(0 ${(kk * kk * 100).toFixed(1)}% 0 0)` : '';
+      giant.style.textShadow = kk ? `${(-j * 0.2).toFixed(3)}em 0 0 rgba(255,90,31,${(.7 * kk + .2).toFixed(2)})` : '';
+      $('hfoot').style.opacity = 1 - clamp((0.95 - edge) / 0.35);
+      $('burger').style.opacity = 1 - clamp((0.75 - edge) / 0.5);
+    }
+    nav.classList.toggle('solid', y > vh * 0.9);
+    // menu: the strip slides sideways while the scene is pinned
+    const r = clamp((y - trackTop) / (track.offsetHeight - vh));
+    const xs = vw * 0.94, xe = vw - stripW - Math.max(18, vw * 0.04);
+    strip.style.transform = `translate(${(xs + (xe - xs) * r).toFixed(1)}px, -50%)`;
+    lettersEl.style.transform = `translate(${(vw * 0.04 - r * (lettersW - vw * 0.7)).toFixed(1)}px, -58%)`;
+    bar.style.transform = `scaleX(${r.toFixed(3)})`;
+    let ativo = 0;
+    cards.forEach((c, i) => {
+      const left = c.getBoundingClientRect().left;
+      const s = clamp((0.98 - left / vw) / 0.3, -0.4, 1.6) * 100;
+      c.style.setProperty('--s', `${s.toFixed(1)}%`);
+      if (left < vw * 0.6) ativo = i;
+    });
+    mcount.textContent = `${String(ativo + 1).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
+  }
+  let raf = 0;
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; frame(); }); };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => { measure(); frame(); });
+  addEventListener('load', () => { measure(); frame(); });
+  document.fonts && document.fonts.ready.then(() => { measure(); frame(); });
+  measure(); frame();
+})();
+</script>
+</body>
+</html>
