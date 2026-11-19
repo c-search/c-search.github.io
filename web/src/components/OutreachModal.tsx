@@ -10,6 +10,7 @@ import { criarLinkCurto } from "@/engine/shortlink";
 import { CORES_SUGERIDAS } from "@/engine/niches";
 import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, mensagemConfirmacao, mensagemRobo, type Abordagem } from "@/engine/outreach";
 import { brl, proposta } from "@/engine/pricing";
+import { mensagemRetorno } from "@/engine/replies";
 import { VerifBadge } from "./Results";
 
 type Props = {
@@ -37,7 +38,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
   // só marca como enviado quando você confirma (abrir o WhatsApp ou copiar não quer dizer que mandou)
   const [perguntar, setPerguntar] = useState(false);
   const [marcado, setMarcado] = useState(false);
-  const [modo, setModo] = useState<"confirmar" | "proposta" | "robo">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta");
+  const [modo, setModo] = useState<"confirmar" | "proposta" | "robo" | "retorno">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta");
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
   const [cor, setCor] = useState<string | undefined>();
@@ -93,8 +94,10 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
     }
   }
   const alternarFoto = (u: string) => setFotos((f) => (f.includes(u) ? f.filter((x) => x !== u) : f.length >= 4 ? f : [...f, u]));
-  const automatica = modo === "robo" ? mensagemRobo(l, meuNome, empresa) : modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa);
+  const automatica = modo === "retorno" ? mensagemRetorno({ ...l, status: statusSalvo }) : modo === "robo" ? mensagemRobo(l, meuNome, empresa) : modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa);
   const msg = texto ?? automatica;
+  // retorno não muda a etapa: continua onde estava
+  const statusEnvio = modo === "proposta" ? "Contatado" : modo === "retorno" ? statusSalvo || "Aguardando confirmação" : "Aguardando confirmação";
   const p = proposta(l);
   const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
@@ -230,11 +233,24 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
               Mensagem curta para quando quem respondeu foi um <b className="text-foreground">atendimento automático</b>. Quando uma pessoa responder, volte em <b className="text-foreground">2. Mandar a proposta</b>.
               <button onClick={() => { setModo("confirmar"); setTexto(null); }} className="ml-1 underline hover:text-foreground cursor-pointer">voltar</button>
             </p>
+          ) : modo === "retorno" ? (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Mensagem leve para <b className="text-foreground">tentar de novo</b> quando não responderam. Espere uns 2 ou 3 dias depois da primeira e mande só uma vez: se não responderem, deixe o lugar descansar.
+              <button onClick={() => { setModo(jaConfirmando || !statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta"); setTexto(null); }} className="ml-1 underline hover:text-foreground cursor-pointer">voltar</button>
+            </p>
           ) : (
-            <button onClick={() => { setModo("robo"); setTexto(null); setEditando(false); }}
-              className="mt-3 text-left text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
-              🤖 Respondeu um robô (atendimento automático)? Use a mensagem curta
-            </button>
+            <div className="mt-3 flex flex-col items-start gap-1.5">
+              {statusSalvo && statusSalvo !== "Novo" && (
+                <button onClick={() => { setModo("retorno"); setTexto(null); setEditando(false); }}
+                  className="text-left text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
+                  ⏳ Não responderam? Mande uma mensagem de retorno, curta e leve
+                </button>
+              )}
+              <button onClick={() => { setModo("robo"); setTexto(null); setEditando(false); }}
+                className="text-left text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline cursor-pointer">
+                🤖 Respondeu um robô (atendimento automático)? Use a mensagem curta
+              </button>
+            </div>
           )}
 
           {modo === "proposta" && (<>
@@ -341,7 +357,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
               <textarea value={msgFinal} onChange={(e) => setTexto(e.target.value)} rows={9}
                 className="w-full rounded-lg bg-black/40 p-3 text-sm outline-none ring-1 ring-white/10 focus:ring-white/40" />
             ) : (
-              <p className="text-sm text-muted-foreground">A mensagem está na prévia ao lado, já com o link da demonstração.</p>
+              <p className="text-sm text-muted-foreground">A mensagem está na prévia ao lado{modo === "proposta" ? ", já com o link da demonstração" : ""}.</p>
             )}
             <div className="mt-2 flex gap-3 text-xs">
               <button onClick={() => setEditando(!editando)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground cursor-pointer">
@@ -404,13 +420,13 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
             )}
             {marcado ? (
               <div className="rounded-xl bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-200 ring-1 ring-emerald-400/20">
-                ✓ Marcado como "{modo === "proposta" ? "Contatado" : "Aguardando confirmação"}" em Meus leads
+                ✓ Marcado como "{statusEnvio}" em Meus leads
               </div>
             ) : perguntar ? (
               <div className="rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/15">
                 <div className="text-sm font-medium">Você mandou a mensagem?</div>
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  <button onClick={() => { onSent(l, modo === "proposta" ? "Contatado" : "Aguardando confirmação"); setMarcado(true); setPerguntar(false); }}
+                  <button onClick={() => { onSent(l, statusEnvio); setMarcado(true); setPerguntar(false); }}
                     className="h-10 rounded-lg bg-foreground text-sm font-semibold text-background cursor-pointer">Sim, mandei</button>
                   <button onClick={() => setPerguntar(false)} className="h-10 rounded-lg text-sm ring-1 ring-white/15 hover:bg-white/5 cursor-pointer">Ainda não</button>
                 </div>

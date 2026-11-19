@@ -12,10 +12,14 @@ function produto(l: Lead) {
   return "site";
 }
 
+/** 2ª tentativa quando não responderam: curta, leve, sem cobrar resposta. */
 export function mensagemRetorno(l: Lead & { status?: string }) {
-  if (l.status === "Aguardando confirmação") return `Oi, tudo bem? Só confirmando: esse é o WhatsApp da ${limpar(l.nome)}?`;
-  return `Oi, ${limpar(l.nome)}, tudo bem? Passando só para saber se você viu minha mensagem. ` +
-    `Se quiser, te mando um exemplo de como ficaria o ${produto(l)} de vocês, sem compromisso.`;
+  const h = new Date().getHours();
+  const saudacao = h < 12 ? "bom dia" : h < 18 ? "boa tarde" : "boa noite";
+  if (!l.status || l.status === "Novo" || l.status === "Aguardando confirmação")
+    return `Oi, ${saudacao}! Não sei se minha mensagem chegou, então passando só para confirmar: esse número é da ${limpar(l.nome)}? 🙂`;
+  return `Oi, ${saudacao}! Passando só para saber se vocês conseguiram ver o projeto que preparei para a ${limpar(l.nome)}. ` +
+    `Sem pressa nenhuma, fico à disposição se quiserem conversar. 🙂`;
 }
 
 export function mensagemExemplo(l: Lead, link: string) {
