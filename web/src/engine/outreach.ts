@@ -60,6 +60,14 @@ export function mensagemConfirmacao(l: Lead, meuNome = "", _empresa = "") {
   return `Olá, ${saudacao()}!${quem} Esse número é da ${limpar(l.nome)}?`;
 }
 
+/** Quando quem responde é um robô/atendimento automático: curta, pede para falar com o responsável. */
+export function mensagemRobo(l: Lead, meuNome = "", empresa = "") {
+  const saude = /dent|odonto|clín|clin|médic|medic|fisio|psic|estét|estet|saúde|saude|consult/i.test(`${l.categoria} ${l.nome}`);
+  const quem = [meuNome.trim() && `meu nome é ${meuNome.trim()}`, empresa.trim() && `sou da empresa ${empresa.trim()}`].filter(Boolean).join(" e ");
+  return `Olá! Na verdade não sou ${saude ? "paciente" : "cliente"} 🙂${quem ? " " + quem.charAt(0).toUpperCase() + quem.slice(1) + "." : ""} ` +
+    `Preparei um projeto pensado especialmente para a ${limpar(l.nome)} e gostaria de apresentar ao responsável. Posso enviar por aqui?`;
+}
+
 /** Proposta com a demonstração. continuacao = já confirmaram o número (você já disse seu nome). */
 export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: string, continuacao = false, empresa = "") {
   const n = meuNome.trim();
