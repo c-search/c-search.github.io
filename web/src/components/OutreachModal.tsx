@@ -207,7 +207,7 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
 
           {l.verificacao?.status === "site" && (
             <div className="mt-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/20">
-              Esse lugar já tem site. Talvez valha oferecer <b>consultoria</b> (vídeos, perfil no Google) em vez de um site novo.
+              Esse lugar já tem site: a abordagem <b>Renovar site</b> já vem marcada, oferecendo uma versão mais completa sem diminuir o que eles têm.
             </div>
           )}
 

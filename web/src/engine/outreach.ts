@@ -3,12 +3,13 @@ import type { Lead } from "@/lib";
 import type { ExampleData } from "./example";
 import { proposta } from "./pricing";
 
-export type Abordagem = "site" | "cardapio" | "portfolio" | "consultoria";
+export type Abordagem = "site" | "cardapio" | "portfolio" | "renovar" | "consultoria";
 
 export const ABORDAGENS: { id: Abordagem; nome: string; desc: string }[] = [
   { id: "site", nome: "Site", desc: "Site profissional ou landing page" },
   { id: "cardapio", nome: "Cardápio digital", desc: "Cardápio com pedido pelo WhatsApp" },
   { id: "portfolio", nome: "Portfólio", desc: "Site com os trabalhos realizados" },
+  { id: "renovar", nome: "Renovar site", desc: "Já tem site ou página de links simples" },
   { id: "consultoria", nome: "Consultoria", desc: "Presença digital completa" },
 ];
 
@@ -16,6 +17,8 @@ const limpar = (n: string) => n.replace(/^\[DEMO\]\s*/, "");
 const PARAGRAFO = "\n\n";
 
 export function abordagemPadrao(l: Lead): Abordagem {
+  // já tem site (ou o mapa diz que tem): oferecer uma versão melhor, não um site "do zero"
+  if (l.verificacao?.status === "site" || l.tipo_site === "Site próprio") return "renovar";
   const p = proposta(l).pacote;
   if (p === "Presença Digital") return "cardapio";
   if (p === "Vitrine") return "portfolio";
@@ -23,11 +26,17 @@ export function abordagemPadrao(l: Lead): Abordagem {
   return "site";
 }
 
+/** Tipo de demo pelo ramo do negócio, como se ele não tivesse site. */
+function demoDoRamo(l: Lead): ExampleData["k"] {
+  const p = proposta({ ...l, tipo_site: "Nenhum", verificacao: undefined }).pacote;
+  return p === "Presença Digital" ? "cardapio" : p === "Vitrine" ? "portfolio" : "site";
+}
+
 export function demoDaAbordagem(a: Abordagem, l: Lead): ExampleData["k"] {
   if (a === "cardapio") return "cardapio";
   if (a === "portfolio") return "portfolio";
   if (a === "site") return "site";
-  return abordagemPadrao(l) === "cardapio" ? "cardapio" : abordagemPadrao(l) === "portfolio" ? "portfolio" : "site";
+  return demoDoRamo(l);
 }
 
 /** "Meu nome é Ryan e eu tenho a C-Search…" (usa o nome e a empresa de Configurações). */
@@ -69,6 +78,8 @@ function corpo(a: Abordagem, link: string) {
       return "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Procurei, mas não encontrei um cardápio digital de vocês, então tomei a liberdade de montar uma demonstração de como ele poderia ficar, com o pedido indo direto para o WhatsApp:" + PARAGRAFO + link + fecho;
     case "portfolio":
       return "Encontrei vocês pesquisando aqui na região e gostei do trabalho de vocês. Procurei, mas não encontrei um site com o portfólio de vocês, então montei uma demonstração de como ele poderia ficar, mostrando os serviços e os trabalhos realizados:" + PARAGRAFO + link + fecho;
+    case "renovar":
+      return "Encontrei vocês pesquisando negócios aqui da região e gostei muito do que vi: dá para ver o cuidado que vocês têm com o trabalho. Vi que vocês já têm uma página na internet, o que é ótimo. Pensando em somar ao que vocês já construíram, montei uma demonstração de uma versão mais completa, com fotos em destaque, tudo organizado e botão direto para o WhatsApp, para transformar ainda mais visitas em clientes:" + PARAGRAFO + link + PARAGRAFO + "É só abrir no celular. A ideia é complementar o que vocês já têm, não começar do zero. Se gostar, eu ajusto tudo com as fotos e as informações reais de vocês. O que acha?";
     case "consultoria":
       return "Ajudo negócios da região a aparecer melhor na internet: site, cardápio digital, perfil no Google e vídeos para as redes. Pensando em vocês, montei uma demonstração de como poderia ficar a presença online de vocês:" + PARAGRAFO + link + PARAGRAFO + "Se fizer sentido, posso te mostrar em poucos minutos como isso pode trazer mais clientes, sem compromisso.";
     default:
