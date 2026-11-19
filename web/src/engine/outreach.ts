@@ -70,16 +70,17 @@ export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: 
 }
 
 function corpo(a: Abordagem, link: string) {
-  const fecho = PARAGRAFO + "É só abrir no celular. Se gostar, eu ajusto tudo com as fotos, os produtos e as informações reais de vocês. O que acha?";
+  const fecho = PARAGRAFO + "É só abrir no celular. Tudo é ajustável ao gosto de vocês: cores, fotos, textos e produtos." + PARAGRAFO +
+    "Vocês teriam interesse? Se quiserem, podemos conversar melhor sobre esse projeto ou sobre os outros trabalhos que eu posso oferecer, como os vídeos para divulgação.";
   switch (a) {
     case "cardapio":
       return "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Procurei, mas não encontrei um cardápio digital de vocês, então tomei a liberdade de montar uma demonstração de como ele poderia ficar, com o pedido indo direto para o WhatsApp:" + PARAGRAFO + link + fecho;
     case "portfolio":
       return "Encontrei vocês pesquisando aqui na região e gostei do trabalho de vocês. Procurei, mas não encontrei um site com o portfólio de vocês, então montei uma demonstração de como ele poderia ficar, mostrando os serviços e os trabalhos realizados:" + PARAGRAFO + link + fecho;
     case "renovar":
-      return "Encontrei vocês pesquisando negócios aqui da região e gostei muito do que vi: dá para ver o cuidado que vocês têm com o trabalho. Vi que vocês já têm uma página na internet, o que é ótimo. Pensando em somar ao que vocês já construíram, montei uma demonstração de uma versão mais completa, com fotos em destaque, tudo organizado e botão direto para o WhatsApp, para transformar ainda mais visitas em clientes:" + PARAGRAFO + link + PARAGRAFO + "É só abrir no celular. A ideia é complementar o que vocês já têm, não começar do zero. Se gostar, eu ajusto tudo com as fotos e as informações reais de vocês. O que acha?";
+      return "Encontrei vocês pesquisando negócios aqui da região e gostei muito do que vi: dá para ver o cuidado que vocês têm com o trabalho. Vi que vocês já têm uma página na internet, o que é ótimo. Pensando em somar ao que vocês já construíram, montei uma demonstração de uma versão mais completa, com fotos em destaque, tudo organizado e botão direto para o WhatsApp, para transformar ainda mais visitas em clientes. A ideia é complementar o que vocês já têm, não começar do zero:" + PARAGRAFO + link + fecho;
     case "consultoria":
-      return "Ajudo negócios da região a aparecer melhor na internet: site, cardápio digital, perfil no Google e vídeos para as redes. Pensando em vocês, montei uma demonstração de como poderia ficar a presença online de vocês:" + PARAGRAFO + link + PARAGRAFO + "Se fizer sentido, posso te mostrar em poucos minutos como isso pode trazer mais clientes, sem compromisso.";
+      return "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Pensando em vocês, montei uma demonstração de como poderia ficar a presença online de vocês:" + PARAGRAFO + link + fecho;
     default:
       return "Encontrei vocês pesquisando negócios aqui da região e gostei do que vi. Procurei, mas não encontrei um site de vocês, então tomei a liberdade de montar uma demonstração de como ele poderia ficar:" + PARAGRAFO + link + fecho;
   }
