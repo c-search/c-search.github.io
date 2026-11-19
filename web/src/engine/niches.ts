@@ -105,6 +105,30 @@ const CARDAPIOS: Cardapio[] = [
     ],
   },
   {
+    id: "salgados", cor: "#C9853F", hero: "1568254183919-78a4f43a2877", ambiente: "1517433670267-08bbd4be890f",
+    frase: "Kits de coffee break, salgados e doces para reuniões, eventos e o seu dia a dia.",
+    secoes: [
+      { nome: "Kits coffee break", itens: [
+        { nome: "Kit reunião (10 pessoas)", desc: "Salgados, mini sanduíches, bolo, café e suco", preco: 189.9, foto: "1568254183919-78a4f43a2877", destaque: true },
+        { nome: "Kit café da manhã (20 pessoas)", desc: "Pães, frios, frutas, bolo, café, leite e suco", preco: 389.9, foto: "1495474472287-4d71bcdd2085", destaque: true },
+        { nome: "Kit festa (50 pessoas)", desc: "Cento de salgados, docinhos, bolo e refrigerantes", preco: 690, foto: "1486427944299-d1955d23e34d", destaque: true },
+      ] },
+      { nome: "Salgados", itens: [
+        { nome: "Cento de salgados fritos", desc: "Coxinha, risoles, bolinha de queijo e kibe", preco: 89.9, foto: "1517433670267-08bbd4be890f" },
+        { nome: "Cento de salgados assados", desc: "Esfiha, empadinha e enroladinho", preco: 99.9 },
+        { nome: "Mini sanduíche natural (unid.)", desc: "Frango, atum ou peito de peru", preco: 6.5 },
+      ] },
+      { nome: "Doces e bolos", itens: [
+        { nome: "Bolo caseiro (inteiro)", desc: "Cenoura, chocolate ou fubá", preco: 45, foto: "1509440159596-0249088772ff" },
+        { nome: "Cento de docinhos", desc: "Brigadeiro, beijinho e cajuzinho", preco: 110 },
+      ] },
+      { nome: "Bebidas", itens: [
+        { nome: "Garrafa de café (1 L)", desc: "Coado na hora", preco: 22 },
+        { nome: "Suco natural (1 L)", desc: "Laranja, uva ou maracujá", preco: 18 },
+      ] },
+    ],
+  },
+  {
     id: "cafe", cor: "#B7835A", hero: "1554118811-1e0d58224f24", ambiente: "1501339847302-ac426a4a7cbb",
     frase: "Grãos especiais, preparo com calma e um lugar para ficar.",
     secoes: [
@@ -203,15 +227,18 @@ const CARDAPIOS: Cardapio[] = [
 ];
 
 export function cardapioPara(categoria: string, nome = ""): Cardapio {
-  const c = `${categoria} ${nome}`.toLowerCase();
-  const id =
-    /pizz/.test(c) ? "pizza" :
-    /hamb|burger|lanch|fast/.test(c) ? "burger" :
-    /padar|pão|pao|panific/.test(c) ? "padaria" :
-    /caf/.test(c) ? "cafe" :
-    /\bbar\b|boteco|adega|bebida|chope|cerve/.test(c) ? "bar" :
-    /doce|confeit|sorvet|açaí|acai|bolo|gelat/.test(c) ? "doces" :
-    /sushi|japon|temaki/.test(c) ? "sushi" : "restaurante";
+  // o nome do lugar diz mais que a categoria do Google ("Kit Lanches e Coffe Break" é coffee break, não hamburgueria);
+  // regras mais específicas primeiro
+  const tipo = (t: string) =>
+    /sushi|japon|temaki/.test(t) ? "sushi" :
+    /pizz/.test(t) ? "pizza" :
+    /coff?ee? ?break|\bkits?\b|salgad|buffet|marmit|eventos/.test(t) ? "salgados" :
+    /padar|pão|pao|pães|paes|panific/.test(t) ? "padaria" :
+    /caf[eé]|coff?ee?|cafeteria|espresso/.test(t) ? "cafe" :
+    /doce|confeit|sorvet|açaí|acai|bolo|gelat|brigadeir/.test(t) ? "doces" :
+    /\bbar\b|boteco|adega|bebida|chope|cerve/.test(t) ? "bar" :
+    /hamb|burger|smash|lanch|fast|x-/.test(t) ? "burger" : null;
+  const id = tipo(nome.toLowerCase()) || tipo(categoria.toLowerCase()) || "restaurante";
   return CARDAPIOS.find((x) => x.id === id)!;
 }
 
