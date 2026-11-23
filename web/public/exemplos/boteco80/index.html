@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Boteco 80 · São José dos Campos</title>
+<meta name="description" content="Boteco 80: o bar que você gosta de estar. Rock, pop e flashback ao vivo, costela da casa e 13 anos de anos 80 na Rua General Osório, 76, São José dos Campos." />
+<meta property="og:title" content="Boteco 80 · 13 anos de flashback" />
+<meta property="og:description" content="Quarta da Canja, Clássicos do Rock, Embalos do Boteco e banda ao vivo no sábado. Reserve sua mesa." />
+<meta property="og:image" content="https://images.pexels.com/photos/8132441/pexels-photo-8132441.jpeg?auto=compress&cs=tinysrgb&w=1200" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=Bungee&family=VT323&family=Yellowtail&display=swap" rel="stylesheet" />
+<script>document.documentElement.classList.add('js');</script>
+<style>
+html, body { background: #0B0614; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0B0614; --bg2: #150A24; --ink: #F6EEFF; --muted: rgba(246,238,255,.72); --faint: rgba(246,238,255,.56);
+  --pink: #FF2E88; --cyan: #2DE2E6; --yellow: #FFD319; --orange: #FF7A1A; --purple: #8A2BE2; --line: rgba(246,238,255,.12);
+  --stripes: linear-gradient(180deg, var(--yellow) 0 20%, var(--orange) 20% 40%, var(--pink) 40% 60%, var(--purple) 60% 80%, var(--cyan) 80% 100%);
+  --display: 'Bungee', 'Arial Black', Impact, sans-serif;
+  --script: 'Yellowtail', 'Brush Script MT', cursive;
+  --pixel: 'VT323', ui-monospace, Consolas, monospace;
+  --body: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+body { color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; overflow-x: clip; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(18px, 4vw, 48px); }
+/* scanlines over everything, very subtle */
+.scan { position: fixed; inset: 0; z-index: 90; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+
+/* ---------- buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 50px; padding: 0 24px; border-radius: 12px; font: 400 14px/1 var(--display); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; transition: transform .2s var(--ease), box-shadow .2s, background .2s, color .2s; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn-yellow { background: var(--yellow); color: #1A0B26; box-shadow: 4px 4px 0 var(--pink); }
+.btn-yellow:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--pink); }
+.btn-line { border: 2px solid var(--cyan); color: var(--cyan); background: rgba(11,6,20,.4); }
+.btn-line:hover { background: var(--cyan); color: #0B0614; }
+
+/* ---------- nav ---------- */
+.nav { position: fixed; z-index: 50; top: 0; left: 0; right: 0; padding: calc(env(safe-area-inset-top, 0px) + 16px) clamp(18px, 4vw, 48px) 14px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: background .3s, backdrop-filter .3s; }
+.nav.solid { background: rgba(11,6,20,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--line); }
+.logo { display: flex; align-items: center; gap: 8px; font: 400 20px/1 var(--display); color: var(--yellow); }
+.logo .rec { width: 22px; height: 22px; }
+.links { display: flex; gap: 26px; font: 400 22px/1 var(--pixel); letter-spacing: .04em; text-transform: uppercase; }
+.links a { color: var(--muted); transition: color .2s; }
+.links a:hover { color: var(--cyan); }
+.nav .btn { height: 42px; padding: 0 16px; font-size: 12px; box-shadow: 3px 3px 0 var(--pink); }
+
+/* ---------- vinyl record ---------- */
+.rec { display: inline-block; border-radius: 50%; position: relative; flex: none;
+  background:
+    radial-gradient(circle, #0B0614 0 5%, var(--yellow) 5.5% 30%, transparent 30.5%),
+    conic-gradient(from 30deg, rgba(255,255,255,.18), transparent 12%, transparent 45%, rgba(255,255,255,.14) 55%, transparent 68%),
+    repeating-radial-gradient(circle, #121014 0 1.4%, #1d1a21 1.4% 2.2%);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.06); animation: spin 2.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- VHS intro ---------- */
+.vhs { position: fixed; inset: 0; z-index: 80; background: #0A1BB0; color: #fff; font: 400 clamp(26px, 3.4vw, 44px)/1 var(--pixel); letter-spacing: .04em; overflow: hidden; }
+.vhs .osd { position: absolute; left: 6vw; top: 8vh; display: grid; gap: 10px; text-shadow: 2px 2px 0 rgba(0,0,0,.35); }
+.vhs .tc { position: absolute; right: 6vw; top: 8vh; }
+.vhs .mid { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: clamp(30px, 5vw, 64px); }
+.vhs .noise { position: absolute; inset: 0; opacity: 0; background: repeating-linear-gradient(180deg, rgba(255,255,255,.5) 0 2px, transparent 2px 5px), repeating-linear-gradient(180deg, transparent 0 40px, rgba(255,255,255,.85) 40px 46px, transparent 46px 140px); }
+.no-js .vhs, .rm .vhs { display: none; }
+
+/* ---------- hero ---------- */
+.hero { position: relative; height: 100vh; height: 100svh; min-height: 600px; overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, #0B0614 0%, #1E0A33 38%, #4B0F57 56%, #A0175F 63%, #0B0614 63.2%); }
+.sky { position: absolute; left: 0; right: 0; top: 0; height: 63%; overflow: hidden; }
+.stars { position: absolute; inset: 0; background-image: radial-gradient(1.4px 1.4px at 12% 22%, #fff 50%, transparent), radial-gradient(1px 1px at 28% 12%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 46% 30%, #fff 50%, transparent), radial-gradient(1px 1px at 63% 9%, #fff 50%, transparent), radial-gradient(1.6px 1.6px at 78% 26%, #fff 50%, transparent), radial-gradient(1px 1px at 90% 14%, #fff 50%, transparent), radial-gradient(1px 1px at 6% 44%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 94% 46%, #fff 50%, transparent); opacity: .7; }
+.sun { position: absolute; left: 50%; top: 100%; width: min(62vh, 72vw); aspect-ratio: 1; transform: translate(-50%, -62%); border-radius: 50%;
+  background: linear-gradient(180deg, #FFE45C 0%, var(--yellow) 22%, var(--orange) 50%, var(--pink) 78%);
+  -webkit-mask: linear-gradient(180deg, #000 48%, transparent 48% 51%, #000 51% 58%, transparent 58% 62%, #000 62% 68%, transparent 68% 73.5%, #000 73.5% 79%, transparent 79% 85.5%, #000 85.5% 90%, transparent 90%);
+  mask: linear-gradient(180deg, #000 48%, transparent 48% 51%, #000 51% 58%, transparent 58% 62%, #000 62% 68%, transparent 68% 73.5%, #000 73.5% 79%, transparent 79% 85.5%, #000 85.5% 90%, transparent 90%);
+  filter: drop-shadow(0 0 40px rgba(255,46,136,.55)); }
+.floor { position: absolute; left: 0; right: 0; top: 63%; bottom: 0; overflow: hidden; perspective: 240px; perspective-origin: 50% 0; background: #12051F; }
+.floor::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,46,136,.35) 0%, rgba(18,5,31,0) 22%, rgba(18,5,31,0) 75%, rgba(11,6,20,.7) 100%); pointer-events: none; }
+.grid { position: absolute; left: -150%; right: -150%; top: 0; height: 300%; transform-origin: 50% 0; transform: rotateX(74deg);
+  background:
+    repeating-linear-gradient(90deg, rgba(255,46,136,.9) 0 3px, transparent 3px 56px),
+    repeating-linear-gradient(180deg, rgba(45,226,230,.8) 0 3px, transparent 3px 56px);
+  animation: road 1s linear infinite; }
+@keyframes road { from { background-position: 0 0, 0 0; } to { background-position: 0 0, 0 56px; } }
+.horizon { position: absolute; left: 0; right: 0; top: 63%; height: 2px; background: var(--pink); box-shadow: 0 0 18px 4px rgba(255,46,136,.8); }
+.hcopy { position: absolute; z-index: 3; left: 0; right: 0; top: 50%; transform: translateY(-58%); text-align: center; padding-inline: 16px; }
+.kick { font: 400 clamp(20px, 2vw, 26px)/1 var(--pixel); letter-spacing: .14em; text-transform: uppercase; color: var(--cyan); text-shadow: 0 0 10px rgba(45,226,230,.7); margin-bottom: 2.2vh; }
+.big { display: flex; align-items: center; justify-content: center; gap: .1em; font: 400 min(12.5vw, 20vh)/.9 var(--display); color: var(--yellow); white-space: nowrap;
+  text-shadow: 0 .04em 0 var(--orange), 0 .08em 0 var(--pink), 0 .12em 0 var(--purple), 0 0 .5em rgba(255,211,25,.35); }
+.big .w { display: inline-flex; align-items: center; }
+.big .l { display: inline-block; }
+.big .rec { width: .78em; height: .78em; margin: 0 .02em; }
+.big .eighty { color: rgba(11,6,20,.82); -webkit-text-stroke: .035em var(--pink); text-shadow: 0 0 .18em rgba(255,46,136,.9), 0 0 .5em rgba(255,46,136,.55); margin-left: .18em; animation: flicker 6s infinite; }
+@keyframes flicker { 0%, 18%, 22%, 60%, 64%, 100% { opacity: 1; } 20%, 62% { opacity: .45; } }
+.tag { margin-top: 3.4vh; font: 400 clamp(30px, 4.2vw, 58px)/1 var(--script); color: #fff; text-shadow: 0 0 6px #fff, 0 0 18px var(--cyan), 0 0 38px var(--cyan); transform: rotate(-4deg); }
+.hbtns { margin-top: 4.4vh; display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
+.osd { position: absolute; z-index: 4; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); font: 400 22px/1 var(--pixel); letter-spacing: .06em; color: rgba(255,255,255,.85); text-shadow: 2px 2px 0 rgba(0,0,0,.5); }
+.osd.l { left: clamp(18px, 4vw, 48px); }
+.osd.r { right: clamp(18px, 4vw, 48px); }
+.js .hero .anim { opacity: 0; }
+
+/* ---------- LED marquee ---------- */
+.marq { position: relative; z-index: 2; background: #06030C; border-block: 2px solid var(--yellow); overflow: hidden; padding: 14px 0; }
+.marq .lab { position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 18px; background: var(--yellow); color: #1A0B26; font: 400 13px/1.1 var(--display); text-transform: uppercase; }
+.track { display: flex; width: max-content; gap: 48px; font: 400 34px/1 var(--pixel); letter-spacing: .06em; text-transform: uppercase; color: var(--yellow); text-shadow: 0 0 8px rgba(255,211,25,.7); animation: marq 38s linear infinite; padding-left: 210px; }
+.track span::after { content: '★'; margin-left: 48px; color: var(--pink); text-shadow: 0 0 8px rgba(255,46,136,.8); }
+@keyframes marq { to { transform: translateX(-50%); } }
+
+/* ---------- sections ---------- */
+section { position: relative; }
+.sec { padding-block: clamp(80px, 12vh, 140px); }
+.eyebrow { font: 400 24px/1 var(--pixel); letter-spacing: .12em; text-transform: uppercase; color: var(--cyan); }
+.h2 { margin-top: 14px; font: 400 clamp(38px, 5.6vw, 76px)/1 var(--display); text-transform: uppercase; }
+.h2 .y { color: var(--yellow); }
+.h2 .p { color: var(--pink); }
+.lead { margin-top: 18px; max-width: 560px; font-size: clamp(16px, 1.3vw, 18px); color: var(--muted); }
+.stripes { height: 14px; background: linear-gradient(90deg, var(--yellow) 0 20%, var(--orange) 20% 40%, var(--pink) 40% 60%, var(--purple) 60% 80%, var(--cyan) 80% 100%); }
+
+/* week as VHS tapes */
+.week { background: radial-gradient(70% 60% at 85% 0%, rgba(138,43,226,.22), transparent 70%), var(--bg); }
+.tapes { margin-top: 56px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+.tape { position: relative; border-radius: 10px; background: #17121D; box-shadow: 0 0 0 1px rgba(255,255,255,.07), 0 24px 50px -24px rgba(0,0,0,.8); overflow: hidden; transition: transform .35s var(--ease), box-shadow .35s; }
+.tape:hover { transform: translateY(-6px) rotate(-.6deg); box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 0 0 4px var(--c), 0 30px 60px -24px rgba(0,0,0,.85); }
+.tape .cover { position: relative; aspect-ratio: 4 / 5; overflow: hidden; }
+.tape .cover img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.1) contrast(1.05); transition: transform .6s var(--ease); }
+.tape:hover .cover img { transform: scale(1.05); }
+.tape .cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,6,20,.1) 30%, rgba(11,6,20,.92) 100%); }
+.tape .day { position: absolute; z-index: 2; left: 16px; top: 14px; font: 400 54px/1 var(--display); color: var(--c); text-shadow: 3px 3px 0 #0B0614; }
+.tape .sp { position: absolute; z-index: 2; right: 14px; top: 16px; font: 400 20px/1 var(--pixel); background: #0B0614; color: #fff; padding: 4px 8px; border-radius: 4px; }
+.tape .bars { position: absolute; z-index: 2; right: 0; top: 52px; bottom: 30%; width: 12px; background: var(--stripes); }
+.tape .tx { position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 16px; }
+.tape h3 { font: 400 24px/1.05 var(--display); text-transform: uppercase; }
+.tape p { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.tape .perk { margin-top: 10px; display: inline-block; font: 400 19px/1.1 var(--pixel); color: #0B0614; background: var(--c); padding: 3px 8px; border-radius: 4px; }
+
+/* the bar */
+.bar { background: var(--bg2); }
+.bar-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(36px, 6vw, 90px); align-items: center; }
+.tv { position: relative; border-radius: 28px; padding: 18px 18px 54px; background: linear-gradient(180deg, #3A2C22, #261C15); box-shadow: inset 0 2px 0 rgba(255,255,255,.08), 0 30px 60px -30px rgba(0,0,0,.9); }
+.tv .screen { position: relative; aspect-ratio: 4 / 3; border-radius: 22px / 26px; overflow: hidden; background: #000; box-shadow: inset 0 0 40px rgba(0,0,0,.9); }
+.tv .screen img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.25) contrast(1.1); }
+.tv .screen::before { content: ''; position: absolute; inset: 0; z-index: 2; background: repeating-linear-gradient(180deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.7)); pointer-events: none; }
+.tv .screen .ch { position: absolute; z-index: 3; right: 16px; top: 12px; font: 400 30px/1 var(--pixel); color: #7CFF6B; text-shadow: 0 0 8px rgba(124,255,107,.8); }
+.tv .knobs { position: absolute; left: 24px; right: 24px; bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.tv .knobs i { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8a7a6a, #2a2019); display: inline-block; margin-right: 10px; }
+.tv .knobs span { font: 400 18px/1 var(--pixel); color: rgba(255,255,255,.5); letter-spacing: .1em; }
+.nums { margin-top: 36px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.nums div { border-top: 2px solid var(--line); padding-top: 14px; }
+.nums b { display: block; font: 400 clamp(34px, 3.6vw, 48px)/1 var(--display); color: var(--yellow); }
+.nums span { display: block; margin-top: 8px; font-size: 14px; color: var(--faint); }
+
+/* menu as a vinyl */
+.menu { background: radial-gradient(60% 70% at 10% 50%, rgba(255,46,136,.16), transparent 70%), var(--bg); overflow: hidden; }
+.menu-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(36px, 6vw, 96px); align-items: center; }
+.disc { position: relative; width: min(78%, 460px); aspect-ratio: 1; margin-inline: 4% auto; }
+.disc .sleeve { position: absolute; inset: 0; border-radius: 6px; overflow: hidden; transform: rotate(-4deg); box-shadow: 0 30px 60px -30px rgba(0,0,0,.9); }
+.disc .sleeve img { width: 100%; height: 100%; object-fit: cover; }
+.disc .sleeve::after { content: 'COSTELA 80'; position: absolute; left: 18px; bottom: 16px; font: 400 clamp(22px, 2.6vw, 32px)/1 var(--display); color: var(--yellow); text-shadow: 3px 3px 0 #0B0614; }
+.disc .rec { position: absolute; width: 92%; height: 92%; top: 4%; left: 38%; animation-duration: 3.2s; box-shadow: 0 20px 50px -20px rgba(0,0,0,.9); }
+.sides { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; margin-top: 40px; }
+.side h3 { font: 400 26px/1 var(--pixel); letter-spacing: .1em; text-transform: uppercase; color: var(--pink); padding-bottom: 12px; border-bottom: 2px solid var(--line); }
+.side ol { list-style: none; counter-reset: t; }
+.side li { counter-increment: t; display: grid; grid-template-columns: 34px 1fr; gap: 6px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.side li::before { content: counter(t, decimal-leading-zero); font: 400 22px/1.2 var(--pixel); color: var(--faint); }
+.side b { display: block; font-weight: 700; font-size: 16px; }
+.side small { display: block; margin-top: 3px; font-size: 14px; color: var(--faint); }
+.deal { margin-top: 26px; display: inline-flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(255,211,25,.1); box-shadow: inset 0 0 0 1px rgba(255,211,25,.35); font-size: 15px; }
+.deal b { font: 400 13px/1 var(--display); color: var(--yellow); text-transform: uppercase; }
+
+/* birthday */
+.niver { padding-block: clamp(70px, 10vh, 120px); background: linear-gradient(90deg, rgba(11,6,20,.92), rgba(11,6,20,.55)), url('https://images.pexels.com/photos/7016022/pexels-photo-7016022.jpeg?auto=compress&cs=tinysrgb&w=1600') center / cover; }
+.niver .h2 { max-width: 760px; }
+.niver .script { font: 400 clamp(40px, 5vw, 70px)/1 var(--script); color: var(--cyan); text-shadow: 0 0 14px rgba(45,226,230,.7); display: block; text-transform: none; margin-bottom: 6px; }
+
+/* visit */
+.visit { background: var(--bg); }
+.vgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: start; margin-top: 44px; }
+.info { display: grid; gap: 22px; }
+.info div { padding: 20px 22px; border-radius: 14px; background: #140C20; box-shadow: inset 0 0 0 1px var(--line); }
+.info dt { font: 400 20px/1 var(--pixel); letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); }
+.info dd { margin-top: 8px; font-size: 17px; }
+.info dd a:hover { color: var(--yellow); }
+.map { border-radius: 18px; overflow: hidden; height: 100%; min-height: 360px; box-shadow: inset 0 0 0 1px var(--line); background: #140C20; }
+.map iframe { width: 100%; height: 100%; min-height: 360px; border: 0; filter: invert(.9) hue-rotate(200deg) saturate(.8) brightness(.95); }
+footer { padding: 30px clamp(18px, 4vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 30px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 400 20px/1.3 var(--pixel); letter-spacing: .04em; color: var(--faint); border-top: 1px solid var(--line); }
+footer a:hover { color: var(--yellow); }
+
+.rv { opacity: 1; }
+.js .rv { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+.js .rv.in { opacity: 1; transform: none; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1020px) {
+  .tapes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bar-grid, .menu-grid, .vgrid { grid-template-columns: 1fr; }
+  .disc { width: min(78%, 440px); }
+}
+@media (max-width: 760px) {
+  .links { display: none; }
+  .big { flex-direction: column; gap: 0; font-size: min(19vw, 15vh); line-height: .95; }
+  .big .eighty { margin-left: 0; font-size: 1.5em; line-height: .9; }
+  .hcopy { transform: translateY(-56%); }
+  .sun { width: 86vw; }
+  .osd.r { display: none; }
+  .hbtns .btn { flex: 1 1 100%; max-width: 340px; }
+  .sides { grid-template-columns: 1fr; }
+  .nums { grid-template-columns: 1fr 1fr 1fr; }
+  .marq .lab { display: none; } .track { padding-left: 0; font-size: 28px; }
+}
+@media (max-width: 520px) {
+  .tapes { grid-template-columns: 1fr; }
+  .tape .cover { aspect-ratio: 5 / 4; }
+  .nav .btn { padding: 0 12px; font-size: 11px; height: 38px; }
+  .logo { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec, .grid, .track, .big .eighty { animation: none !important; }
+  .js .rv { opacity: 1; transform: none; transition: none; }
+  .js .hero .anim { opacity: 1 !important; }
+}
+</style>
+</head>
+<body>
+<div class="scan" aria-hidden="true"></div>
+
+<div class="vhs" id="vhs" aria-hidden="true">
+  <div class="osd"><span>PLAY ▶</span><span>SP</span></div>
+  <div class="tc" id="vhsTc">0:00:00</div>
+  <div class="mid">BOTECO 80 · 13 ANOS</div>
+  <div class="noise" id="vhsNoise"></div>
+</div>
+
+<header class="nav anim" id="nav">
+  <a class="logo" href="#topo" aria-label="Boteco 80, início"><span class="rec" aria-hidden="true"></span>BOTECO 80</a>
+  <nav class="links" aria-label="Seções">
+    <a href="#agenda">Agenda</a>
+    <a href="#bar">O bar</a>
+    <a href="#cardapio">Cardápio</a>
+    <a href="#visite">Visite</a>
+  </nav>
+  <a class="btn btn-yellow wa" href="#" target="_blank" rel="noopener">Reservar mesa</a>
+</header>
+
+<main id="topo">
+  <section class="hero" aria-label="Boteco 80">
+    <div class="sky"><div class="stars"></div><div class="sun anim" id="sun"></div></div>
+    <div class="floor anim" id="floor"><div class="grid"></div></div>
+    <div class="horizon"></div>
+    <div class="hcopy">
+      <p class="kick anim" id="kick">São José dos Campos · 13 anos de flashback</p>
+      <h1 class="big" id="big" aria-label="Boteco 80">
+        <span class="w" aria-hidden="true"><span class="l">B</span><span class="l">O</span><span class="l">T</span><span class="l">E</span><span class="l">C</span><span class="l rec"></span></span>
+        <span class="eighty l" aria-hidden="true">80</span>
+      </h1>
+      <p class="tag anim" id="tag">o bar que você gosta de estar</p>
+      <div class="hbtns anim" id="hbtns">
+        <a class="btn btn-yellow wa" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20.5l1.3-4A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c.3 2.4 2.1 4.3 4.5 4.8l1-1.2 2 .8-.3 1.6c-3.8.6-8-3.5-7.4-7.4l1.6-.3.8 2z"/></svg>
+          Reservar mesa
+        </a>
+        <a class="btn btn-line" href="#agenda">Ver a agenda</a>
+      </div>
+    </div>
+    <div class="osd l anim" id="osdL">▶ PLAY &nbsp;<span id="clock">00:00:00</span></div>
+    <div class="osd r anim" id="osdR">CH 80 · QUA–SÁB · 17H</div>
+  </section>
+
+  <div class="marq" aria-label="Artistas que já tocaram no Boteco 80">
+    <div class="lab">Já passou<br />no palco</div>
+    <div class="track" id="track"></div>
+  </div>
+
+  <section class="sec week" id="agenda" aria-labelledby="agendaT">
+    <div class="wrap">
+      <p class="eyebrow rv">A programação</p>
+      <h2 class="h2 rv" id="agendaT">Toda semana <span class="y">tem fita</span> nova</h2>
+      <p class="lead rv">Quatro noites, quatro climas. Escolhe a sua, reserva a mesa e deixa o resto com a gente.</p>
+      <div class="tapes">
+        <article class="tape rv" style="--c: var(--yellow)">
+          <div class="cover"><img src="https://images.pexels.com/photos/6173824/pexels-photo-6173824.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Músico tocando violão no palco de um bar" loading="lazy" /></div>
+          <span class="day">QUA</span><span class="sp">SP</span><span class="bars"></span>
+          <div class="tx"><h3>Quarta da Canja</h3><p>Palco aberto a partir das 19h. Trouxe o instrumento? Sobe e toca.</p><span class="perk">Músico ganha 1 cerveja</span></div>
+        </article>
+        <article class="tape rv" style="--c: var(--orange)">
+          <div class="cover"><img src="https://images.pexels.com/photos/39981567/pexels-photo-39981567.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Guitarrista tocando sob luz roxa" loading="lazy" /></div>
+          <span class="day">QUI</span><span class="sp">SP</span><span class="bars"></span>
+          <div class="tx"><h3>Clássicos do Rock</h3><p>Rock nacional e internacional ao vivo, daqueles que todo mundo canta junto.</p><span class="perk">Costela com preço especial</span></div>
+        </article>
+        <article class="tape rv" style="--c: var(--pink)">
+          <div class="cover"><img src="https://images.pexels.com/photos/8132441/pexels-photo-8132441.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Globo espelhado refletindo luzes na pista" loading="lazy" /></div>
+          <span class="day">SEX</span><span class="sp">SP</span><span class="bars"></span>
+          <div class="tx"><h3>Embalos do Boteco</h3><p>Pista de dança com DJ e flash 70, 80 e 90 até a última música.</p><span class="perk">Lugares limitados</span></div>
+        </article>
+        <article class="tape rv" style="--c: var(--cyan)">
+          <div class="cover"><img src="https://images.pexels.com/photos/8512413/pexels-photo-8512413.jpeg?auto=compress&cs=tinysrgb&w=700" alt="Banda tocando em palco com luz rosa" loading="lazy" /></div>
+          <span class="day">SÁB</span><span class="sp">SP</span><span class="bars"></span>
+          <div class="tx"><h3>Noite de banda</h3><p>Tributos e bandas ao vivo, do pop ao rock, a partir das 20h.</p><span class="perk">Reserve antes</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="stripes" aria-hidden="true"></div>
+
+  <section class="sec bar" id="bar" aria-labelledby="barT">
+    <div class="wrap bar-grid">
+      <div class="tv rv">
+        <div class="screen"><img src="https://images.pexels.com/photos/7016364/pexels-photo-7016364.jpeg?auto=compress&cs=tinysrgb&w=1000" alt="Atendente sorrindo atrás do balcão do bar" loading="lazy" /><span class="ch">CH 80</span></div>
+        <div class="knobs"><div><i></i><i></i></div><span>BOTECO·VISION</span></div>
+      </div>
+      <div>
+        <p class="eyebrow rv">O bar</p>
+        <h2 class="h2 rv" id="barT">Treze anos <span class="p">rebobinando</span> os anos 80</h2>
+        <p class="lead rv">Uma parede inteira de ídolos da época, TVs passando comerciais, desenhos e clipes que você não via há décadas, e um palco que nunca fica vazio. O Boteco 80 é o encontro de quem cresceu com fita cassete e de quem só ouviu falar, mas canta todas.</p>
+        <div class="nums rv">
+          <div><b>13</b><span>anos de casa</span></div>
+          <div><b>4</b><span>noites de música por semana</span></div>
+          <div><b>4,6★</b><span>de nota no Google</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec menu" id="cardapio" aria-labelledby="menuT">
+    <div class="wrap menu-grid">
+      <div class="disc rv" aria-hidden="true">
+        <span class="rec"></span>
+        <div class="sleeve"><img src="https://images.pexels.com/photos/36669802/pexels-photo-36669802.jpeg?auto=compress&cs=tinysrgb&w=900" alt="" loading="lazy" /></div>
+      </div>
+      <div>
+        <p class="eyebrow rv">Cardápio</p>
+        <h2 class="h2 rv" id="menuT">O disco <span class="y">da casa</span></h2>
+        <p class="lead rv">A costela 80 nasceu com um dos sócios e virou a queridinha de quem vem pela música e volta pela comida.</p>
+        <div class="sides rv">
+          <div class="side">
+            <h3>Lado A · Pra comer</h3>
+            <ol>
+              <li><div><b>Costela 80</b><small>A queridinha da casa, com farofa e fritas</small></div></li>
+              <li><div><b>Porções pra dividir</b><small>Pra beliscar enquanto a banda afina</small></div></li>
+              <li><div><b>Almoço de fim de semana</b><small>Sábado e domingo, pra começar cedo</small></div></li>
+            </ol>
+          </div>
+          <div class="side">
+            <h3>Lado B · Pra beber</h3>
+            <ol>
+              <li><div><b>Chopp gelado</b><small>Tirado na hora, colarinho no ponto</small></div></li>
+              <li><div><b>Cervejas</b><small>As de sempre e algumas especiais</small></div></li>
+              <li><div><b>Drinks da casa</b><small>Clássicos com cara de anos 80</small></div></li>
+            </ol>
+          </div>
+        </div>
+        <p class="deal rv"><b>Quarta e quinta</b> Costela com preço especial</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="niver" aria-labelledby="niverT">
+    <div class="wrap">
+      <h2 class="h2 rv" id="niverT"><span class="script">Faz aniversário?</span>Comemore com trilha sonora <span class="y">dos anos 80</span></h2>
+      <p class="lead rv">Junta a turma, reserva as mesas e deixa a banda cuidar do parabéns. A gente prepara o espaço pra você.</p>
+      <div class="hbtns rv" style="justify-content:flex-start"><a class="btn btn-yellow" id="waNiver" href="#" target="_blank" rel="noopener">Reservar meu aniversário</a></div>
+    </div>
+  </section>
+
+  <section class="sec visit" id="visite" aria-labelledby="visitT">
+    <div class="wrap">
+      <p class="eyebrow rv">Visite</p>
+      <h2 class="h2 rv" id="visitT">Aperta o <span class="p">play</span> e vem</h2>
+      <div class="vgrid">
+        <dl class="info rv">
+          <div><dt>Endereço</dt><dd>Rua General Osório, 76 · Vila Ema<br />São José dos Campos – SP</dd></div>
+          <div><dt>Quando</dt><dd>De quarta a sábado, a partir das 17h</dd></div>
+          <div><dt>Reservas</dt><dd><a class="wa" href="#" target="_blank" rel="noopener">WhatsApp (12) 99720-1079</a></dd></div>
+          <div style="background:none;box-shadow:none;padding:0"><a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&query=Boteco+80+Rua+General+Os%C3%B3rio+76+S%C3%A3o+Jos%C3%A9+dos+Campos" target="_blank" rel="noopener">Como chegar</a></div>
+        </dl>
+        <div class="map rv"><iframe title="Mapa: Boteco 80" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=Boteco%2080%2C%20Rua%20General%20Os%C3%B3rio%2C%2076%2C%20S%C3%A3o%20Jos%C3%A9%20dos%20Campos&z=16&output=embed"></iframe></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>© Boteco 80 · Rua General Osório, 76 · São José dos Campos – SP</span>
+  <span>Site criado pelo <a href="https://c-search.github.io/" target="_blank" rel="noopener">Syde Studio</a></span>
+</footer>
+
+<script>
+(() => {
+  const WHATS = '5512997201079';
+  const wa = (t) => `https://wa.me/${WHATS}?text=${encodeURIComponent(t)}`;
+  document.querySelectorAll('.wa').forEach((a) => (a.href = wa('Olá! Vim pelo site e quero reservar uma mesa no Boteco 80.')));
+  document.getElementById('waNiver').href = wa('Olá! Quero comemorar meu aniversário no Boteco 80. Como funciona a reserva?');
+
+  const BANDAS = ['Psychocandy', 'All-Star 40', 'LoveTrack', 'Zucca', 'Soul Valley', 'La Gringa', 'Se7e Cidades', 'Simplesmente Roupa Nova', 'Há 10 Mil Anos Atrás', 'DJ Paulo Couto', 'DJ Jr. Dias', 'Cisco Quirino', 'Charlie Sanches', 'Gabriel Vélez & Lucas Nanini'];
+  const track = document.getElementById('track');
+  track.innerHTML = [...BANDAS, ...BANDAS].map((b) => `<span>${b}</span>`).join('');
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) document.documentElement.classList.add('rm');
+  const $ = (id) => document.getElementById(id);
+  const A = (el, kf, o) => el.animate(kf, { fill: 'both', ...o });
+
+  // VHS clock in the corner: the real time, like a VCR
+  const pad = (n) => String(n).padStart(2, '0');
+  const tick = () => { const d = new Date(); $('clock').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+  tick(); setInterval(tick, 1000);
+
+  const letters = [...document.querySelectorAll('#big .l')];
+  function showHero() {
+    const els = ['nav', 'kick', 'tag', 'hbtns', 'osdL', 'osdR', 'sun', 'floor'].map($);
+    if (reduce) { els.forEach((e) => e.classList.remove('anim')); return; }
+    A($('sun'), [{ opacity: 0, transform: 'translate(-50%, -20%)' }, { opacity: 1, transform: 'translate(-50%, -62%)' }], { duration: 1400, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    A($('floor'), [{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 100 });
+    A($('kick'), [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: 300 });
+    letters.forEach((l, i) => A(l, [{ opacity: 0, transform: 'translateY(-.6em) scale(1.15)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 380 + i * 70, easing: 'cubic-bezier(.3,1.5,.5,1)' }));
+    A($('tag'), [{ opacity: 0, filter: 'brightness(3) blur(4px)' }, { opacity: .3, offset: .3 }, { opacity: 1, offset: .45 }, { opacity: .5, offset: .55 }, { opacity: 1, filter: 'none' }], { duration: 900, delay: 1050 });
+    A($('hbtns'), [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: 1300 });
+    [$('nav'), $('osdL'), $('osdR')].forEach((e) => A(e, [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 1200 }));
+    setTimeout(() => els.forEach((e) => e.classList.remove('anim')), 30);
+  }
+
+  // VHS intro: blue screen, tracking noise, CRT switch-off into the hero
+  const vhs = $('vhs');
+  if (reduce) { vhs.remove(); showHero(); }
+  else {
+    let s = 0; const tc = setInterval(() => { s++; $('vhsTc').textContent = `0:00:${pad(s)}`; }, 280);
+    setTimeout(() => {
+      A($('vhsNoise'), [{ opacity: 0, transform: 'translateY(0)' }, { opacity: .9, transform: 'translateY(-30px)', offset: .3 }, { opacity: .6, transform: 'translateY(20px)', offset: .7 }, { opacity: 1, transform: 'translateY(-10px)' }], { duration: 380, easing: 'steps(6, end)' });
+    }, 850);
+    setTimeout(() => {
+      clearInterval(tc);
+      A(vhs, [{ transform: 'scale(1, 1)', filter: 'brightness(1)' }, { transform: 'scale(1, .006)', filter: 'brightness(3)', offset: .6 }, { transform: 'scale(0, .006)', filter: 'brightness(4)' }], { duration: 520, easing: 'cubic-bezier(.7,0,.3,1)' }).finished.then(() => vhs.remove());
+      setTimeout(showHero, 260);
+    }, 1250);
+  }
+
+  // reveal on scroll
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.rv').forEach((el, i) => { el.style.transitionDelay = `${(i % 4) * 70}ms`; io.observe(el); });
+
+  const nav = $('nav');
+  const onScroll = () => nav.classList.toggle('solid', scrollY > innerHeight * .6);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+})();
+</script>
+</body>
+</html>
