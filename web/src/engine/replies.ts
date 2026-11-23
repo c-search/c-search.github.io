@@ -16,14 +16,14 @@ function produto(l: Lead) {
 export type CasoRetorno = "numero" | "robo" | "proposta" | "viram" | "preco" | "pensar";
 export const CASOS_RETORNO: { id: CasoRetorno; nome: string }[] = [
   { id: "numero", nome: "Pergunta do número" },
-  { id: "robo", nome: "Mensagem do robô" },
+  { id: "robo", nome: "Pedi para enviar / robô" },
   { id: "proposta", nome: "Proposta enviada" },
   { id: "viram", nome: "Viram o projeto e pararam" },
   { id: "preco", nome: "Sumiram depois do preço" },
   { id: "pensar", nome: "Disseram que iam pensar" },
 ];
 export const casoPadrao = (status?: string): CasoRetorno =>
-  status === "Contatado" ? "proposta" : status === "Respondeu" ? "viram" : status === "Negociando" ? "preco" : "numero";
+  status === "Pedi para enviar" ? "robo" : status === "Contatado" ? "proposta" : status === "Respondeu" ? "viram" : status === "Negociando" ? "preco" : "numero";
 
 /** 2ª tentativa quando não responderam: curta, leve, sem cobrar resposta. */
 export function mensagemRetorno(l: Lead & { status?: string }, caso: CasoRetorno = casoPadrao(l.status)) {

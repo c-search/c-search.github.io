@@ -8,7 +8,7 @@ import { exampleData, linkLongo, type ExampleData } from "@/engine/example";
 import { buscarFotos, type FotoAchada } from "@/engine/photos";
 import { criarLinkCurto } from "@/engine/shortlink";
 import { CORES_SUGERIDAS } from "@/engine/niches";
-import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, mensagemConfirmacao, mensagemRobo, type Abordagem } from "@/engine/outreach";
+import { ABORDAGENS, abordagemPadrao, demoDaAbordagem, mensagemAbordagem, mensagemConfirmacao, mensagemPermissao, mensagemRobo, type Abordagem } from "@/engine/outreach";
 import { brl, proposta } from "@/engine/pricing";
 import { CASOS_RETORNO, casoPadrao, mensagemRetorno, type CasoRetorno } from "@/engine/replies";
 import { VerifBadge } from "./Results";
@@ -35,10 +35,11 @@ const DEMOS: { id: ExampleData["k"]; nome: string }[] = [
 export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, githubToken, onClose, onSent, onCopy, statusSalvo }: Props) {
   // 1º contato: confirmar o número com uma mensagem curta; depois, a proposta com a demo
   const jaConfirmando = statusSalvo === "Aguardando confirmação";
+  const jaPediu = statusSalvo === "Pedi para enviar";
   // só marca como enviado quando você confirma (abrir o WhatsApp ou copiar não quer dizer que mandou)
   const [perguntar, setPerguntar] = useState(false);
   const [marcado, setMarcado] = useState(false);
-  const [modo, setModo] = useState<"confirmar" | "proposta" | "robo" | "retorno">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : "proposta");
+  const [modo, setModo] = useState<"confirmar" | "permissao" | "proposta" | "robo" | "retorno">(!statusSalvo || statusSalvo === "Novo" ? "confirmar" : jaConfirmando ? "permissao" : "proposta");
   const [caso, setCaso] = useState<CasoRetorno>(() => casoPadrao(statusSalvo));
   const [abordagem, setAbordagem] = useState<Abordagem>(() => abordagemPadrao(l));
   const [demo, setDemo] = useState<ExampleData["k"]>(() => demoDaAbordagem(abordagemPadrao(l), l));
@@ -95,10 +96,10 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
     }
   }
   const alternarFoto = (u: string) => setFotos((f) => (f.includes(u) ? f.filter((x) => x !== u) : f.length >= 4 ? f : [...f, u]));
-  const automatica = modo === "retorno" ? mensagemRetorno({ ...l, status: statusSalvo }, caso) : modo === "robo" ? mensagemRobo(l, meuNome, empresa) : modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa);
+  const automatica = modo === "retorno" ? mensagemRetorno({ ...l, status: statusSalvo }, caso) : modo === "robo" ? mensagemRobo(l, meuNome, empresa) : modo === "confirmar" ? mensagemConfirmacao(l, meuNome, empresa) : modo === "permissao" ? mensagemPermissao(l, meuNome, empresa) : mensagemAbordagem(abordagem, l, link, meuNome, jaConfirmando, empresa, jaPediu);
   const msg = texto ?? automatica;
   // retorno não muda a etapa: continua onde estava
-  const statusEnvio = modo === "proposta" ? "Contatado" : modo === "retorno" ? statusSalvo || "Aguardando confirmação" : "Aguardando confirmação";
+  const statusEnvio = modo === "proposta" ? "Contatado" : modo === "permissao" || modo === "robo" ? "Pedi para enviar" : modo === "retorno" ? statusSalvo || "Aguardando confirmação" : "Aguardando confirmação";
   const p = proposta(l);
   const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
@@ -215,8 +216,8 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
             </div>
           )}
 
-          <div className="mt-5 grid grid-cols-3 gap-1.5 rounded-2xl bg-white/[0.03] p-1 ring-1 ring-white/10">
-            {([["confirmar", "1. Confirmar o número", "Mensagem curta: \"É da …?\""], ["proposta", "2. Mandar a proposta", jaConfirmando ? "Já perguntou: agora a demo" : "Mensagem completa com a demo"], ["retorno", "3. Não responderam", "Tentar de novo, de leve"]] as const).map(([k, t, d]) => (
+          <div className="mt-5 grid grid-cols-2 gap-1.5 rounded-2xl sm:grid-cols-4 bg-white/[0.03] p-1 ring-1 ring-white/10">
+            {([["confirmar", "1. Confirmar o número", "Mensagem curta: \"É da …?\""], ["permissao", "2. Pedir para enviar", "Apresenta a empresa e pede o ok"], ["proposta", "3. Mandar a proposta", jaPediu ? "Deram o ok: agora a demo" : "Mensagem com a demo"], ["retorno", "4. Não responderam", "Tentar de novo, de leve"]] as const).map(([k, t, d]) => (
               <button key={k} onClick={() => { setModo(k); setTexto(null); setEditando(false); }}
                 className={cn("rounded-xl px-3 py-2 text-left transition cursor-pointer", modo === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
                 <div className="text-sm font-semibold">{t}</div>
@@ -226,12 +227,17 @@ export function OutreachModal({ lead: l, meuNome, meuWhats, empresa, serperKey, 
           </div>
           {modo === "confirmar" && (
             <p className="mt-3 text-xs text-muted-foreground">
-              Primeiro confirme se o número é mesmo do lugar. Quando responderem, abra <b className="text-foreground">Abordar</b> de novo (em Meus leads) e mande a proposta com a demonstração. Menos chance de falar com a pessoa errada e de ter o número bloqueado.
+              Primeiro confirme se o número é mesmo do lugar. Quando responderem, abra <b className="text-foreground">Abordar</b> de novo (em Meus leads) e use <b className="text-foreground">2. Pedir para enviar</b>. Menos chance de falar com a pessoa errada e de ter o número bloqueado.
+            </p>
+          )}
+          {modo === "permissao" && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Responderam que o número é deles? Agora apresente a empresa e peça para enviar o projeto ao responsável. Quando disserem que pode, vá em <b className="text-foreground">3. Mandar a proposta</b>.
             </p>
           )}
           {modo === "robo" ? (
             <p className="mt-3 text-xs text-muted-foreground">
-              Mensagem curta para quando quem respondeu foi um <b className="text-foreground">atendimento automático</b>. Quando uma pessoa responder, volte em <b className="text-foreground">2. Mandar a proposta</b>.
+              Mensagem curta para quando quem respondeu foi um <b className="text-foreground">atendimento automático</b>. Quando uma pessoa disser que pode enviar, vá em <b className="text-foreground">3. Mandar a proposta</b>.
               <button onClick={() => { setModo("confirmar"); setTexto(null); }} className="ml-1 underline hover:text-foreground cursor-pointer">voltar</button>
             </p>
           ) : modo === "retorno" ? (

@@ -60,6 +60,14 @@ export function mensagemConfirmacao(l: Lead, meuNome = "", _empresa = "") {
   return `Olá, ${saudacao()}!${quem} Esse número é da ${limpar(l.nome)}?`;
 }
 
+/** 2º passo, depois que confirmaram o número: apresenta a empresa e pede para enviar o projeto ao responsável. */
+export function mensagemPermissao(l: Lead, _meuNome = "", empresa = "") {
+  const e = empresa.trim();
+  const quem = e ? `Eu tenho uma empresa chamada ${e}, onde criamos` : "Eu crio";
+  return `Que bom, obrigado por responder!${PARAGRAFO}${quem} sites, cardápios digitais e vídeos de divulgação para negócios da região.${PARAGRAFO}` +
+    `Preparei um projeto pensado especialmente para a ${limpar(l.nome)} e gostaria de apresentar ao responsável pelo estabelecimento. Posso enviar por aqui mesmo?`;
+}
+
 /** Quando quem responde é um robô/atendimento automático: curta, pede para falar com o responsável. */
 export function mensagemRobo(l: Lead, meuNome = "", empresa = "") {
   const saude = /dent|odonto|clín|clin|médic|medic|fisio|psic|estét|estet|saúde|saude|consult/i.test(`${l.categoria} ${l.nome}`);
@@ -69,7 +77,9 @@ export function mensagemRobo(l: Lead, meuNome = "", empresa = "") {
 }
 
 /** Proposta com a demonstração. continuacao = já confirmaram o número (você já disse seu nome). */
-export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: string, continuacao = false, empresa = "") {
+export function mensagemAbordagem(a: Abordagem, l: Lead, link: string, meuNome: string, continuacao = false, empresa = "", jaApresentado = false) {
+  // já se apresentou e pediu para enviar: vai direto ao projeto
+  if (jaApresentado) return "Perfeito, muito obrigado!" + PARAGRAFO + corpo(a, link);
   const n = meuNome.trim();
   const abertura = continuacao
     ? "Que bom, obrigado por responder!"
